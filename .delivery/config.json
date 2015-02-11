@@ -1,0 +1,8 @@
+{
+    "version": "1",
+    "build_cookbook": "delivery-truck",
+    "build_nodes": {
+        "default": ["name:build-node.delivery.chef.co-*"]
+    },
+    "skip_phases": ["security", "smoke", "provision", "deploy", "quality"]
+}
