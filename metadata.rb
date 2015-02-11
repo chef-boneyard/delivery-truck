@@ -4,7 +4,7 @@ maintainer_email 'delivery-team@chef.io'
 license          'All rights reserved'
 description      'Delivery Build Cookbook for your cookbooks!'
 long_description 'Delivery Build Cookbook for your cookbooks!'
-version          '0.3.1'
+version          '0.3.2'
 
 supports 'ubuntu', '>= 12.04'
 supports 'redhat', '>= 6.5'
