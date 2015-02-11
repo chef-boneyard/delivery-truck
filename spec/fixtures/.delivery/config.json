@@ -1,0 +1,7 @@
+{
+  "version": "1",
+  "build_cookbook": "delivery_truck",
+  "build_nodes": {
+    "default": ["name:delivery-builder*"]
+  }
+}
