@@ -28,6 +28,11 @@ link File.join(cookbook_directory, 'delivery-truck') do
   to cb_dir
 end
 
+delivery_truck_exec "fetch_ssl_certs" do
+  command "knife ssl fetch -c #{delivery_config}"
+  not_if "knife ssl check"
+end
+
 delivery_truck_exec "upload_cookbook_delivery-truck" do
   command "knife cookbook upload delivery-truck --freeze -c #{delivery_config} -o #{cookbook_directory}"
 end
