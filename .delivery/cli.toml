@@ -1,6 +1,0 @@
-enterprise = "chef"
-git_port = "8989"
-organization = "Delivery-Build-Cookbooks"
-pipeline = "master"
-server = "delivery.chef.co"
-user = "duffieldt"
