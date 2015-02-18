@@ -13,9 +13,9 @@ describe DeliveryTruck::Helpers do
 
   describe '.changed_cookbooks' do
     before do
-      allow(described_class).to receive(:pipeline_sha)
+      allow(described_class).to receive(:pre_change_sha)
         .with(node).and_return("01234")
-      allow(described_class).to receive(:patchset_sha)
+      allow(described_class).to receive(:change_sha)
         .with(node).and_return("12345")
       allow(described_class).to receive(:repo_path)
         .with(node).and_return("/tmp")
@@ -297,25 +297,45 @@ describe DeliveryTruck::Helpers do
     end
   end
 
-  describe '.patchset_sha' do
+  describe '.change_sha' do
     before { node.default['delivery_builder']['change']['sha'] = '01234'}
-    subject { described_class.patchset_sha(node) }
+    subject { described_class.change_sha(node) }
     it { is_expected.to eql '01234' }
   end
 
-  describe '.pipeline_sha' do
+  describe '.pre_change_sha' do
     let(:response) { double("git rev-parse", :stdout => "qwerty012\n") }
-    before do
-      node.default['delivery_builder']['change']['pipeline'] = 'master'
-      allow(described_class).to receive(:repo_path).with(node).and_return('/tmp')
-      allow(described_class).to receive(:shell_out).with(
-        "git rev-parse origin/master",
-        :cwd => '/tmp'
-      ).and_return(response)
+
+    context 'when running in verify' do
+      before do
+        node.default['delivery_builder']['change']['stage'] = 'verify'
+        node.default['delivery_builder']['change']['pipeline'] = 'master'
+        allow(described_class).to receive(:repo_path).with(node).and_return('/tmp')
+        allow(described_class).to receive(:shell_out).with(
+                                    "git rev-parse origin/master",
+                                    :cwd => '/tmp'
+                                  ).and_return(response)
+      end
+
+      it 'returns the SHA at the HEAD of the pipeline branch' do
+        expect(described_class.pre_change_sha(node)).to eql 'qwerty012'
+      end
     end
 
-    it 'returns the SHA at the HEAD of the pipeline branch' do
-      expect(described_class.pipeline_sha(node)).to eql 'qwerty012'
+    context 'when running in later stages' do
+      before do
+        node.default['delivery_builder']['change']['stage'] = 'build'
+        node.default['delivery_builder']['change']['pipeline'] = 'master'
+        allow(described_class).to receive(:repo_path).with(node).and_return('/tmp')
+        allow(described_class).to receive(:shell_out).with(
+                                    "git log origin/master --merges --pretty=\"%H\" -n2 | tail -n1",
+                                    :cwd => '/tmp'
+                                  ).and_return(response)
+      end
+
+      it 'returns the SHA for the 2nd most recent merge to pipeline' do
+        expect(described_class.pre_change_sha(node)).to eql 'qwerty012'
+      end
     end
   end
 

@@ -2,13 +2,13 @@
     "version": "1",
     "build_cookbook": "self",
     "build_nodes": {
-        "default": ["name:build-node.delivery.chef.co-*"]
+        "default": ["name:delivery-builder*"]
     },
     "skip_phases": ["security", "smoke", "provision", "deploy", "quality", "functional"],
     "build_attributes": {
         "publish": {
             "chef_server": true,
-            "github": "opscode-cookbooks/delivery-truck"
+            "github": "tduffield/delivery-truck"
         }
     }
 }

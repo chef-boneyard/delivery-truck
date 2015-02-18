@@ -33,4 +33,19 @@ The directory below is not a valid cookbook:
       EOM
     end
   end
+
+  # If we do not have the change information yet lets report it
+  class MissingChangeInformation < Error
+    def initialize(message)
+      @message = message
+    end
+
+    def to_s
+      <<-EOM
+At this point there is no Change Information loaded.
+Extra Details:
+#{@message}
+EOM
+    end
+  end
 end

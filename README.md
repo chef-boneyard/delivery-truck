@@ -1,15 +1,16 @@
-# `delivery_truck`
-`delivery_truck` is a Chef Delivery build cookbook for continuously delivering
-Chef cookbooks. To quickly get started you just need to set `delivery_truck` to
+# `delivery-truck`
+`delivery-truck` is a Chef Delivery build cookbook for continuously delivering
+Chef cookbooks. To quickly get started you just need to set `delivery-truck` to
 be your build cookbook in your `.delivery/config.json`.
 
 ## Customizing Behavior using `.delivery/config.json`
-The behavior of the `delivery_truck` cookbook phase recipes can be easily
+The behavior of the `delivery-truck` cookbook phase recipes can be easily
 controlled by specifying certain values in your `.delivery/config.json` file.
 The control these values offer you is limited and not meant as a method to
 drastically alter the way the recipe functions.
 
 ### deploy
+_Coming Soon_
 ```json
 {
   "build_attributes": {
@@ -21,6 +22,7 @@ drastically alter the way the recipe functions.
 ```
 
 ### functional
+_Coming Soon_
 ```json
 {
   "build_attributes": {
@@ -35,6 +37,13 @@ drastically alter the way the recipe functions.
 ```
 
 ### lint
+The `lint` phase will [foodcritic](http://foodcritic.io) but you can specify
+which rules you would like to follow directly from your `config.json`.
+
+* `ignore_rules` - Provide a list of foodcritic rules you would like to ignore.
+* `only_rules` - Explictly state which foodcritic rules you would like to run.
+Any other rules except these will be ignored.
+
 ```json
 {
   "build_attributes": {
@@ -53,6 +62,36 @@ drastically alter the way the recipe functions.
 ### quality
 
 ### publish
+From the `publish` phase you can quickly and easily deploy cookbooks to
+your Chef Server and your entire project to a Github account.
+
+* `chef_server` - Set to true/false depending on whether you would like to
+upload any modified cookbooks to the Chef Server associated with Delivery.
+* `github` - Specify the Github repository you would like to push your project
+to. In order to work you must create a shared secrets data bag item (see "Shared
+Secrets" below) with a key named `github` with the value
+being a [deploy key](https://developer.github.com/guides/managing-deploy-keys/)
+with access to that repo.
+
+*Example .delivery/config.json*
+```json
+{
+  "build_attributes": {
+    "publish": {
+      "chef_server": true,
+      "github": "<org>/<project>"
+    }
+  }
+}
+```
+
+*Example Github shared secrets databag*
+```json
+{
+  "id": "<your ID here>",
+  "github": "<private key>"
+}
+```
 
 ### security
 
@@ -62,8 +101,23 @@ drastically alter the way the recipe functions.
 
 ### unit
 
+## Handling Secrets
+This cookbook implements a rudamentary approach to handling secrets. This process
+is largely out of band from Chef Delivery for the time being.
+
+`delivery-truck` will look for secrets in the `delivery-secrets` data bag on the
+Delivery Chef Server. It will expect to find an item in that data bag named
+`<ent>-<org>-<project>`. For example, this cookbook is kept in the
+'Delivery-Build-Cookbooks' org of the 'chef' enterprise so it's data bag name is
+`chef-Delivery-Build-Cookbooks-delivery-truck`.
+
+This cookbook expects this data bag item to be encrypted with the same
+encrypted_data_bag_secret that is on your builders. You will need to ensure that
+the data bag is available on the Chef Server before you run this cookbook for
+the first time otherwise it will fail.
+
 ## Custom Resources
-`delivery_truck` includes a number of custom resources that you can use in your
+`delivery-truck` includes a number of custom resources that you can use in your
 phase recipes to easily describe the different actions you would like to take
 in a human readable, idempotent fashion.
 
