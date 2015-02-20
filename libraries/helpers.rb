@@ -32,8 +32,8 @@ module DeliveryTruck
     # @return [Array#Hash]
     def changed_cookbooks(node)
       modified_files = changed_files(
-        pipeline_sha(node),
-        patchset_sha(node),
+        pre_change_sha(node),
+        change_sha(node),
         node
       )
       repo_dir = repo_path(node)
@@ -162,24 +162,38 @@ module DeliveryTruck
       nil
     end
 
-    # Rerturn the SHA for the HEAD of the current patchset.
+    # Rerturn the SHA that we are testing. For verify stage this will be the SHA
+    # associated for the patchset. For later stages it will be the SHA for the
+    # merge commit back into the pipeline branch.
     #
     # @param [Chef::Node] Chef Node object
     # @return [String]
-    def patchset_sha(node)
+    def change_sha(node)
       node['delivery_builder']['change']['sha']
     end
 
-    # Return the SHA for the HEAD of the pipeline branch
+    # Return the SHA for the point in our history where we split off. For verify
+    # this will be HEAD on the pipeline branch. For later stages, because HEAD
+    # on the pipeline branch is our change, we will look for the 2nd most recent
+    # commit to the pipeline branch.
     #
     # @param [Chef::Node] Chef Node object
     # @return [String]
-    def pipeline_sha(node)
+    def pre_change_sha(node)
       branch = node['delivery_builder']['change']['pipeline']
-      shell_out(
-        "git rev-parse origin/#{branch}",
-        :cwd => repo_path(node)
-      ).stdout.strip
+
+      if node['delivery_builder']['change']['stage'] == 'verify'
+        shell_out(
+          "git rev-parse origin/#{branch}",
+          :cwd => repo_path(node)
+        ).stdout.strip
+      else
+        # This command looks in the git history for the last two merges to our
+        # pipeline branch. The most recent will be our SHA so the second to last
+        # will be the SHA we are looking for.
+        command = "git log origin/#{branch} --merges --pretty=\"%H\" -n2 | tail -n1"
+        shell_out(command, :cwd => repo_path(node)).stdout.strip
+      end
     end
 
     # Return the fully-qualified path to the root of the repo.
@@ -198,6 +212,60 @@ module DeliveryTruck
     def delivery_workspace_chef_config(node)
       "#{node['delivery_builder']['workspace']}/solo.rb"
     end
+
+    # Return the Standard Acceptance Environment Name
+    #
+    def get_acceptance_environment(node)
+      if is_change_loaded?(node)
+        change = node['delivery_builder']['change']
+        ent = change['enterprise']
+        org = change['organization']
+        proj = change['project']
+        pipe = change['pipeline']
+        "acceptance-#{ent}-#{org}-#{proj}-#{pipe}"
+      end
+    end
+
+    # Using identifying components of the change, generate a project slug.
+    #
+    # @param [Chef::Node] Chef Node object
+    # @param [String]
+    def project_slug(node)
+      if is_change_loaded?(node)
+        change = node['delivery_builder']['change']
+        ent = change['enterprise']
+        org = change['organization']
+        proj = change['project']
+        "#{ent}-#{org}-#{proj}"
+      end
+    end
+
+    # Validate that the change is already loaded.
+    def is_change_loaded?(node)
+      if node['delivery_builder']['change']
+        true
+      else
+        message = <<-EOM
+The value of
+  node['delivery_builder']['change']
+has not been set yet!
+I apologize profusely for this.
+EOM
+        raise MissingChangeInformation.new(message)
+      end
+    end
+
+    # Pull down the encrypted data bag containing the secrets for this project.
+    #
+    # @param [Chef::Node] Chef Node object
+    # @return [Hash]
+    def get_project_secrets(node)
+      Chef_Delivery::ClientHelper.enter_client_mode_as_delivery
+      secret_file = Chef::EncryptedDataBagItem.load_secret(Chef::Config[:encrypted_data_bag_secret])
+      secrets = Chef::EncryptedDataBagItem.load('delivery-secrets', project_slug(node), secret_file)
+      Chef_Delivery::ClientHelper.enter_solo_mode
+      secrets
+    end
   end
 
   module DSL
@@ -213,13 +281,13 @@ module DeliveryTruck
     end
 
     # Return the SHA for the patchset currently being tested
-    def patchset_sha
-      DeliveryTruck::Helpers.patchset_sha(node)
+    def change_sha
+      DeliveryTruck::Helpers.change_sha(node)
     end
 
     # Return the SHA for the HEAD of the pipeline branch
-    def pipeline_sha
-      DeliveryTruck::Helpers.pipeline_sha(node)
+    def pre_change_sha
+      DeliveryTruck::Helpers.pre_change_sha(node)
     end
 
     # Return the path to the project workspace on the Delivery Builder
@@ -230,6 +298,22 @@ module DeliveryTruck
     # Return the path to the Chef config file for the current workspace
     def delivery_workspace_chef_config
       DeliveryTruck::Helpers.delivery_workspace_chef_config(node)
+    end
+
+    # Get the acceptance environment
+    def get_acceptance_environment
+      DeliveryTruck::Helpers.get_acceptance_environment(node)
+    end
+
+    # Return a project slug
+    def project_slug
+      DeliveryTruck::Helpers.project_slug(node)
+    end
+
+    # Grab the data bag from the Chef Server where the secrets for this
+    # project are kept
+    def get_project_secrets
+      DeliveryTruck::Helpers.get_project_secrets(node)
     end
   end
 end

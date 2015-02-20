@@ -93,3 +93,7 @@ Vagrantfile
 # Travis #
 ##########
 .travis.yml
+
+# Delivery #
+############
+.delivery/*
