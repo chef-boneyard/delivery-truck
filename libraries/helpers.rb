@@ -226,6 +226,24 @@ module DeliveryTruck
       end
     end
 
+    # Return the Standard Delivery Environment Name
+    #
+    # @param [Chef::Node] Chef Node object
+    # @param [String] Could Return:
+    # => get_acceptance_environment
+    # => union
+    # => rehearsal
+    # => delivered
+    def delivery_environment(node)
+      if is_change_loaded?
+        if node['delivery_builder']['change']['stage'] == 'acceptance'
+          get_acceptance_environment
+        else
+          node['delivery_builder']['change']['stage']
+        end
+      end
+    end
+
     # Using identifying components of the change, generate a project slug.
     #
     # @param [Chef::Node] Chef Node object
@@ -238,6 +256,14 @@ module DeliveryTruck
         proj = change['project']
         "#{ent}-#{org}-#{proj}"
       end
+    end
+
+    # Return the project name
+    #
+    # @param [Chef::Node] Chef Node object
+    # @param [String]
+    def project_name(node)
+      node['delivery_builder']['change']['project'] if is_change_loaded?(node)
     end
 
     # Validate that the change is already loaded.
@@ -305,9 +331,19 @@ EOM
       DeliveryTruck::Helpers.get_acceptance_environment(node)
     end
 
+    # Return the Standard Delivery Environment Name
+    def delivery_environment
+      DeliveryTruck::Helpers.delivery_environment(node)
+    end
+
     # Return a project slug
     def project_slug
       DeliveryTruck::Helpers.project_slug(node)
+    end
+
+    # Return the project name
+    def project_name
+      DeliveryTruck::Helpers.project_name(node)
     end
 
     # Grab the data bag from the Chef Server where the secrets for this

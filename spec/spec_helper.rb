@@ -20,6 +20,8 @@ module SharedLetDeclarations
   ]}
 
   let(:no_changed_cookbooks) {[]}
+
+  let(:project_name) { 'game_of_thrones' }
 end
 
 RSpec.configure do |config|
