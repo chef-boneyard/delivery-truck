@@ -16,7 +16,7 @@ class Chef
       SLEEP_TIME = 15
       PUSH_SLEEP_TIME = 5
 
-      def search
+      def get_search
         @search ||= begin
           # Our default search has to be here since we evaluate `project_name`
           #
@@ -39,7 +39,11 @@ class Chef
       end
 
       def timeout
-        @tiimeout ||= new_resource.timeout
+        @timeout ||= new_resource.timeout
+      end
+
+      def dec_timeout(number)
+        @timeout -= number
       end
 
       def deploy_ccr
@@ -54,7 +58,7 @@ class Chef
           # Find any dependency/app node
           ::Chef::Log.info("Finding dependency/app nodes in #{delivery_environment}...")
           ::Chef_Delivery::ClientHelper.enter_client_mode_as_delivery
-          nodes = search(:node, search)
+          nodes = search(:node, get_search)
 
           if !nodes || nodes.empty?
             # We didn't find any node to deploy. Lets skip this phase!
@@ -141,7 +145,7 @@ class Chef
               raise "Deployment failed! Not all nodes were successful."
             end
 
-            timeout -= PUSH_SLEEP_TIME
+            dec_timeout(PUSH_SLEEP_TIME)
           end until timeout <= 0
 
           break if finished
@@ -154,7 +158,7 @@ class Chef
             raise "Timeout waiting for deploy..."
           end
 
-          timeout -= SLEEP_TIME
+          dec_timeout(SLEEP_TIME)
         end while timeout > 0
 
         ## If we make it here and we are past our timeout the job timed out.

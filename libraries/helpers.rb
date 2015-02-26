@@ -235,9 +235,9 @@ module DeliveryTruck
     # => rehearsal
     # => delivered
     def delivery_environment(node)
-      if is_change_loaded?
+      if is_change_loaded?(node)
         if node['delivery_builder']['change']['stage'] == 'acceptance'
-          get_acceptance_environment
+          get_acceptance_environment(node)
         else
           node['delivery_builder']['change']['stage']
         end
