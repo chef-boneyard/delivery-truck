@@ -4,7 +4,7 @@
     "build_nodes": {
         "default": ["name:build-node.delivery.chef.co-*"]
     },
-    "skip_phases": ["security", "smoke", "provision", "deploy", "quality", "functional"],
+    "skip_phases": ["security", "smoke", "provision", "deploy", "quality"],
     "build_attributes": {
         "publish": {
             "chef_server": true,
