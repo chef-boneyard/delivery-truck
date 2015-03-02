@@ -12,7 +12,7 @@ module DeliveryTruck
       # @param cookbook_path [String] Path to cookbook
       # @return [TrueClass, FalseClass]
       def has_kitchen_tests?(cookbook_path)
-        File.exist?(File.join(cookbook_path, '.kitchen.yml'))
+        File.exist?(File.join(cookbook_path, '.kitchen.docker.yml'))
       end
     end
   end

@@ -345,4 +345,9 @@ describe DeliveryTruck::Helpers do
     it { is_expected.to eql '/tmp' }
   end
 
+  describe '.current_stage' do
+    before { node.default['delivery_builder']['change']['stage'] = 'union' }
+    subject { described_class.current_stage(node) }
+    it { is_expected.to eql 'union' }
+  end
 end
