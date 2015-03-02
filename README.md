@@ -10,34 +10,15 @@ The control these values offer you is limited and not meant as a method to
 drastically alter the way the recipe functions.
 
 ### deploy
-_Coming Soon_
-```json
-{
-  "build_attributes": {
-    "deploy": {
-      "ccr_query": "recipes::"
-    }
-  }
-}
-```
 
 ### functional
-_Coming Soon_
-```json
-{
-  "build_attributes": {
-    "functional": {
-      "test_kitchen_regex": {
-        "global": "*-ubuntu-*",
-        "cookbook_name": "default-*"
-      }
-    }
-  }
-}
-```
+The `functional` phase will execute [test-kitchen](http://kitchen.ci) using the
+[kitchen-docker](http://github.com/portertech/kitchen-docker) driver. In order for
+tests to be executed you *must* have a `.kitchen.docker.yml` file in the root each
+cookbook in your project that you want to test.
 
 ### lint
-The `lint` phase will [foodcritic](http://foodcritic.io) but you can specify
+The `lint` phase will execute [foodcritic](http://foodcritic.io) but you can specify
 which rules you would like to follow directly from your `config.json`.
 
 * `ignore_rules` - Provide a list of foodcritic rules you would like to ignore.
@@ -184,3 +165,8 @@ against the cookbooks in your Delivery project.
 
 It will accept the following parameters:
 * path (name) - the path to the cookbook you would like to test
+
+## Local Development
+* You will need boot2docker (or some other Docker VM)
+### make commands
+`make functional`

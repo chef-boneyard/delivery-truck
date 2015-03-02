@@ -1,0 +1,7 @@
+DEPENDENCIES
+  delivery-truck
+    path: .
+    metadata: true
+
+GRAPH
+  delivery-truck (0.3.11)

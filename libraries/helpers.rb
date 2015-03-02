@@ -226,6 +226,14 @@ module DeliveryTruck
       end
     end
 
+    # Return the current stage being executed
+    #
+    # @param [Chef::Node] Chef Node object
+    # @return [String]
+    def current_stage(node)
+      node['delivery_builder']['change']['stage']
+    end
+
     # Return the Standard Delivery Environment Name
     #
     # @param [Chef::Node] Chef Node object
@@ -350,6 +358,11 @@ EOM
     # project are kept
     def get_project_secrets
       DeliveryTruck::Helpers.get_project_secrets(node)
+    end
+
+    # Get the current stage name
+    def current_stage
+      DeliveryTruck::Helpers.current_stage(node)
     end
   end
 end
