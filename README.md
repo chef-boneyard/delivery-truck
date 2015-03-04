@@ -15,7 +15,8 @@ drastically alter the way the recipe functions.
 The `functional` phase will execute [test-kitchen](http://kitchen.ci) using the
 [kitchen-docker](http://github.com/portertech/kitchen-docker) driver. In order for
 tests to be executed you *must* have a `.kitchen.docker.yml` file in the root each
-cookbook in your project that you want to test.
+cookbook in your project that you want to test. An example file can be see in the
+root of this project.
 
 ### lint
 The `lint` phase will execute [foodcritic](http://foodcritic.io) but you can specify
@@ -168,5 +169,6 @@ It will accept the following parameters:
 
 ## Local Development
 * You will need boot2docker (or some other Docker VM)
+
 ### make commands
 `make functional`
