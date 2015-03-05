@@ -2,6 +2,7 @@
 driver:
   name: docker
   provision_command: curl -L http://www.chef.io/chef/install.sh | bash
+  binary: '/usr/bin/docker'
 
 provisioner:
   name: chef_solo

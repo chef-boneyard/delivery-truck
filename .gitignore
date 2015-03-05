@@ -19,3 +19,7 @@
 bin/
 tmp/
 vendor/
+
+.delivery/helpers/
+.delivery/live.json
+.delivery/sandbox.json
