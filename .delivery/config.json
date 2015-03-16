@@ -2,7 +2,7 @@
     "version": "1",
     "build_cookbook": "self",
     "build_nodes": {
-        "default": ["name:build-node.delivery.chef.co-*"]
+        "default": ["name:builder-*.delivery.chef.co"]
     },
     "skip_phases": ["security", "smoke", "provision", "deploy", "quality"],
     "build_attributes": {

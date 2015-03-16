@@ -1,9 +1,9 @@
 name             'delivery-truck'
 maintainer       'Chef Delivery Team'
 maintainer_email 'delivery-team@chef.io'
-license          'All rights reserved'
+license          'Apache 2.0'
 description      'Delivery Build Cookbook for your cookbooks!'
-long_description 'Delivery Build Cookbook for your cookbooks!'
+
 version          '0.3.14'
 
 supports 'ubuntu', '>= 12.04'
