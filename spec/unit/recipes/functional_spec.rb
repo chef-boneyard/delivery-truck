@@ -11,7 +11,7 @@ RSpec.shared_examples "cleanup docker" do
   end
 end
 
-describe "delivery-truck::functional" do
+describe "delivery-truck::functional", :ignore => true do
   let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
 
   before do
