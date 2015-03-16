@@ -4,7 +4,7 @@ maintainer_email 'delivery-team@chef.io'
 license          'Apache 2.0'
 description      'Delivery Build Cookbook for your cookbooks!'
 
-version          '0.3.14'
+version          '0.3.15'
 
 supports 'ubuntu', '>= 12.04'
 supports 'redhat', '>= 6.5'
