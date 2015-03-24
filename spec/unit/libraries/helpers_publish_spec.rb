@@ -12,10 +12,10 @@ describe DeliveryTruck::Helpers::Publish do
 
     context 'when config value is set' do
       it 'returns the value' do
-        node.default['delivery_config']['build_attributes']['publish']['chef_server'] = true
+        node.default['delivery']['config']['delivery-truck']['publish']['chef_server'] = true
         expect(described_class.upload_cookbook_to_chef_server?(node)).to eql(true)
 
-        node.default['delivery_config']['build_attributes']['publish']['chef_server'] = false
+        node.default['delivery']['config']['delivery-truck']['publish']['chef_server'] = false
         expect(described_class.upload_cookbook_to_chef_server?(node)).to eql(false)
       end
     end
@@ -31,22 +31,12 @@ describe DeliveryTruck::Helpers::Publish do
 
     context 'when config value is set' do
       it 'returns the value' do
-        node.default['delivery_config']['build_attributes']['publish']['github'] = true
+        node.default['delivery']['config']['delivery-truck']['publish']['github'] = true
         expect(described_class.push_repo_to_github?(node)).to eql(true)
 
-        node.default['delivery_config']['build_attributes']['publish']['github'] = false
+        node.default['delivery']['config']['delivery-truck']['publish']['github'] = false
         expect(described_class.push_repo_to_github?(node)).to eql(false)
       end
-    end
-  end
-
-  describe '.github_repo' do
-    before do
-      node.default['delivery_config']['build_attributes']['publish']['github'] = 'chef/chef'
-    end
-
-    it 'returns the github repo' do
-      expect(described_class.github_repo(node)).to eql('chef/chef')
     end
   end
 end

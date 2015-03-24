@@ -1,22 +1,23 @@
 # `delivery-truck`
-`delivery-truck` is a Chef Delivery build cookbook for continuously delivering
+`delivery-truck` is a Chef Delivery build_cookbook for continuously delivering
 Chef cookbooks. To quickly get started you just need to set `delivery-truck` to
 be your build cookbook in your `.delivery/config.json`.
+
+```
+{
+  "version": "2",
+  "build_cookbook": {
+    "name": "delivery-truck",
+    "git": "https://github.com/opscode-cookbooks/delivery-truck.git"
+  }
+}
+```
 
 ## Customizing Behavior using `.delivery/config.json`
 The behavior of the `delivery-truck` cookbook phase recipes can be easily
 controlled by specifying certain values in your `.delivery/config.json` file.
 The control these values offer you is limited and not meant as a method to
 drastically alter the way the recipe functions.
-
-### deploy
-
-### functional
-The `functional` phase will execute [test-kitchen](http://kitchen.ci) using the
-[kitchen-docker](http://github.com/portertech/kitchen-docker) driver. In order for
-tests to be executed you *must* have a `.kitchen.docker.yml` file in the root each
-cookbook in your project that you want to test. An example file can be see in the
-root of this project.
 
 ### lint
 The `lint` phase will execute [foodcritic](http://foodcritic.io) but you can specify
@@ -28,7 +29,9 @@ Any other rules except these will be ignored.
 
 ```json
 {
-  "build_attributes": {
+  "version": "2",
+  "build_cookbook": {..},
+  "delivery-truck": {
     "lint": {
       "foodcritic": {
         "ignore_rules": ["FC001"],
@@ -39,10 +42,6 @@ Any other rules except these will be ignored.
 }
 ```
 
-### provision
-
-### quality
-
 ### publish
 From the `publish` phase you can quickly and easily deploy cookbooks to
 your Chef Server and your entire project to a Github account.
@@ -50,15 +49,16 @@ your Chef Server and your entire project to a Github account.
 * `chef_server` - Set to true/false depending on whether you would like to
 upload any modified cookbooks to the Chef Server associated with Delivery.
 * `github` - Specify the Github repository you would like to push your project
-to. In order to work you must create a shared secrets data bag item (see "Shared
-Secrets" below) with a key named `github` with the value
-being a [deploy key](https://developer.github.com/guides/managing-deploy-keys/)
-with access to that repo.
+to. In order to work you must create a shared secrets data bag item (see "Handling
+Secrets" below) with a key named github with the value being a
+[deploy key](https://developer.github.com/guides/managing-deploy-keys/) with
+access to that repo.
 
-*Example .delivery/config.json*
 ```json
 {
-  "build_attributes": {
+  "version": "2",
+  "build_cookbook": {..},
+  "delivery-truck": {
     "publish": {
       "chef_server": true,
       "github": "<org>/<project>"
@@ -67,7 +67,7 @@ with access to that repo.
 }
 ```
 
-*Example Github shared secrets databag*
+*example data bag*
 ```json
 {
   "id": "<your ID here>",
@@ -75,15 +75,25 @@ with access to that repo.
 }
 ```
 
-### security
+## Skipped Phases
+The following phases have no content and can be skipped: functional, provision,
+quality, security and smoke.
 
-### smoke
+```json
+{
+  "version": "2",
+  "build_cookbook": {..},
+  "skip_phases": [
+    "funcitonal",
+    "provision",
+    "quality",
+    "security",
+    "smoke"
+  ]
+}
+```
 
-### syntax
-
-### unit
-
-## Handling Secrets
+## Handling Secrets (ALPHA)
 This cookbook implements a rudamentary approach to handling secrets. This process
 is largely out of band from Chef Delivery for the time being.
 
@@ -98,9 +108,17 @@ encrypted_data_bag_secret that is on your builders. You will need to ensure that
 the data bag is available on the Chef Server before you run this cookbook for
 the first time otherwise it will fail.
 
+To get this data bag you can use the DSL `get_project_secrets` to get the
+contents of the data bag.
+
+```
+my_secrets = get_project_secrets
+puts my_secrets['id'] # chef-Delivery-Build-Cookbooks-delivery-truck
+```
+
 ## License & Authors
-- Author:: Tom Duffield <tom@chef.io>
-- Author:: Salim Afiune <afiunes@chef.io>
+- Author:: Tom Duffield (<tom@chef.io>)
+- Author:: Salim Afiune (<afiunes@chef.io>)
 
 ```text
 Copyright:: 2015 Chef Software, Inc

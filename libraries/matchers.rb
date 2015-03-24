@@ -16,9 +16,10 @@
 #
 
 if defined?(ChefSpec)
-  def run_delivery_truck_exec(resource_name)
-    ChefSpec::Matchers::ResourceMatcher.new(:delivery_truck_exec, :run, resource_name)
+  def create_chef_environment(resource_name)
+    ChefSpec::Matchers::ResourceMatcher.new(:chef_environment, :create, resource_name)
   end
+
   def run_delivery_truck_deploy(resource_name)
     ChefSpec::Matchers::ResourceMatcher.new(:delivery_truck_deploy, :run, resource_name)
   end

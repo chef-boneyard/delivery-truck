@@ -19,15 +19,15 @@ class Chef
   class Provider
     class DeliveryTruckDeploy < Chef::Provider::LWRPBase
       action :run do
-        converge_by("Dispatch push-job for #{delivery_environment} => #{project_name} - #{new_resource.name}") do
+        converge_by("Dispatch push-job for #{delivery_environment} => #{node['delivery']['change']['project']} - #{new_resource.name}") do
           new_resource.updated_by_last_action(deploy_ccr)
         end
       end
 
       private
 
-      SLEEP_TIME = 15
-      PUSH_SLEEP_TIME = 5
+      SLEEP_TIME ||= 15
+      PUSH_SLEEP_TIME ||= 5
 
       def get_search
         @search ||= begin
@@ -41,7 +41,7 @@ class Chef
           # If this is a project like delivery that the app_name and the
           # project_name are totally different from the deploy_cookbook you
           # can customize the search.
-          (@new_resource.search || "recipes:#{project_name}*").tap do |search|
+          (@new_resource.search || "recipes:#{node['delivery']['change']['project']}*").tap do |search|
             # We validate that the user has provided a chef_environment
             search << " AND chef_environment:#{delivery_environment}" unless search =~ /chef_environment/
 
@@ -76,7 +76,7 @@ class Chef
           if !nodes || nodes.empty?
             # We didn't find any node to deploy. Lets skip this phase!
             ::Chef::Log.info("No dependency/app nodes found. Skipping phase!")
-            ::Chef_Delivery::ClientHelper.enter_solo_mode
+            ::Chef_Delivery::ClientHelper.leave_client_mode_as_delivery
             break
           end
 
@@ -88,7 +88,6 @@ class Chef
           ::Chef::Log.info("Found dependency/app nodes: #{node_names}")
 
           chef_server_rest = Chef::REST.new(Chef::Config[:chef_server_url])
-          ::Chef_Delivery::ClientHelper.enter_solo_mode
 
           # Kick off command via push.
           ::Chef::Log.info("Triggering #{new_resource.command} on dependency nodes " +
@@ -173,6 +172,7 @@ class Chef
 
           dec_timeout(SLEEP_TIME)
         end while timeout > 0
+        ::Chef_Delivery::ClientHelper.leave_client_mode_as_delivery
 
         ## If we make it here and we are past our timeout the job timed out.
         if timeout <= 0

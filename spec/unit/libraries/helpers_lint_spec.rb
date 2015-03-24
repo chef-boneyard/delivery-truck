@@ -6,7 +6,7 @@ describe DeliveryTruck::Helpers::Lint do
   describe '.foodcritic_tags' do
     context 'when foodcritic config is nil' do
       before do
-        node.default['delivery_config']['build_attributes']['lint']['foodcritic'] = nil
+        node.default['delivery']['config']['delivery-truck']['lint']['foodcritic'] = nil
       end
 
       it 'returns an empty string' do
@@ -16,7 +16,7 @@ describe DeliveryTruck::Helpers::Lint do
 
     context 'when foodcritic config is empty' do
       before do
-        node.default['delivery_config']['build_attributes']['lint']['foodcritic'] = {}
+        node.default['delivery']['config']['delivery-truck']['lint']['foodcritic'] = {}
       end
 
       it 'returns an empty string' do
@@ -27,7 +27,7 @@ describe DeliveryTruck::Helpers::Lint do
     context 'when `only_rules` has been set' do
       context 'with no rules' do
         before do
-          node.default['delivery_config']['build_attributes']['lint']['foodcritic']['only_rules'] = []
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['only_rules'] = []
         end
 
         it 'returns an empty string' do
@@ -37,7 +37,7 @@ describe DeliveryTruck::Helpers::Lint do
 
       context 'with one rule' do
         before do
-          node.default['delivery_config']['build_attributes']['lint']['foodcritic']['only_rules'] = ['FC001']
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['only_rules'] = ['FC001']
         end
 
         it 'returns a string with the one rule' do
@@ -47,7 +47,7 @@ describe DeliveryTruck::Helpers::Lint do
 
       context 'with multiple rules' do
         before do
-          node.default['delivery_config']['build_attributes']['lint']['foodcritic']['only_rules'] = ['FC001', 'FC002']
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['only_rules'] = ['FC001', 'FC002']
         end
 
         it 'returns a string with multiple rules' do
@@ -59,7 +59,7 @@ describe DeliveryTruck::Helpers::Lint do
     context 'when `ignore_rules` has been set' do
       context 'with no rules' do
         before do
-          node.default['delivery_config']['build_attributes']['lint']['foodcritic']['ignore_rules'] = []
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['ignore_rules'] = []
         end
 
         it 'returns an empty string' do
@@ -69,7 +69,7 @@ describe DeliveryTruck::Helpers::Lint do
 
       context 'with one rule' do
         before do
-          node.default['delivery_config']['build_attributes']['lint']['foodcritic']['ignore_rules'] = ['FC001']
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['ignore_rules'] = ['FC001']
         end
 
         it 'returns a string with the one rule' do
@@ -79,7 +79,7 @@ describe DeliveryTruck::Helpers::Lint do
 
       context 'with multiple rules' do
         before do
-          node.default['delivery_config']['build_attributes']['lint']['foodcritic']['ignore_rules'] = ['FC001', 'FC002']
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['ignore_rules'] = ['FC001', 'FC002']
         end
 
         it 'returns a string with multiple rules' do
@@ -90,8 +90,8 @@ describe DeliveryTruck::Helpers::Lint do
 
     context 'when `only_rules` and `ignore_rules` have both been set' do
       before do
-        node.default['delivery_config']['build_attributes']['lint']['foodcritic']['only_rules'] = ['FC001']
-        node.default['delivery_config']['build_attributes']['lint']['foodcritic']['ignore_rules'] = ['FC002']
+        node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['only_rules'] = ['FC001']
+        node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['ignore_rules'] = ['FC002']
       end
 
       it 'only `only_rules` values are honored' do

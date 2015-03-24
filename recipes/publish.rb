@@ -22,33 +22,11 @@
 # [`delivery-truck` cookbook's README](README.md) for
 # additional configuration details.
 
-load_config File.join(repo_path, '.delivery', 'config.json')
+config_rb = File.join('/var/opt/delivery/workspace/.chef', 'knife.rb')
 
 # Create the upload directory where cookbooks to be uploaded will be staged
-cookbook_directory = File.join(node['delivery_builder']['cache'], "cookbook-upload")
+cookbook_directory = File.join(node['delivery']['workspace']['cache'], "cookbook-upload")
 directory cookbook_directory
-
-# Grab the Chef config file we'll use to publish to Chef Server
-delivery_config = File.join(node['delivery_builder']['root_workspace_etc'], 'delivery.rb')
-
-# Create the environment if it doesn't exist
-env_name = get_acceptance_environment
-ruby_block "Create Env #{env_name} if not there." do
-  block do
-    Chef_Delivery::ClientHelper.enter_client_mode_as_delivery
-
-    begin
-      env = Chef::Environment.load(env_name)
-    rescue Net::HTTPServerException => http_e
-      raise http_e unless http_e.response.code == "404"
-      Chef::Log.info("Creating Environment #{env_name}")
-      env = Chef::Environment.new()
-      env.name(env_name)
-      env.create
-    end
-    Chef_Delivery::ClientHelper.enter_solo_mode
-  end
-end
 
 # Upload each cookbook to the Chef Server
 if upload_cookbook_to_chef_server?
@@ -57,10 +35,9 @@ if upload_cookbook_to_chef_server?
       to cookbook[:path]
     end
 
-    delivery_truck_exec "upload_cookbook_#{cookbook[:name]}" do
+    execute "upload_cookbook_#{cookbook[:name]}" do
       command "knife cookbook upload #{cookbook[:name]} --freeze " \
-              "--env #{env_name} " \
-              "--config #{delivery_config} " \
+              "--config #{config_rb} " \
               "--cookbook-path #{cookbook_directory}"
     end
   end
@@ -68,53 +45,47 @@ end
 
 # If the user specified a github repo to push to, push to that repo
 if push_repo_to_github?
-  build_user_home = "/home/#{node['delivery_builder']['build_user']}"
-  deploy_key_path = "#{build_user_home}/.ssh/#{project_slug}-github.pem"
-  git_ssh = ::File.join(node['delivery_builder']['cache'], 'git_ssh')
+  git_ssh = File.join(node['delivery']['workspace']['cache'], 'git_ssh')
+  deploy_key = File.join(node['delivery']['workspace']['cache'], 'github.pem')
   secrets = get_project_secrets
 
-  directory "#{build_user_home}/.ssh" do
-    owner node['delivery_builder']['build_user']
-    group 'root'
-    mode '0700'
-  end
-
-  file deploy_key_path do
+  file deploy_key do
     content secrets['github']
-    owner node['delivery_builder']['build_user']
+    owner 'dbuild'
     group 'root'
     mode '0600'
   end
 
-  file git_ssh do
-    content <<-EOH
-#!/bin/bash
-# Martin Emde
-# https://github.com/martinemde/git-ssh-wrapper
-
-unset SSH_AUTH_SOCK
-ssh -o CheckHostIP=no \
-    -o IdentitiesOnly=yes \
-    -o LogLevel=INFO \
-    -o StrictHostKeyChecking=no \
-    -o PasswordAuthentication=no \
-    -o UserKnownHostsFile=/tmp/delivery-git-known-hosts \
-    -o IdentityFile=/home/dbuild/.ssh/#{project_slug}-github.pem \
-    $*
-    EOH
+  template git_ssh do
+    source 'git_ssh.erb'
+    owner 'dbuild'
+    group 'root'
     mode '0755'
   end
 
-  delivery_truck_exec "add_github_remote" do
+  execute "set_git_username" do
+    command "git config user.name 'Delivery'"
+    cwd node['delivery']['workspace']['repo']
+    environment({"GIT_SSH" => git_ssh})
+  end
+
+  execute "set_git_email" do
+    command "git config user.email 'delivery@chef.io'"
+    cwd node['delivery']['workspace']['repo']
+    environment({"GIT_SSH" => git_ssh})
+  end
+
+  github_repo = node['delivery']['config']['delivery-truck']['publish']['github']
+  execute "add_github_remote" do
     command "git remote add github git@github.com:#{github_repo}.git"
-    cwd node['delivery_builder']['repo']
+    cwd node['delivery']['workspace']['repo']
     environment({"GIT_SSH" => git_ssh})
     not_if "git remote --verbose | grep ^github"
   end
 
-  delivery_truck_exec "push_to_github" do
+  execute "push_to_github" do
     command "git push github master"
-    cwd node['delivery_builder']['repo']
+    cwd node['delivery']['workspace']['repo']
     environment({"GIT_SSH" => git_ssh})
   end
 end
