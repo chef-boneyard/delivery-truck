@@ -164,7 +164,6 @@ describe "delivery-truck::publish" do
       expect(chef_run).to create_file('/tmp/cache/github.pem')
                            .with(content: 'SECRET',
                                  owner: 'dbuild',
-                                 group: 'root',
                                  mode: '0600')
     end
 
@@ -172,7 +171,6 @@ describe "delivery-truck::publish" do
       expect(chef_run).to create_template('/tmp/cache/git_ssh')
                            .with(source: 'git_ssh.erb',
                                  owner: 'dbuild',
-                                 group: 'root',
                                  mode: '0755')
     end
 

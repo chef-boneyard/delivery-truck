@@ -52,14 +52,12 @@ if push_repo_to_github?
   file deploy_key do
     content secrets['github']
     owner 'dbuild'
-    group 'root'
     mode '0600'
   end
 
   template git_ssh do
     source 'git_ssh.erb'
     owner 'dbuild'
-    group 'root'
     mode '0755'
   end
 
