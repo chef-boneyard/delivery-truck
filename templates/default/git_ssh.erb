@@ -7,6 +7,6 @@ ssh -o CheckHostIP=no \
     -o LogLevel=INFO \
     -o StrictHostKeyChecking=no \
     -o PasswordAuthentication=no \
-    -o UserKnownHostsFile=#{node['delivery']['workspace']['cache']}/delivery-git-known-hosts \
-    -o IdentityFile=#{node['delivery']['workspace']['cache']}/github.pem \
+    -o UserKnownHostsFile=<%= node['delivery']['workspace']['cache'] %>/delivery-git-known-hosts \
+    -o IdentityFile=<%= node['delivery']['workspace']['cache'] %>/github.pem \
     $*
