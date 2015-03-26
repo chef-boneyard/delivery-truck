@@ -24,13 +24,6 @@ module DeliveryTruck
     include Chef::Mixin::ShellOut
     extend self
 
-    # This value is also set in the delivery_builder cookbook. To avoid
-    # depending on an external cookbook we are going to duplicate its definition
-    # here.
-    unless defined? CONFIG_ATTRIBUTE_KEY
-      CONFIG_ATTRIBUTE_KEY = 'delivery_config'.freeze
-    end
-
     # Inspect the files that are different between the patchset and the current
     # HEAD of the pipeline branch. If any files related to a cookbook have
     # changed, return the name of that cookbook along with its path.
@@ -46,20 +39,22 @@ module DeliveryTruck
     def changed_cookbooks(node)
       modified_files = changed_files(
         pre_change_sha(node),
-        change_sha(node),
+        node['delivery']['change']['sha'],
         node
       )
-      repo_dir = repo_path(node)
+      repo_dir = node['delivery']['workspace']['repo']
 
       changed_cookbooks = []
       cookbooks_in_repo(node).each do |cookbook|
         if cookbook == repo_dir && !modified_files.empty?
           name = get_cookbook_name(repo_dir)
-          changed_cookbooks << {:name => name, :path => repo_dir}
+          version = get_cookbook_version(repo_dir)
+          changed_cookbooks << {:name => name, :path => repo_dir, :version => version}
         elsif !modified_files.select { |file| file.include? cookbook }.empty?
           path = File.join(repo_dir, cookbook)
           name = get_cookbook_name(path)
-          changed_cookbooks << {:name => name, :path => path}
+          version = get_cookbook_version(path)
+          changed_cookbooks << {:name => name, :path => path, :version => version}
         end
       end
 
@@ -77,7 +72,7 @@ module DeliveryTruck
     def changed_files(parent_sha, change_sha, node)
       response = shell_out!(
         "git diff --name-only #{parent_sha} #{change_sha}",
-        :cwd => repo_path(node)
+        :cwd => node['delivery']['workspace']['repo']
       ).stdout.strip
 
       changed_files = []
@@ -102,15 +97,15 @@ module DeliveryTruck
     def cookbooks_in_repo(node)
 
       # Is the current directory a cookbook?
-      if is_cookbook?(repo_path(node))
-        [repo_path(node)]
+      if is_cookbook?(node['delivery']['workspace']['repo'])
+        [node['delivery']['workspace']['repo']]
 
       # Is there a `cookbooks` directory in this directory?
-      elsif File.directory?(File.join(repo_path(node), 'cookbooks'))
+      elsif File.directory?(File.join(node['delivery']['workspace']['repo'], 'cookbooks'))
         # If so, return a list of the folders inside this directory but...
-        Dir.chdir(repo_path(node)) do
+        Dir.chdir(node['delivery']['workspace']['repo']) do
           Dir.glob('cookbooks/*').select do |entry|
-            full_path = File.join(repo_path(node), entry)
+            full_path = File.join(node['delivery']['workspace']['repo'], entry)
 
             # Make sure the entry is a directory and a cookbook
             File.directory?(full_path) && is_cookbook?(full_path)
@@ -129,13 +124,24 @@ module DeliveryTruck
     # @param path [String] The path to the cookbook
     # @param [String]
     def get_cookbook_name(path)
+      metadata = load_metadata(path)
+      metadata.name
+    end
+
+
+    def get_cookbook_version(path)
+      metadata = load_metadata(path)
+      metadata.version
+    end
+
+    def load_metadata(path)
       metadata = Chef::Cookbook::Metadata.new
       if File.exist?(File.join(path, 'metadata.json'))
-        metadata.from_json_file(File.join(path, 'metadata.json'))
+        metadata.from_json(File.read(File.join(path, 'metadata.json')))
       else
         metadata.from_file(File.join(path, 'metadata.rb'))
       end
-      metadata.name
+      metadata
     end
 
     # Looks for indications that the directory passed is a Chef cookbook.
@@ -144,45 +150,7 @@ module DeliveryTruck
     # @return [TrueClass, FalseClass]
     def is_cookbook?(path)
       File.exist?(File.join(path, 'metadata.json')) ||
-      File.exist?(File.join(path, 'metadata.rb'))
-    end
-
-    # This method will load the Delivery configuration file. If we are running
-    # on a Delivery Build Node, then the delivery_builder cookbook will have
-    # already done this for us. If the config file has not been loaded then we
-    # will need to load it ourselves.
-    #
-    # @param config_file [String] Fully-qualified path to Delivery config file.
-    # @param node [Chef::Node] Chef Node object
-    # @return [nil]
-    def load_config(config_file, node)
-      # Check to see if CONFIG_ATTRIBUTE_KEY is present. This is set by the
-      # delivery_builder cookbook and will indicate that we are running on
-      # a Delivery build node.
-      if node[CONFIG_ATTRIBUTE_KEY]
-        # We don't need to do anything since the delivery_builder cookbook has
-        # already loaded the attributes.
-      else
-        # Check to see if the Delivery config exists in the project root. If it
-        # does, then load it into the node object.
-        if File.exist?(config_file)
-          config = Chef::JSONCompat.from_json(IO.read(config_file))
-          node.force_override[CONFIG_ATTRIBUTE_KEY] = config
-        else
-          raise DeliveryTruck::MissingConfiguration, config_file
-        end
-      end
-      nil
-    end
-
-    # Rerturn the SHA that we are testing. For verify stage this will be the SHA
-    # associated for the patchset. For later stages it will be the SHA for the
-    # merge commit back into the pipeline branch.
-    #
-    # @param [Chef::Node] Chef Node object
-    # @return [String]
-    def change_sha(node)
-      node['delivery_builder']['change']['sha']
+        File.exist?(File.join(path, 'metadata.rb'))
     end
 
     # Return the SHA for the point in our history where we split off. For verify
@@ -193,58 +161,33 @@ module DeliveryTruck
     # @param [Chef::Node] Chef Node object
     # @return [String]
     def pre_change_sha(node)
-      branch = node['delivery_builder']['change']['pipeline']
+      branch = node['delivery']['change']['pipeline']
 
-      if node['delivery_builder']['change']['stage'] == 'verify'
+      if node['delivery']['change']['stage'] == 'verify'
         shell_out(
           "git rev-parse origin/#{branch}",
-          :cwd => repo_path(node)
+          :cwd => node['delivery']['workspace']['repo']
         ).stdout.strip
       else
         # This command looks in the git history for the last two merges to our
         # pipeline branch. The most recent will be our SHA so the second to last
         # will be the SHA we are looking for.
         command = "git log origin/#{branch} --merges --pretty=\"%H\" -n2 | tail -n1"
-        shell_out(command, :cwd => repo_path(node)).stdout.strip
+        shell_out(command, :cwd => node['delivery']['workspace']['repo']).stdout.strip
       end
-    end
-
-    # Return the fully-qualified path to the root of the repo.
-    #
-    # @param [Chef::Node] Chef Node object
-    # @return [String]
-    def repo_path(node)
-      node['delivery_builder']['repo'] || File.expand_path("../..", __FILE__)
-    end
-
-    # Return the path to the chef config file for use with knife commands inside
-    # the phase recipes.
-    #
-    # @param [Chef::Node] Chef Node object
-    # @return [String]
-    def delivery_workspace_chef_config(node)
-      "#{node['delivery_builder']['workspace']}/solo.rb"
     end
 
     # Return the Standard Acceptance Environment Name
     #
-    def get_acceptance_environment(node)
-      if is_change_loaded?(node)
-        change = node['delivery_builder']['change']
-        ent = change['enterprise']
-        org = change['organization']
-        proj = change['project']
-        pipe = change['pipeline']
-        "acceptance-#{ent}-#{org}-#{proj}-#{pipe}"
-      end
-    end
-
-    # Return the current stage being executed
-    #
     # @param [Chef::Node] Chef Node object
-    # @return [String]
-    def current_stage(node)
-      node['delivery_builder']['change']['stage']
+    #
+    def get_acceptance_environment(node)
+      change = node['delivery']['change']
+      ent = change['enterprise']
+      org = change['organization']
+      proj = change['project']
+      pipe = change['pipeline']
+      "acceptance-#{ent}-#{org}-#{proj}-#{pipe}"
     end
 
     # Return the Standard Delivery Environment Name
@@ -256,12 +199,10 @@ module DeliveryTruck
     # => rehearsal
     # => delivered
     def delivery_environment(node)
-      if is_change_loaded?(node)
-        if node['delivery_builder']['change']['stage'] == 'acceptance'
-          get_acceptance_environment(node)
-        else
-          node['delivery_builder']['change']['stage']
-        end
+      if node['delivery']['change']['stage'] == 'acceptance'
+        get_acceptance_environment(node)
+      else
+        node['delivery']['change']['stage']
       end
     end
 
@@ -270,36 +211,11 @@ module DeliveryTruck
     # @param [Chef::Node] Chef Node object
     # @param [String]
     def project_slug(node)
-      if is_change_loaded?(node)
-        change = node['delivery_builder']['change']
-        ent = change['enterprise']
-        org = change['organization']
-        proj = change['project']
-        "#{ent}-#{org}-#{proj}"
-      end
-    end
-
-    # Return the project name
-    #
-    # @param [Chef::Node] Chef Node object
-    # @param [String]
-    def project_name(node)
-      node['delivery_builder']['change']['project'] if is_change_loaded?(node)
-    end
-
-    # Validate that the change is already loaded.
-    def is_change_loaded?(node)
-      if node['delivery_builder']['change']
-        true
-      else
-        message = <<-EOM
-The value of
-  node['delivery_builder']['change']
-has not been set yet!
-I apologize profusely for this.
-EOM
-        raise MissingChangeInformation.new(message)
-      end
+      change = node['delivery']['change']
+      ent = change['enterprise']
+      org = change['organization']
+      proj = change['project']
+      "#{ent}-#{org}-#{proj}"
     end
 
     # Pull down the encrypted data bag containing the secrets for this project.
@@ -307,11 +223,28 @@ EOM
     # @param [Chef::Node] Chef Node object
     # @return [Hash]
     def get_project_secrets(node)
-      Chef_Delivery::ClientHelper.enter_client_mode_as_delivery
+      ::Chef_Delivery::ClientHelper.enter_client_mode_as_delivery
       secret_file = Chef::EncryptedDataBagItem.load_secret(Chef::Config[:encrypted_data_bag_secret])
       secrets = Chef::EncryptedDataBagItem.load('delivery-secrets', project_slug(node), secret_file)
-      Chef_Delivery::ClientHelper.enter_solo_mode
+      ::Chef_Delivery::ClientHelper.leave_client_mode_as_delivery
       secrets
+    end
+
+    # Create a hash object with the necessary details for Cheffish to talk to
+    # the Chef Server that triggered the change.
+    #
+    # @param [Chef::Node] Chef node object
+    # @return [Hash]
+    def delivery_chef_server(node)
+      server_details = {}
+      ::Chef_Delivery::ClientHelper.enter_client_mode_as_delivery
+      server_details[:chef_server_url] = Chef::Config[:chef_server_url]
+      server_details[:options] = {
+        client_name: ::Chef::Config[:node_name],
+        signing_key_filename: ::Chef::Config[:client_key]
+      }
+      ::Chef_Delivery::ClientHelper.leave_client_mode_as_delivery
+      server_details
     end
   end
 
@@ -320,31 +253,6 @@ EOM
     # Return a list of the cookbooks that have been modified
     def changed_cookbooks
       DeliveryTruck::Helpers.changed_cookbooks(node)
-    end
-
-    # Load the Delivery configuration file into the node object
-    def load_config(config_file)
-      DeliveryTruck::Helpers.load_config(config_file, node)
-    end
-
-    # Return the SHA for the patchset currently being tested
-    def change_sha
-      DeliveryTruck::Helpers.change_sha(node)
-    end
-
-    # Return the SHA for the HEAD of the pipeline branch
-    def pre_change_sha
-      DeliveryTruck::Helpers.pre_change_sha(node)
-    end
-
-    # Return the path to the project workspace on the Delivery Builder
-    def repo_path
-      DeliveryTruck::Helpers.repo_path(node)
-    end
-
-    # Return the path to the Chef config file for the current workspace
-    def delivery_workspace_chef_config
-      DeliveryTruck::Helpers.delivery_workspace_chef_config(node)
     end
 
     # Get the acceptance environment
@@ -362,20 +270,15 @@ EOM
       DeliveryTruck::Helpers.project_slug(node)
     end
 
-    # Return the project name
-    def project_name
-      DeliveryTruck::Helpers.project_name(node)
-    end
-
     # Grab the data bag from the Chef Server where the secrets for this
     # project are kept
     def get_project_secrets
       DeliveryTruck::Helpers.get_project_secrets(node)
     end
 
-    # Get the current stage name
-    def current_stage
-      DeliveryTruck::Helpers.current_stage(node)
+    # Return a hash object for cheffish with details to talk to the Chef Server
+    def delivery_chef_server
+      DeliveryTruck::Helpers.delivery_chef_server(node)
     end
   end
 end

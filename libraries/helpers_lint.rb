@@ -27,7 +27,7 @@ module DeliveryTruck
       # @return [String]
       def foodcritic_tags(node)
         begin
-          config = node[CONFIG_ATTRIBUTE_KEY]['build_attributes']['lint']['foodcritic']
+          config = node['delivery']['config']['delivery-truck']['lint']['foodcritic']
           case
           when config['only_rules'] && !config['only_rules'].empty?
             "-t " + config['only_rules'].join(" -t ")

@@ -15,11 +15,9 @@
 # limitations under the License.
 #
 
-load_config File.join(repo_path, '.delivery', 'config.json')
-
 changed_cookbooks.each do |cookbook|
   # Run `knife cookbook test` against the modified cookbook
-  delivery_truck_exec "syntax_check_#{cookbook[:name]}" do
-    command "knife cookbook test -c #{delivery_workspace_chef_config} -o #{cookbook[:path]} -a"
+  execute "syntax_check_#{cookbook[:name]}" do
+    command "knife cookbook test -o #{cookbook[:path]} -a"
   end
 end

@@ -27,7 +27,7 @@ module DeliveryTruck
       # @param [Chef::Node] Chef Node object
       # @return [TrueClass, FalseClass]
       def upload_cookbook_to_chef_server?(node)
-        node[CONFIG_ATTRIBUTE_KEY]['build_attributes']['publish']['chef_server']
+        node['delivery']['config']['delivery-truck']['publish']['chef_server']
       rescue
         false
       end
@@ -38,18 +38,9 @@ module DeliveryTruck
       # @param [Chef::Node] Chef Node object
       # @return [TrueClass, FalseClass]
       def push_repo_to_github?(node)
-        !!node[CONFIG_ATTRIBUTE_KEY]['build_attributes']['publish']['github']
+        !!node['delivery']['config']['delivery-truck']['publish']['github']
       rescue
         false
-      end
-
-      # Read the Delivery Config and return the value of the Github repo the
-      # user would like to push to.
-      #
-      # @param [Chef::Node] Chef Node object
-      # @return [String]
-      def github_repo(node)
-        node[CONFIG_ATTRIBUTE_KEY]['build_attributes']['publish']['github']
       end
     end
   end
@@ -63,11 +54,6 @@ module DeliveryTruck
     # Check config.json for whether user wants to push to Github
     def push_repo_to_github?
       DeliveryTruck::Helpers::Publish.push_repo_to_github?(node)
-    end
-
-    # Return the github repo the user would like to push to
-    def github_repo
-      DeliveryTruck::Helpers::Publish.github_repo(node)
     end
   end
 end

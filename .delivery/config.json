@@ -1,6 +1,9 @@
 {
-    "version": "1",
-    "build_cookbook": "self",
+    "version": "2",
+    "build_cookbook": {
+        "name": "delivery-truck",
+        "path": "./"
+    },
     "build_nodes": {
         "default": ["name:builder-*.delivery.chef.co"]
     },
@@ -12,7 +15,7 @@
         "quality",
         "functional"
     ],
-    "build_attributes": {
+    "delivery-truck": {
         "publish": {
             "chef_server": true,
             "github": "opscode-cookbooks/delivery-truck"

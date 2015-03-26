@@ -1,110 +1,139 @@
 require 'spec_helper'
 
 describe "delivery-truck::publish" do
-  let(:publish_run) do
+  let(:chef_run) do
     ChefSpec::SoloRunner.new do |node|
-      node.default['delivery_builder']['cache'] = "/tmp/workspace/cache"
-      node.default['delivery_builder']['repo'] = "/tmp/workspace/repo"
-      node.default['delivery_builder']['root_workspace_etc'] = "/tmp/root_workspace_etc"
-    end.converge(described_recipe)
+      node.set['delivery']['workspace']['root'] = '/tmp'
+      node.set['delivery']['workspace']['repo'] = '/tmp/repo'
+      node.set['delivery']['workspace']['chef'] = '/tmp/chef'
+      node.set['delivery']['workspace']['cache'] = '/tmp/cache'
+
+      node.set['delivery']['change']['enterprise'] = 'Chef'
+      node.set['delivery']['change']['organization'] = 'Delivery'
+      node.set['delivery']['change']['project'] = 'Secret'
+      node.set['delivery']['change']['pipeline'] = 'master'
+      node.set['delivery']['change']['change_id'] = 'aaaa-bbbb-cccc'
+      node.set['delivery']['change']['patchset_number'] = '1'
+      node.set['delivery']['change']['stage'] = 'acceptance'
+      node.set['delivery']['change']['phase'] = 'publish'
+      node.set['delivery']['change']['git_url'] = 'https://git.co/my_project.git'
+      node.set['delivery']['change']['sha'] = '0123456789abcdef'
+      node.set['delivery']['change']['patchset_branch'] = 'mypatchset/branch'
+    end
+  end
+
+  let(:delivery_chef_server) do
+    {
+      chef_server_url: 'http://myserver.chef',
+      options: {
+        client_name: 'spec',
+        signing_key_filename: '/tmp/keys/spec.pem'
+      }
+    }
   end
 
   before do
-    allow(DeliveryTruck::Helpers).to receive(:get_acceptance_environment).and_return('spec')
-    allow(DeliveryTruck::Helpers).to receive(:load_config).and_return(nil)
-    allow(DeliveryTruck::Helpers).to receive(:repo_path).and_return('/tmp')
     allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
+    allow(DeliveryTruck::Helpers).to receive(:delivery_chef_server).and_return(delivery_chef_server)
   end
 
-  it 'creates cookbook staging directory' do
-    expect(publish_run).to create_directory("/tmp/workspace/cache/cookbook-upload")
+  context 'always' do
+    before do
+      chef_run.converge(described_recipe)
+    end
+
+    it 'creates cookbook staging directory' do
+      expect(chef_run).to create_directory("/tmp/cache/cookbook-upload")
+    end
   end
 
-  it 'creates the Chef Environment if it is missing' do
-    expect(publish_run).to run_ruby_block("Create Env spec if not there.")
-  end
 
   context 'when user does not specify they wish to upload to Chef Server' do
     before do
       allow(DeliveryTruck::Helpers::Publish).to receive(:upload_cookbook_to_chef_server?).and_return(false)
+      chef_run.converge(described_recipe)
     end
 
     it 'does not upload cookbooks' do
-      expect(publish_run).not_to create_link('/tmp/workspace/cache/cookbook-upload/julia')
-      expect(publish_run).not_to create_link('/tmp/workspace/cache/cookbook-upload/gordon')
-      expect(publish_run).not_to create_link('/tmp/workspace/cache/cookbook-upload/emeril')
+      expect(chef_run).not_to create_link('/tmp/cache/cookbook-upload/julia')
+      expect(chef_run).not_to create_link('/tmp/cache/cookbook-upload/gordon')
+      expect(chef_run).not_to create_link('/tmp/cache/cookbook-upload/emeril')
 
-      expect(publish_run).not_to run_delivery_truck_exec("upload_cookbook_julia")
-      expect(publish_run).not_to run_delivery_truck_exec("upload_cookbook_gordon")
-      expect(publish_run).not_to run_delivery_truck_exec("upload_cookbook_emeril")
+      expect(chef_run).not_to run_execute("upload_cookbook_julia")
+      expect(chef_run).not_to run_execute("upload_cookbook_gordon")
+      expect(chef_run).not_to run_execute("upload_cookbook_emeril")
     end
   end
 
   context 'when user specifies they wish to upload to Chef Server' do
     before do
       allow(DeliveryTruck::Helpers::Publish).to receive(:upload_cookbook_to_chef_server?).and_return(true)
+      chef_run.node.set['delivery']['config']['delivery-truck']['publish']['chef_server'] = true
     end
 
     context 'and no cookbooks changed' do
       before do
         allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
+        chef_run.converge(described_recipe)
       end
 
       it 'does nothing' do
-        expect(publish_run).not_to create_link('/tmp/workspace/cache/cookbook-upload/julia')
-        expect(publish_run).not_to create_link('/tmp/workspace/cache/cookbook-upload/gordon')
-        expect(publish_run).not_to create_link('/tmp/workspace/cache/cookbook-upload/emeril')
+        expect(chef_run).not_to create_link('/tmp/cache/cookbook-upload/julia')
+        expect(chef_run).not_to create_link('/tmp/cache/cookbook-upload/gordon')
+        expect(chef_run).not_to create_link('/tmp/cache/cookbook-upload/emeril')
 
-        expect(publish_run).not_to run_delivery_truck_exec("upload_cookbook_julia")
-        expect(publish_run).not_to run_delivery_truck_exec("upload_cookbook_gordon")
-        expect(publish_run).not_to run_delivery_truck_exec("upload_cookbook_emeril")
+        expect(chef_run).not_to run_execute("upload_cookbook_julia")
+        expect(chef_run).not_to run_execute("upload_cookbook_gordon")
+        expect(chef_run).not_to run_execute("upload_cookbook_emeril")
       end
     end
 
     context 'and one cookbook changed' do
       before do
         allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+        chef_run.converge(described_recipe)
       end
 
       it 'uploads only that cookbook' do
-        expect(publish_run).to create_link('/tmp/workspace/cache/cookbook-upload/julia')
-                                .with(to: '/tmp/cookbooks/julia')
-        expect(publish_run).not_to create_link('/tmp/workspace/cache/cookbook-upload/gordon')
-        expect(publish_run).not_to create_link('/tmp/workspace/cache/cookbook-upload/emeril')
+        expect(chef_run).to create_link('/tmp/cache/cookbook-upload/julia')
+                             .with(to: '/tmp/repo/cookbooks/julia')
+        expect(chef_run).not_to create_link('/tmp/cache/cookbook-upload/gordon')
+        expect(chef_run).not_to create_link('/tmp/cache/cookbook-upload/emeril')
 
-        expect(publish_run).to run_delivery_truck_exec("upload_cookbook_julia")
-                                .with(command: 'knife cookbook upload julia ' \
-                                               '--freeze --env spec ' \
-                                               '--config /tmp/root_workspace_etc/delivery.rb ' \
-                                               '--cookbook-path /tmp/workspace/cache/cookbook-upload')
-        expect(publish_run).not_to run_delivery_truck_exec("upload_cookbook_gordon")
-        expect(publish_run).not_to run_delivery_truck_exec("upload_cookbook_emeril")
-        end
+        expect(chef_run).to run_execute("upload_cookbook_julia")
+                             .with(command: 'knife cookbook upload julia ' \
+                                            '--freeze ' \
+                                            '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                                            '--cookbook-path /tmp/cache/cookbook-upload')
+        expect(chef_run).not_to run_execute("upload_cookbook_gordon")
+        expect(chef_run).not_to run_execute("upload_cookbook_emeril")
+      end
     end
 
     context 'and multiple cookbooks changed' do
       before do
         allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
+        chef_run.converge(described_recipe)
       end
 
-      it 'uploads only that cookbook' do
-        expect(publish_run).to create_link('/tmp/workspace/cache/cookbook-upload/julia')
-                                .with(to: '/tmp/cookbooks/julia')
-        expect(publish_run).to create_link('/tmp/workspace/cache/cookbook-upload/gordon')
-                                .with(to: '/tmp/cookbooks/gordon')
-        expect(publish_run).not_to create_link('/tmp/workspace/cache/cookbook-upload/emeril')
+      it 'uploads only those cookbook' do
+        expect(chef_run).to create_link('/tmp/cache/cookbook-upload/julia')
+                             .with(to: '/tmp/repo/cookbooks/julia')
+        expect(chef_run).to create_link('/tmp/cache/cookbook-upload/gordon')
+                             .with(to: '/tmp/repo/cookbooks/gordon')
+        expect(chef_run).not_to create_link('/tmp/cache/cookbook-upload/emeril')
 
-        expect(publish_run).to run_delivery_truck_exec("upload_cookbook_julia")
-                                .with(command: 'knife cookbook upload julia ' \
-                                               '--freeze --env spec ' \
-                                               '--config /tmp/root_workspace_etc/delivery.rb ' \
-                                               '--cookbook-path /tmp/workspace/cache/cookbook-upload')
-        expect(publish_run).to run_delivery_truck_exec("upload_cookbook_gordon")
-                                    .with(command: 'knife cookbook upload gordon ' \
-                                                   '--freeze --env spec ' \
-                                                   '--config /tmp/root_workspace_etc/delivery.rb ' \
-                                                   '--cookbook-path /tmp/workspace/cache/cookbook-upload')
-        expect(publish_run).not_to run_delivery_truck_exec("upload_cookbook_emeril")
+        expect(chef_run).to run_execute("upload_cookbook_julia")
+                             .with(command: 'knife cookbook upload julia ' \
+                                            '--freeze ' \
+                                            '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                                            '--cookbook-path /tmp/cache/cookbook-upload')
+        expect(chef_run).to run_execute("upload_cookbook_gordon")
+                             .with(command: 'knife cookbook upload gordon ' \
+                                            '--freeze ' \
+                                            '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                                            '--cookbook-path /tmp/cache/cookbook-upload')
+        expect(chef_run).not_to run_execute("upload_cookbook_emeril")
       end
     end
   end
@@ -113,10 +142,11 @@ describe "delivery-truck::publish" do
     before do
       allow(DeliveryTruck::Helpers::Publish).to receive(:push_repo_to_github?).and_return(false)
       stub_command("git remote --verbose | grep ^github").and_return(false)
+      chef_run.converge(described_recipe)
     end
 
     it 'does not push to github' do
-      expect(publish_run).not_to run_delivery_truck_exec("push_to_github")
+      expect(chef_run).not_to run_execute("push_to_github")
     end
   end
 
@@ -124,32 +154,54 @@ describe "delivery-truck::publish" do
     let(:secrets) {{'github' => 'SECRET'}}
 
     before do
-      allow(DeliveryTruck::Helpers::Publish).to receive(:push_repo_to_github?).and_return(true)
-      allow(DeliveryTruck::Helpers::Publish).to receive(:github_repo).and_return('spec/spec')
-      allow(DeliveryTruck::Helpers).to receive(:project_slug).and_return('local-delivery-truck')
       allow(DeliveryTruck::Helpers).to receive(:get_project_secrets).and_return(secrets)
       stub_command("git remote --verbose | grep ^github").and_return(false)
+      chef_run.node.set['delivery']['config']['delivery-truck']['publish']['github'] = 'spec/spec'
+      chef_run.converge(described_recipe)
     end
 
-    it 'creates git_ssh wrapper' do
-      expect(publish_run).to create_file("/tmp/workspace/cache/git_ssh")
-                              .with(mode: '0755')
-      expect(publish_run).to render_file("/tmp/workspace/cache/git_ssh")
-                              .with_content(/IdentityFile=\/home\/dbuild\/.ssh\/local-delivery-truck-github.pem/)
+    it 'creates a deploy key' do
+      expect(chef_run).to create_file('/tmp/cache/github.pem')
+                           .with(content: 'SECRET',
+                                 owner: 'dbuild',
+                                 group: 'root',
+                                 mode: '0600')
+    end
+
+    it 'creates the git_ssh wrapper file' do
+      expect(chef_run).to create_template('/tmp/cache/git_ssh')
+                           .with(source: 'git_ssh.erb',
+                                 owner: 'dbuild',
+                                 group: 'root',
+                                 mode: '0755')
+    end
+
+    it 'adds git username' do
+      expect(chef_run).to run_execute('set_git_username')
+                           .with(command: "git config user.name 'Delivery'",
+                                 cwd: '/tmp/repo',
+                                 environment: {"GIT_SSH" => "/tmp/cache/git_ssh"})
+    end
+
+    it 'adds git email' do
+      expect(chef_run).to run_execute('set_git_email')
+                           .with(command: "git config user.email 'delivery@chef.io'",
+                                 cwd: '/tmp/repo',
+                                 environment: {"GIT_SSH" => "/tmp/cache/git_ssh"})
     end
 
     it 'adds github remote' do
-      expect(publish_run).to run_delivery_truck_exec("add_github_remote")
-                              .with(command: 'git remote add github git@github.com:spec/spec.git',
-                                    cwd: '/tmp/workspace/repo',
-                                    environment: {"GIT_SSH" => "/tmp/workspace/cache/git_ssh"})
+      expect(chef_run).to run_execute("add_github_remote")
+                           .with(command: 'git remote add github git@github.com:spec/spec.git',
+                                 cwd: '/tmp/repo',
+                                 environment: {"GIT_SSH" => "/tmp/cache/git_ssh"})
     end
 
     it 'pushes to github' do
-      expect(publish_run).to run_delivery_truck_exec('push_to_github')
-                              .with(command: 'git push github master',
-                                    cwd: '/tmp/workspace/repo',
-                                    environment: {"GIT_SSH" => "/tmp/workspace/cache/git_ssh"})
+      expect(chef_run).to run_execute('push_to_github')
+                           .with(command: 'git push github master',
+                                 cwd: '/tmp/repo',
+                                 environment: {"GIT_SSH" => "/tmp/cache/git_ssh"})
     end
   end
 

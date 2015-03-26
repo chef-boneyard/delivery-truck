@@ -11,17 +11,15 @@ module SharedLetDeclarations
   extend RSpec::SharedContext
 
   let(:one_changed_cookbook) {[
-    {:name => 'julia', :path => "/tmp/cookbooks/julia"}
+    {:name => 'julia', :path => "/tmp/repo/cookbooks/julia"}
   ]}
 
   let(:two_changed_cookbooks) {[
-    {:name => 'julia', :path => "/tmp/cookbooks/julia"},
-    {:name => 'gordon', :path => "/tmp/cookbooks/gordon"}
+    {:name => 'julia', :path => "/tmp/repo/cookbooks/julia"},
+    {:name => 'gordon', :path => "/tmp/repo/cookbooks/gordon"}
   ]}
 
   let(:no_changed_cookbooks) {[]}
-
-  let(:project_name) { 'game_of_thrones' }
 end
 
 RSpec.configure do |config|

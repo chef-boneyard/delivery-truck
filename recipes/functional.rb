@@ -15,9 +15,4 @@
 # limitations under the License.
 #
 
-# We aren't at a point where we're ready for functional stuff yet so this
-# recipe will do nothing for the time being.
-
-load_config File.join(repo_path, '.delivery', 'config.json')
-
 # SKIP PHASE

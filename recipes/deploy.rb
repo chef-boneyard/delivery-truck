@@ -15,14 +15,42 @@
 # limitations under the License.
 #
 
-load_config File.join(repo_path, '.delivery', 'config.json')
-
 # Send CCR requests to every node that is running this cookbook or any
 # other one in the current project
-search_terms = changed_cookbooks.map {|cookbook| "recipes:#{cookbook[:name]}*" }
+version_map = {}
+search_terms = []
+env_name = delivery_environment
+
+changed_cookbooks.each do |cookbook|
+  search_terms << "recipes:#{cookbook[:name]}*"
+  version_map[cookbook[:name]] = cookbook[:version]
+end
+
+ruby_block "update the #{env_name} environment" do
+  block do
+    Chef_Delivery::ClientHelper.enter_client_mode_as_delivery
+
+    begin
+      env = Chef::Environment.load(env_name)
+    rescue Net::HTTPServerException => http_e
+      raise http_e unless http_e.response.code == "404"
+      Chef::Log.info("Creating Environment #{env_name}")
+      env = Chef::Environment.new()
+      env.name(env_name)
+      env.create
+    end
+
+    version_map.each do |cookbook, version|
+      env.cookbook(cookbook, version)
+    end
+
+    env.save
+    Chef_Delivery::ClientHelper.leave_client_mode_as_delivery
+  end
+end
 
 unless search_terms.empty?
-  delivery_truck_deploy "deploy_#{project_name}" do
+  delivery_truck_deploy "deploy_#{node['delivery']['change']['project']}" do
     search search_terms.join(" OR ")
   end
 end
