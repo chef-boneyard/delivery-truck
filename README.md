@@ -1,6 +1,10 @@
 # `delivery-truck`
 `delivery-truck` is a Chef Delivery build_cookbook for continuously delivering
-Chef cookbooks. To quickly get started you just need to set `delivery-truck` to
+Chef cookbooks.
+
+_This is alpha stage software, and is in a state of perpetual change. Use at your own risk!_
+
+To quickly get started you just need to set `delivery-truck` to
 be your build cookbook in your `.delivery/config.json`.
 
 ```
