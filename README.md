@@ -80,7 +80,7 @@ access to that repo.
 ```
 
 ## Skipped Phases
-The following phases have no content and can be skipped: functional, provision,
+The following phases have no content and can be skipped: functional,
 quality, security and smoke.
 
 ```json
@@ -89,7 +89,6 @@ quality, security and smoke.
   "build_cookbook": {..},
   "skip_phases": [
     "funcitonal",
-    "provision",
     "quality",
     "security",
     "smoke"
