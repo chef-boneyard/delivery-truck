@@ -97,7 +97,7 @@ quality, security and smoke.
 ```
 
 ## Handling Secrets (ALPHA)
-This cookbook implements a rudamentary approach to handling secrets. This process
+This cookbook implements a rudimentary approach to handling secrets. This process
 is largely out of band from Chef Delivery for the time being.
 
 `delivery-truck` will look for secrets in the `delivery-secrets` data bag on the
@@ -138,3 +138,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
+
