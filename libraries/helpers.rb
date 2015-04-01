@@ -118,22 +118,32 @@ module DeliveryTruck
       end
     end
 
-    # This method will leverage a core Chef library to load a cookbook's
-    # metadata file and return the name of the cookbook.
+    # This method will return the name of a cookbook based on that
+    # cookbook's metadata.
     #
     # @param path [String] The path to the cookbook
-    # @param [String]
+    # @return [String]
     def get_cookbook_name(path)
       metadata = load_metadata(path)
       metadata.name
     end
 
 
+    # This method will return the version of a cookbook based on that
+    # cookbook's metadata.
+    #
+    # @param path [String] The path to the cookbook
+    # @return [String]
     def get_cookbook_version(path)
       metadata = load_metadata(path)
       metadata.version
     end
 
+    # Load the metadata.(rb|json) from a cookbook. Use the internal Chef
+    # libary to read that metadata.
+    #
+    # @param path [String] The path to the cookbook
+    # @return [Chef::Cookbook::Metadata]
     def load_metadata(path)
       metadata = Chef::Cookbook::Metadata.new
       if File.exist?(File.join(path, 'metadata.json'))
@@ -253,6 +263,15 @@ module DeliveryTruck
     # Return a list of the cookbooks that have been modified
     def changed_cookbooks
       DeliveryTruck::Helpers.changed_cookbooks(node)
+    end
+
+    # Return a list of the files that have been modified
+    def changed_files
+      DeliveryTruck::Helpers.changed_files(
+        DeliveryTruck::Helpers.pre_change_sha(node),
+        node['delivery']['change']['sha'],
+        node
+      )
     end
 
     # Get the acceptance environment
