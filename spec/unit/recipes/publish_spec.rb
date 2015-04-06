@@ -149,6 +149,7 @@ describe "delivery-truck::publish" do
 
         expect(chef_run).to run_execute("berks_vendor_cookbook_julia")
                              .with(command: 'berks vendor /tmp/cache/cookbook-upload')
+                             .with(cwd: '/tmp/repo/cookbooks/julia')
 
         expect(chef_run).to run_execute("upload_cookbook_julia")
                              .with(command: 'knife cookbook upload julia ' \
