@@ -43,7 +43,7 @@ if upload_cookbook_to_chef_server?
     end
 
     execute "upload_cookbook_#{cookbook[:name]}" do
-      command "knife cookbook upload #{cookbook[:name]} --freeze --all" \
+      command "knife cookbook upload #{cookbook[:name]} --freeze --all " \
               "--config #{config_rb} " \
               "--cookbook-path #{cookbook_directory}"
     end
