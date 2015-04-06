@@ -31,12 +31,18 @@ directory cookbook_directory
 # Upload each cookbook to the Chef Server
 if upload_cookbook_to_chef_server?
   changed_cookbooks.each do |cookbook|
-    link ::File.join(cookbook_directory, cookbook[:name]) do
-      to cookbook[:path]
+    if File.exist?(File.join(cookbook[:path], 'Berksfile'))
+      execute "berks_vendor_cookbook_#{cookbook[:name]}" do
+        command "berks vendor #{cookbook_directory}"
+      end
+    else
+      link ::File.join(cookbook_directory, cookbook[:name]) do
+        to cookbook[:path]
+      end
     end
 
     execute "upload_cookbook_#{cookbook[:name]}" do
-      command "knife cookbook upload #{cookbook[:name]} --freeze " \
+      command "knife cookbook upload #{cookbook[:name]} --freeze --all" \
               "--config #{config_rb} " \
               "--cookbook-path #{cookbook_directory}"
     end

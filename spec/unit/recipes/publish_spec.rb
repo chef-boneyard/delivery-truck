@@ -102,7 +102,7 @@ describe "delivery-truck::publish" do
 
         expect(chef_run).to run_execute("upload_cookbook_julia")
                              .with(command: 'knife cookbook upload julia ' \
-                                            '--freeze ' \
+                                            '--freeze --all' \
                                             '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
                                             '--cookbook-path /tmp/cache/cookbook-upload')
         expect(chef_run).not_to run_execute("upload_cookbook_gordon")
@@ -125,15 +125,36 @@ describe "delivery-truck::publish" do
 
         expect(chef_run).to run_execute("upload_cookbook_julia")
                              .with(command: 'knife cookbook upload julia ' \
-                                            '--freeze ' \
+                                            '--freeze --all' \
                                             '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
                                             '--cookbook-path /tmp/cache/cookbook-upload')
         expect(chef_run).to run_execute("upload_cookbook_gordon")
                              .with(command: 'knife cookbook upload gordon ' \
-                                            '--freeze ' \
+                                            '--freeze --all' \
                                             '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
                                             '--cookbook-path /tmp/cache/cookbook-upload')
         expect(chef_run).not_to run_execute("upload_cookbook_emeril")
+      end
+    end
+
+    context 'a Berksfile exists' do
+      before do
+        allow(File).to receive(:exist?).and_call_original
+        allow(File).to receive(:exist?).with('/tmp/repo/cookbooks/julia/Berksfile').and_return(true)
+        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+        chef_run.converge(described_recipe)
+      end
+
+      it 'vendors all dependencies with Berkshelf' do
+
+        expect(chef_run).to run_execute("berks_vendor_cookbook_julia")
+                             .with(command: 'berks vendor /tmp/cache/cookbook-upload')
+
+        expect(chef_run).to run_execute("upload_cookbook_julia")
+                             .with(command: 'knife cookbook upload julia ' \
+                                            '--freeze --all' \
+                                            '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                                            '--cookbook-path /tmp/cache/cookbook-upload')
       end
     end
   end
