@@ -102,7 +102,7 @@ describe "delivery-truck::publish" do
 
         expect(chef_run).to run_execute("upload_cookbook_julia")
                              .with(command: 'knife cookbook upload julia ' \
-                                            '--freeze --all' \
+                                            '--freeze --all ' \
                                             '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
                                             '--cookbook-path /tmp/cache/cookbook-upload')
         expect(chef_run).not_to run_execute("upload_cookbook_gordon")
@@ -125,12 +125,12 @@ describe "delivery-truck::publish" do
 
         expect(chef_run).to run_execute("upload_cookbook_julia")
                              .with(command: 'knife cookbook upload julia ' \
-                                            '--freeze --all' \
+                                            '--freeze --all ' \
                                             '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
                                             '--cookbook-path /tmp/cache/cookbook-upload')
         expect(chef_run).to run_execute("upload_cookbook_gordon")
                              .with(command: 'knife cookbook upload gordon ' \
-                                            '--freeze --all' \
+                                            '--freeze --all ' \
                                             '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
                                             '--cookbook-path /tmp/cache/cookbook-upload')
         expect(chef_run).not_to run_execute("upload_cookbook_emeril")
@@ -153,7 +153,7 @@ describe "delivery-truck::publish" do
 
         expect(chef_run).to run_execute("upload_cookbook_julia")
                              .with(command: 'knife cookbook upload julia ' \
-                                            '--freeze --all' \
+                                            '--freeze --all ' \
                                             '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
                                             '--cookbook-path /tmp/cache/cookbook-upload')
       end
