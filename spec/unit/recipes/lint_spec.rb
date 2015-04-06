@@ -66,4 +66,21 @@ describe "delivery-truck::lint" do
       expect(chef_run).not_to run_execute("lint_foodcritic_emeril")
     end
   end
+
+  context "when a .rubocop.yml is present" do
+    before do
+      allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_tags).and_return("")
+      allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+      allow(File).to receive(:exist?).and_call_original
+      allow(File).to receive(:exist?).with("/tmp/repo/cookbooks/julia/.rubocop.yml").and_return(true)
+    end
+
+    it "runs Rubocop" do
+      expect(chef_run).to run_execute("lint_rubocop_julia").with(
+        :command => "rubocop /tmp/repo/cookbooks/julia"
+      )
+      expect(chef_run).not_to run_execute("lint_rubocop_gordon")
+      expect(chef_run).not_to run_execute("lint_rubocop_emeril")
+    end
+  end
 end
