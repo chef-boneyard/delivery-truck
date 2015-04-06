@@ -60,6 +60,7 @@ if push_repo_to_github?
     content secrets['github']
     owner 'dbuild'
     mode '0600'
+    sensitive true
   end
 
   template git_ssh do

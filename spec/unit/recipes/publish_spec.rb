@@ -186,7 +186,8 @@ describe "delivery-truck::publish" do
       expect(chef_run).to create_file('/tmp/cache/github.pem')
                            .with(content: 'SECRET',
                                  owner: 'dbuild',
-                                 mode: '0600')
+                                 mode: '0600',
+                                 sensitive: true)
     end
 
     it 'creates the git_ssh wrapper file' do
