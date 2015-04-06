@@ -26,5 +26,5 @@ end
 
 # Temporary workaround until chefdk installs chef-sugar.
 chef_gem 'chef-sugar' do
-  version '2.5.0'
+  version '3.1.0'
 end
