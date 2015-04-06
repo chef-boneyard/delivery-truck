@@ -34,6 +34,7 @@ if upload_cookbook_to_chef_server?
     if File.exist?(File.join(cookbook[:path], 'Berksfile'))
       execute "berks_vendor_cookbook_#{cookbook[:name]}" do
         command "berks vendor #{cookbook_directory}"
+        cwd cookbook[:path]
       end
     else
       link ::File.join(cookbook_directory, cookbook[:name]) do
