@@ -43,7 +43,7 @@ describe "delivery-truck::publish" do
     end
 
     it 'deletes and recreates cookbook staging directory' do
-      expect(chef_run).to delete_directory("/tmp/cache/cookbook-upload")
+      expect(chef_run).to delete_directory("/tmp/cache/cookbook-upload").with(recursive: true)
       expect(chef_run).to create_directory("/tmp/cache/cookbook-upload")
     end
   end
