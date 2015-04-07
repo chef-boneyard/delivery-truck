@@ -26,5 +26,7 @@ end
 
 # Temporary workaround until chefdk installs chef-sugar.
 chef_gem 'chef-sugar' do
-  version '2.5.0'
+  # We always ride the latest version of chef-sugar. This could prove dangerous
+  # but it more closely matches the CD philosophy which Delivery implements!
+  action :upgrade
 end
