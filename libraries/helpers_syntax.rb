@@ -22,7 +22,8 @@ module DeliveryTruck
     module Syntax
       extend self
 
-      # Check whether or not the metadata file was modified.
+      # Check whether or not the metadata file was modified when cookbook-related
+      # files were modified.
       #
       # @param path [String] The path to the cookbook
       # @param node [Chef::Node]
@@ -37,11 +38,28 @@ module DeliveryTruck
         cookbook_path = Pathname.new(path)
         workspace_repo = Pathname.new(node['delivery']['workspace']['repo'])
         relative_dir = cookbook_path.relative_path_from(workspace_repo).to_s
+        files_to_check = %W(
+          metadata\.(rb|json)
+          Berksfile
+          Berksfile\.lock
+          Policyfile\.rb
+          Policyfile\.lock\.json
+          recipes\/.*
+          attributes\/.*
+          libraries\/.*
+          files\/.*
+          templates\/.*
+        ).join('|')
 
-        if relative_dir == '.'
+        if relative_dir == '.' && !!modified_files.find {|f| /^(#{files_to_check})/ =~ f }
           !!modified_files.find {|f| /^metadata\.(rb|json)/ =~ f }
-        else
+        elsif !!modified_files.find {|f| /^#{relative_dir}\/(#{files_to_check})/ =~ f }
           !!modified_files.find {|f| /^#{relative_dir}\/metadata\.(rb|json)/ =~ f }
+        else
+          # We return true here as an indication that we should not fail checks.
+          # In reality we simply did not change any files that would require us
+          # to bump our version number in our metadata.rb.
+          true
         end
       end
     end

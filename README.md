@@ -34,7 +34,10 @@ Any other rules except these will be ignored.
 ```json
 {
   "version": "2",
-  "build_cookbook": {..},
+  "build_cookbook": {
+    "name": "delivery-truck",
+    "git": "https://github.com/opscode-cookbooks/delivery-truck.git"
+  },
   "delivery-truck": {
     "lint": {
       "foodcritic": {
@@ -61,7 +64,10 @@ access to that repo.
 ```json
 {
   "version": "2",
-  "build_cookbook": {..},
+  "build_cookbook": {
+    "name": "delivery-truck",
+    "git": "https://github.com/opscode-cookbooks/delivery-truck.git"
+  },
   "delivery-truck": {
     "publish": {
       "chef_server": true,
@@ -86,9 +92,12 @@ quality, security and smoke.
 ```json
 {
   "version": "2",
-  "build_cookbook": {..},
+  "build_cookbook": {
+    "name": "delivery-truck",
+    "git": "https://github.com/opscode-cookbooks/delivery-truck.git"
+  },
   "skip_phases": [
-    "funcitonal",
+    "functional",
     "quality",
     "security",
     "smoke"
