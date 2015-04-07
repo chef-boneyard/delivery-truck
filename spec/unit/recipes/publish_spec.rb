@@ -42,7 +42,8 @@ describe "delivery-truck::publish" do
       chef_run.converge(described_recipe)
     end
 
-    it 'creates cookbook staging directory' do
+    it 'deletes and recreates cookbook staging directory' do
+      expect(chef_run).to delete_directory("/tmp/cache/cookbook-upload")
       expect(chef_run).to create_directory("/tmp/cache/cookbook-upload")
     end
   end
