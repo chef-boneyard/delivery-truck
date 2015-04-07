@@ -26,7 +26,11 @@ config_rb = File.join('/var/opt/delivery/workspace/.chef', 'knife.rb')
 
 # Create the upload directory where cookbooks to be uploaded will be staged
 cookbook_directory = File.join(node['delivery']['workspace']['cache'], "cookbook-upload")
-directory cookbook_directory
+directory cookbook_directory do
+  # We delete the cookbook upload staging directory each time to ensure we
+  # don't have out-of-date cookbooks hanging around from a previous build.
+  action [:delete, :create]
+end
 
 # Upload each cookbook to the Chef Server
 if upload_cookbook_to_chef_server?
