@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "delivery-truck::syntax" do
   let(:chef_run) do
-    ChefSpec::ServerRunner.new do |node|
+    ChefSpec::SoloRunner.new do |node|
       node.set['delivery']['workspace']['root'] = '/tmp'
       node.set['delivery']['workspace']['repo'] = '/tmp/repo'
       node.set['delivery']['workspace']['chef'] = '/tmp/chef'

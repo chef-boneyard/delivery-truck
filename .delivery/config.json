@@ -12,8 +12,7 @@
         "smoke",
         "provision",
         "deploy",
-        "quality",
-        "functional"
+        "quality"
     ],
     "delivery-truck": {
         "publish": {
