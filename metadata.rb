@@ -13,5 +13,6 @@ supports 'ubuntu', '>= 12.04'
 supports 'redhat', '>= 6.5'
 supports 'centos', '>= 6.5'
 
+depends 'aufs'
 depends 'docker'
 depends 'sudo'

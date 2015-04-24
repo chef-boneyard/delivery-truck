@@ -19,6 +19,11 @@ ENV['PATH'] = "/opt/chefdk/bin:/opt/chefdk/embedded/bin:#{ENV['PATH']}"
 
 #######################################################################
 
+# Setup AUFS
+# There is currently a bug in devicemapper with Docker #9562 and #4036.
+# To get around this we are using AUFS.
+include_recipe 'aufs'
+
 # Install and setup Docker
 include_recipe 'docker'
 

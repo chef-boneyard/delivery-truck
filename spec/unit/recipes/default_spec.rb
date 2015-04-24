@@ -25,10 +25,12 @@ describe "delivery-truck::default" do
   before do
     allow_any_instance_of(Chef::Recipe).to receive(:include_recipe).and_call_original
     allow_any_instance_of(Chef::Recipe).to receive(:include_recipe).with('docker')
+    allow_any_instance_of(Chef::Recipe).to receive(:include_recipe).with('aufs')
   end
 
   it 'installs docker' do
     expect_any_instance_of(Chef::Recipe).to receive(:include_recipe).with('docker')
+    expect_any_instance_of(Chef::Recipe).to receive(:include_recipe).with('aufs')
     chef_run
   end
 
