@@ -28,11 +28,10 @@ module DeliveryTruck
     # HEAD of the pipeline branch. If any files related to a cookbook have
     # changed, return the name of that cookbook along with its path.
     #
-    # @example Simple loop to exemplify how to access the name, path and version.
+    # @example Simple loop to exemplify how to access the name and path.
     #   changed_cookbooks.each do |cookbook|
     #     puts "Cookbook #{cookbook[:name]} has been modified."
     #     puts "It is avaialble at #{cookbook[:path]}"
-    #     puts "It is currently at v#{cookbook[:version]}"
     #   end
     #
     # @param node [Chef::Node] Chef Node object
@@ -60,38 +59,6 @@ module DeliveryTruck
       end
 
       changed_cookbooks
-    end
-
-    # Get a list of all the cookbooks in the project and return metadata about
-    # each of them including name, path and version.
-    #
-    # @example Simple loop to exemplify how to access name, path and version
-    #   all_cookbooks.each do |cookbook|
-    #     puts "This project has a cookbook named #{cookbook[:name]}"
-    #     puts "It is located at #{cookbook[:path]}"
-    #     puts "It is currently at v#{cookbook[:version]}"
-    #   end
-    #
-    # @param node [Chef::Node] Chef Node object
-    # @return [Array#Hash]
-    def all_cookbooks(node)
-      repo_dir = node['delivery']['workspace']['repo']
-
-      all_cookbooks = []
-      cookbooks_in_repo(node).each do |cookbook|
-        if cookbook == repo_dir
-          name = get_cookbook_name(repo_dir)
-          version = get_cookbook_version(repo_dir)
-          all_cookbooks << {:name => name, :path => repo_dir, :version => version}
-        else
-          path = File.join(repo_dir, cookbook)
-          name = get_cookbook_name(path)
-          version = get_cookbook_version(path)
-          all_cookbooks << {:name => name, :path => path, :version => version}
-        end
-      end
-
-      all_cookbooks
     end
 
     # Get a list of the files that have changed between two shas and return them
@@ -292,11 +259,6 @@ module DeliveryTruck
   end
 
   module DSL
-
-    # Return a list of all the cookbooks in the project
-    def all_cookbooks
-      DeliveryTruck::Helpers.all_cookbooks(node)
-    end
 
     # Return a list of the cookbooks that have been modified
     def changed_cookbooks

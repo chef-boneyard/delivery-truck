@@ -97,20 +97,13 @@ quality, security and smoke.
     "git": "https://github.com/opscode-cookbooks/delivery-truck.git"
   },
   "skip_phases": [
+    "functional",
     "quality",
     "security",
     "smoke"
   ]
 }
 ```
-
-## Functional Testing using Kitchen-Docker
-This cookbook, during the Functional phase of the Acceptance stage, will execute
-your Test Kitchen tests using kitchen-docker. To take advantage of this
-functionality you need to provide a `.kitchen.docker.yml` file in your project.
-An example of one such file can be found in [here](.kitchen.docker.yml). For more
-information on kitchen-docker, please check out it's
-[github repo](https://github.com/portertech/kitchen-docker).
 
 ## Handling Secrets (ALPHA)
 This cookbook implements a rudimentary approach to handling secrets. This process
