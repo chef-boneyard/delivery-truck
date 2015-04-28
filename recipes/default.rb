@@ -19,27 +19,6 @@ ENV['PATH'] = "/opt/chefdk/bin:/opt/chefdk/embedded/bin:#{ENV['PATH']}"
 
 #######################################################################
 
-# Setup AUFS
-# There is currently a bug in devicemapper with Docker #9562 and #4036.
-# To get around this we are using AUFS.
-include_recipe 'aufs'
-
-# Install and setup Docker
-include_recipe 'docker'
-
-# Allow dbuild to execute Docker as sudo
-sudo 'dbuild-docker' do
-  user 'dbuild'
-  runas 'root'
-  commands ['/usr/bin/docker']
-  defaults ['setenv', 'env_reset']
-  nopasswd true
-end
-
-chef_gem 'kitchen-docker' do
-  version '2.0.0'
-end
-
 # Temporary workaround until we reliably use a newer version of ChefDK
 chef_gem 'chefspec' do
   version '4.1.1'

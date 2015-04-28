@@ -15,14 +15,4 @@
 # limitations under the License.
 #
 
-if node['delivery']['change']['stage'] == 'acceptance'
-  all_cookbooks.each do |cookbook|
-    execute "functional_kitchen_#{cookbook[:name]}" do
-      cwd cookbook[:path]
-      command "kitchen test"
-      environment('PATH' => ENV['PATH'],
-                  'KITCHEN_YAML' => '.kitchen.docker.yml')
-      only_if { has_kitchen_tests?(cookbook[:path]) }
-    end
-  end
-end
+# SKIP PHASE
