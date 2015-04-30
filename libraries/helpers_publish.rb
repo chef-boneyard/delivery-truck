@@ -32,13 +32,24 @@ module DeliveryTruck
         false
       end
 
-      # Read the Delivery Config to see if the uesr has indicated a Github
+      # Read the Delivery Config to see if the user has indicated a Github
       # repo they would like to push to.
       #
       # @param [Chef::Node] Chef Node object
       # @return [TrueClass, FalseClass]
       def push_repo_to_github?(node)
         !!node['delivery']['config']['delivery-truck']['publish']['github']
+      rescue
+        false
+      end
+
+      # Read the Delivery Config to see if the user has indicated a Supermarket
+      # Server they would like to push to.
+      #
+      # @param [Chef::Node] Chef Node object
+      # @return [TrueClass, FalseClass]
+      def share_cookbook_to_supermarket?(node)
+        !!node['delivery']['config']['delivery-truck']['publish']['supermarket']
       rescue
         false
       end
@@ -54,6 +65,11 @@ module DeliveryTruck
     # Check config.json for whether user wants to push to Github
     def push_repo_to_github?
       DeliveryTruck::Helpers::Publish.push_repo_to_github?(node)
+    end
+
+    # Check config.json for whether user wants to share to Supermarket
+    def share_cookbook_to_supermarket?
+      DeliveryTruck::Helpers::Publish.share_cookbook_to_supermarket?(node)
     end
   end
 end

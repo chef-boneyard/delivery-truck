@@ -51,10 +51,12 @@ Any other rules except these will be ignored.
 
 ### publish
 From the `publish` phase you can quickly and easily deploy cookbooks to
-your Chef Server and your entire project to a Github account.
+your Chef Server, Supermarket Server and your entire project to a Github account.
 
 * `chef_server` - Set to true/false depending on whether you would like to
 upload any modified cookbooks to the Chef Server associated with Delivery.
+* `supermarket` - Specify the Supermarket Server you would like to use to
+share any modified cookbooks.
 * `github` - Specify the Github repository you would like to push your project
 to. In order to work you must create a shared secrets data bag item (see "Handling
 Secrets" below) with a key named github with the value being a
@@ -71,6 +73,7 @@ access to that repo.
   "delivery-truck": {
     "publish": {
       "chef_server": true,
+      "supermarket": "https://supermarket.chef.io",
       "github": "<org>/<project>"
     }
   }

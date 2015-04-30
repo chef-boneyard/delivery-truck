@@ -30,3 +30,10 @@ chef_gem 'chef-sugar' do
   # but it more closely matches the CD philosophy which Delivery implements!
   action :upgrade
 end
+
+# If the user specified a supermarket server lets install the knife plugin
+if share_cookbook_to_supermarket?
+  chef_gem 'knife-supermarket' do
+    action :install
+  end
+end
