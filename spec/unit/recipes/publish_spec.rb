@@ -48,6 +48,132 @@ describe "delivery-truck::publish" do
     end
   end
 
+  context 'when user does not specify they wish to share to Supermarket Server' do
+    before do
+      allow(DeliveryTruck::Helpers::Publish).to receive(:share_cookbook_to_supermarket?).and_return(false)
+      chef_run.converge(described_recipe)
+    end
+
+    it 'does not upload cookbooks' do
+      expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/julia')
+      expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/gordon')
+      expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/emeril')
+
+      expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_julia")
+      expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_gordon")
+      expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_emeril")
+    end
+  end
+
+  context 'when user specifies they wish to share to Supermarket Server' do
+    before do
+      allow(DeliveryTruck::Helpers::Publish).to receive(:share_cookbook_to_supermarket?).and_return(true)
+      chef_run.node.set['delivery']['config']['delivery-truck']['publish']['supermarket'] = 'https://supermarket.chef.io'
+    end
+
+    context 'always' do
+      before do
+        chef_run.converge(described_recipe)
+      end
+
+      it 'deletes and recreates cookbook-to-share directory' do
+        expect(chef_run).to delete_directory("/tmp/cache/cookbook-share").with(recursive: true)
+        expect(chef_run).to create_directory("/tmp/cache/cookbook-share")
+      end
+    end
+
+    context 'and no cookbooks changed' do
+      before do
+        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
+        chef_run.converge(described_recipe)
+      end
+
+      it 'does nothing' do
+        expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/julia')
+        expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/gordon')
+        expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/emeril')
+
+        expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_julia")
+        expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_gordon")
+        expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_emeril")
+      end
+    end
+
+    context 'and one cookbook changed' do
+      before do
+        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+        stub_command('knife supermarket show julia 0.1.0 ' \
+                     '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                     '--supermarket-site https://supermarket.chef.io').and_return(false)
+        chef_run.converge(described_recipe)
+      end
+
+      it 'shares only that cookbook' do
+        expect(chef_run).to create_link('/tmp/cache/cookbook-share/julia')
+                             .with(to: '/tmp/repo/cookbooks/julia')
+        expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/gordon')
+        expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/emeril')
+
+        expect(chef_run).to run_execute("share_cookbook_to_supermarket_julia")
+                             .with(command: 'knife supermarket share julia ' \
+                                            '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                                            '--supermarket-site https://supermarket.chef.io ' \
+                                            '--cookbook-path /tmp/cache/cookbook-share')
+        expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_gordon")
+        expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_emeril")
+      end
+
+      context 'but it already exists on Supermarket' do
+        before do
+          stub_command('knife supermarket show julia 0.1.0 ' \
+                       '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                       '--supermarket-site https://supermarket.chef.io').and_return(true)
+          chef_run.converge(described_recipe)
+        end
+
+        it 'do not share that cookbook' do
+          expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_julia")
+                                  .with(command: 'knife supermarket share julia ' \
+                                                 '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                                                 '--supermarket-site https://supermarket.chef.io ' \
+                                                 '--cookbook-path /tmp/cache/cookbook-share')
+        end
+      end
+    end
+
+    context 'and multiple cookbooks changed' do
+      before do
+        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
+        stub_command('knife supermarket show julia 0.1.0 ' \
+                     '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                     '--supermarket-site https://supermarket.chef.io').and_return(false)
+        stub_command('knife supermarket show gordon 0.2.0 ' \
+                     '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                     '--supermarket-site https://supermarket.chef.io').and_return(false)
+        chef_run.converge(described_recipe)
+      end
+
+      it 'shares only those cookbook' do
+        expect(chef_run).to create_link('/tmp/cache/cookbook-share/julia')
+                             .with(to: '/tmp/repo/cookbooks/julia')
+        expect(chef_run).to create_link('/tmp/cache/cookbook-share/gordon')
+                             .with(to: '/tmp/repo/cookbooks/gordon')
+        expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/emeril')
+
+        expect(chef_run).to run_execute("share_cookbook_to_supermarket_julia")
+                             .with(command: 'knife supermarket share julia ' \
+                                            '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                                            '--supermarket-site https://supermarket.chef.io ' \
+                                            '--cookbook-path /tmp/cache/cookbook-share')
+        expect(chef_run).to run_execute("share_cookbook_to_supermarket_gordon")
+                             .with(command: 'knife supermarket share gordon ' \
+                                            '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                                            '--supermarket-site https://supermarket.chef.io ' \
+                                            '--cookbook-path /tmp/cache/cookbook-share')
+        expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_emeril")
+      end
+    end
+  end
 
   context 'when user does not specify they wish to upload to Chef Server' do
     before do
