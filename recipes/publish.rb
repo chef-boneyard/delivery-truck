@@ -24,6 +24,40 @@
 
 config_rb = File.join('/var/opt/delivery/workspace/.chef', 'knife.rb')
 
+# If the user specified a supermarket server to share to, share it
+if share_cookbook_to_supermarket?
+  supermarket_site = node['delivery']['config']['delivery-truck']['publish']['supermarket']
+  cookbook_directory_supermarket = File.join(node['delivery']['workspace']['cache'], "cookbook-share")
+
+  directory cookbook_directory_supermarket do
+    recursive true
+    # We delete the cookbook-to-share staging directory each time to ensure we
+    # don't have out-of-date cookbooks hanging around from a previous build.
+    action [:delete, :create]
+  end
+
+  changed_cookbooks.each do |cookbook|
+    # Supermarket does not let you share a cookbook without a `metadata.rb`
+    # then running `berks vendor` is not an option otherwise we will ended
+    # up just with a `metadata.json`
+    #
+    # Lets link the real cookbook.
+    link ::File.join(cookbook_directory_supermarket, cookbook[:name]) do
+      to cookbook[:path]
+    end
+
+    execute "share_cookbook_to_supermarket_#{cookbook[:name]}" do
+      command "knife supermarket share #{cookbook[:name]} " \
+              "--config #{config_rb} " \
+              "--supermarket-site #{supermarket_site} " \
+              "--cookbook-path #{cookbook_directory_supermarket}"
+      not_if "knife supermarket show #{cookbook[:name]} #{cookbook[:version]} " \
+              "--config #{config_rb} " \
+              "--supermarket-site #{supermarket_site}"
+    end
+  end
+end
+
 # Create the upload directory where cookbooks to be uploaded will be staged
 cookbook_directory = File.join(node['delivery']['workspace']['cache'], "cookbook-upload")
 directory cookbook_directory do
