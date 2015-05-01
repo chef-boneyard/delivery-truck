@@ -44,7 +44,7 @@ module DeliveryTruck
       end
 
       # Read the Delivery Config to see if the user has indicated a Supermarket
-      # Server they would like to push to.
+      # Server they would like to share to.
       #
       # @param [Chef::Node] Chef Node object
       # @return [TrueClass, FalseClass]

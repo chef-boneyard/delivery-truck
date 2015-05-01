@@ -31,7 +31,7 @@ describe DeliveryTruck::Helpers::Publish do
 
     context 'when config value is set' do
       it 'returns the value' do
-        node.default['delivery']['config']['delivery-truck']['publish']['supermarket'] = true
+        node.default['delivery']['config']['delivery-truck']['publish']['supermarket'] = 'https://supermarket.chef.io'
         expect(described_class.share_cookbook_to_supermarket?(node)).to eql(true)
 
         node.default['delivery']['config']['delivery-truck']['publish']['supermarket'] = false

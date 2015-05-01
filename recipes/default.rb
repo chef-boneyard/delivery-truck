@@ -32,8 +32,7 @@ chef_gem 'chef-sugar' do
 end
 
 # If the user specified a supermarket server lets install the knife plugin
-if share_cookbook_to_supermarket?
-  chef_gem 'knife-supermarket' do
-    action :install
-  end
+chef_gem 'knife-supermarket' do
+  only_if { share_cookbook_to_supermarket? }
+  action :install
 end

@@ -54,7 +54,7 @@ describe "delivery-truck::publish" do
       chef_run.converge(described_recipe)
     end
 
-    it 'does not upload cookbooks' do
+    it 'does not share cookbooks' do
       expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/julia')
       expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/gordon')
       expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/emeril')
