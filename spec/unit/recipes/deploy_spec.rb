@@ -22,16 +22,26 @@ describe "delivery-truck::deploy" do
     end.converge(described_recipe)
   end
 
+  let(:search_query) do
+    "(#{recipe_list}) AND chef_environment:union AND recipes:push-jobs*"
+  end
+
+  let(:node_list) { %w(node1 node2) }
+
   context "when a single cookbook has been modified" do
     before do
       allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
       allow(DeliveryTruck::Helpers).to receive(:get_cookbook_version).and_return('1.0.0')
     end
 
+    let(:recipe_list) { 'recipes:julia*' }
+
     it "deploy only that cookbook" do
+      expect(DeliveryTruck::Helpers::Deploy).to receive(:delivery_chef_server_search).with(:node, search_query).and_return(node_list)
       expect(chef_run).to run_ruby_block('update the union environment')
-      expect(chef_run).to run_delivery_truck_deploy("deploy_Secret").with(
-                            :search => "recipes:julia*"
+      expect(chef_run).to dispatch_delivery_push_job("deploy_Secret").with(
+                            :command => 'chef-client',
+                            :nodes => node_list
                           )
     end
   end
@@ -42,10 +52,14 @@ describe "delivery-truck::deploy" do
       allow(DeliveryTruck::Helpers).to receive(:get_cookbook_version).and_return('1.0.0')
     end
 
+    let(:recipe_list) { 'recipes:julia* OR recipes:gordon*' }
+
     it "deploy only those cookbooks" do
+      expect(DeliveryTruck::Helpers::Deploy).to receive(:delivery_chef_server_search).with(:node, search_query).and_return(node_list)
       expect(chef_run).to run_ruby_block('update the union environment')
-      expect(chef_run).to run_delivery_truck_deploy("deploy_Secret").with(
-                            :search => "recipes:julia* OR recipes:gordon*"
+      expect(chef_run).to dispatch_delivery_push_job("deploy_Secret").with(
+                            :command => 'chef-client',
+                            :nodes => node_list
                           )
     end
   end
@@ -58,7 +72,7 @@ describe "delivery-truck::deploy" do
 
     it "does not deploy any cookbooks" do
       expect(chef_run).to run_ruby_block('update the union environment')
-      expect(chef_run).not_to run_delivery_truck_deploy("deploy_Secret")
+      expect(chef_run).not_to dispatch_delivery_push_job("deploy_Secret")
     end
   end
 end
