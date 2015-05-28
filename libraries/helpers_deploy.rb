@@ -15,16 +15,24 @@
 # limitations under the License.
 #
 
-# These files create / add to the Delivery::DSL module
-require_relative 'helpers'
-require_relative 'helpers_functional'
-require_relative 'helpers_lint'
-require_relative 'helpers_unit'
-require_relative 'helpers_publish'
-require_relative 'helpers_syntax'
-require_relative 'helpers_deploy'
+module DeliveryTruck
+  module Helpers
+    module Deploy
+      extend self
 
-# And these mix the DSL methods into the Chef infrastructure
-Chef::Recipe.send(:include, DeliveryTruck::DSL)
-Chef::Resource.send(:include, DeliveryTruck::DSL)
-Chef::Provider.send(:include, DeliveryTruck::DSL)
+      def delivery_chef_server_search(type, query)
+        ::Chef_Delivery::ClientHelper.enter_client_mode_as_delivery
+        results = []
+        ::Chef::Search::Query.new.search(type, query) { |o| results << o }
+        ::Chef_Delivery::ClientHelper.leave_client_mode_as_delivery
+        results
+      end
+    end
+  end
+
+  module DSL
+    def delivery_chef_server_search(type, query)
+      DeliveryTruck::Helpers::Deploy.delivery_chef_server_search(type, query)
+    end
+  end
+end

@@ -50,7 +50,14 @@ ruby_block "update the #{env_name} environment" do
 end
 
 unless search_terms.empty?
-  delivery_truck_deploy "deploy_#{node['delivery']['change']['project']}" do
-    search search_terms.join(" OR ")
+  search_query = "(#{search_terms.join(' OR ')}) " \
+                 "AND chef_environment:#{delivery_environment} " \
+                 "AND recipes:push-jobs*"
+
+  my_nodes = delivery_chef_server_search(:node, search_query)
+
+  delivery_push_job "deploy_#{node['delivery']['change']['project']}" do
+    command 'chef-client'
+    nodes my_nodes
   end
 end
