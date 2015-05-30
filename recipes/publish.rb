@@ -67,6 +67,22 @@ directory cookbook_directory do
   action [:delete, :create]
 end
 
+# We need this for berks vendor to work when puling cookbooks from Chef server.
+directory "#{node['delivery']['workspace']['cache']}/.berkshelf" do
+  recursive true
+end
+
+file "#{node['delivery']['workspace']['cache']}/.berkshelf/config.json" do
+  content <<EOM
+{
+  "chef": {
+     "client_key": "/var/opt/delivery/workspace/.chef/delivery.pem",
+     "node_name": "delivery"
+  }
+}
+EOM
+end
+
 # Upload each cookbook to the Chef Server
 if upload_cookbook_to_chef_server?
   changed_cookbooks.each do |cookbook|
