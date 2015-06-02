@@ -23,8 +23,4 @@ if defined?(ChefSpec)
   def run_delivery_truck_deploy(resource_name)
     ChefSpec::Matchers::ResourceMatcher.new(:delivery_truck_deploy, :run, resource_name)
   end
-
-  def dispatch_delivery_push_job(resource_name)
-    ChefSpec::Matchers::ResourceMatcher.new(:delivery_push_job, :dispatch, resource_name)
-  end
 end

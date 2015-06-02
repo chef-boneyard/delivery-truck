@@ -33,8 +33,8 @@ describe "delivery-truck::publish" do
   end
 
   before do
-    allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
-    allow(DeliveryTruck::Helpers).to receive(:delivery_chef_server).and_return(delivery_chef_server)
+    allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
+    allow_any_instance_of(Chef::Recipe).to receive(:delivery_chef_server).and_return(delivery_chef_server)
   end
 
   context 'always' do
@@ -84,7 +84,7 @@ describe "delivery-truck::publish" do
 
     context 'and no cookbooks changed' do
       before do
-        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
+        allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
         chef_run.converge(described_recipe)
       end
 
@@ -101,7 +101,7 @@ describe "delivery-truck::publish" do
 
     context 'and one cookbook changed' do
       before do
-        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+        allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
         stub_command('knife supermarket show julia 0.1.0 ' \
                      '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
                      '--supermarket-site https://supermarket.chef.io').and_return(false)
@@ -143,7 +143,7 @@ describe "delivery-truck::publish" do
 
     context 'and multiple cookbooks changed' do
       before do
-        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
+        allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
         stub_command('knife supermarket show julia 0.1.0 ' \
                      '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
                      '--supermarket-site https://supermarket.chef.io').and_return(false)
@@ -200,7 +200,7 @@ describe "delivery-truck::publish" do
 
     context 'and no cookbooks changed' do
       before do
-        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
+        allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
         chef_run.converge(described_recipe)
       end
 
@@ -217,7 +217,7 @@ describe "delivery-truck::publish" do
 
     context 'and one cookbook changed' do
       before do
-        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+        allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
         chef_run.converge(described_recipe)
       end
 
@@ -239,7 +239,7 @@ describe "delivery-truck::publish" do
 
     context 'and multiple cookbooks changed' do
       before do
-        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
+        allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
         chef_run.converge(described_recipe)
       end
 
@@ -268,7 +268,7 @@ describe "delivery-truck::publish" do
       before do
         allow(File).to receive(:exist?).and_call_original
         allow(File).to receive(:exist?).with('/tmp/repo/cookbooks/julia/Berksfile').and_return(true)
-        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+        allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
         chef_run.converge(described_recipe)
       end
 
@@ -303,7 +303,7 @@ describe "delivery-truck::publish" do
     let(:secrets) {{'github' => 'SECRET'}}
 
     before do
-      allow(DeliveryTruck::Helpers).to receive(:get_project_secrets).and_return(secrets)
+      allow_any_instance_of(Chef::Recipe).to receive(:get_project_secrets).and_return(secrets)
       stub_command("git remote --verbose | grep ^github").and_return(false)
       chef_run.node.set['delivery']['config']['delivery-truck']['publish']['github'] = 'spec/spec'
       chef_run.converge(described_recipe)

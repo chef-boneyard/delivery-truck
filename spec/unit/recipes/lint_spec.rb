@@ -25,7 +25,7 @@ describe "delivery-truck::lint" do
   context "when a single cookbook has been modified" do
     before do
       allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_tags).and_return("-t FC001")
-      allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+      allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
     end
 
     it "runs test-kitchen against only that cookbook" do
@@ -40,7 +40,7 @@ describe "delivery-truck::lint" do
   context "when multiple cookbooks have been modified" do
     before do
       allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_tags).and_return("-t ~FC002")
-      allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
+      allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
     end
 
     it "runs test-kitchen against only those cookbooks" do
@@ -57,7 +57,7 @@ describe "delivery-truck::lint" do
   context "when no cookbooks have been modified" do
     before do
       allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_tags).and_return("")
-      allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
+      allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
     end
 
     it "does not run test-kitchen against any cookbooks" do
@@ -70,7 +70,7 @@ describe "delivery-truck::lint" do
   context "when a .rubocop.yml is present" do
     before do
       allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_tags).and_return("")
-      allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+      allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
       allow(File).to receive(:exist?).and_call_original
       allow(File).to receive(:exist?).with("/tmp/repo/cookbooks/julia/.rubocop.yml").and_return(true)
     end

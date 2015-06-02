@@ -29,7 +29,7 @@ describe "delivery-truck::syntax" do
 
     context "when a single cookbook has been modified" do
       before do
-        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+        allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
       end
 
       it "runs `knife cookbook test` against only that cookbook" do
@@ -43,7 +43,7 @@ describe "delivery-truck::syntax" do
 
     context "when multiple cookbooks have been modified" do
       before do
-        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
+        allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
       end
 
       it "runs `knife cookbook test` against only those cookbooks" do
@@ -59,7 +59,7 @@ describe "delivery-truck::syntax" do
 
     context "when no cookbooks have been modified" do
       before do
-        allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
+        allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
       end
 
       it "does not run `knife cookbook test` against any cookbooks" do
