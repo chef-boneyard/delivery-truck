@@ -22,8 +22,8 @@ search_terms = []
 env_name = delivery_environment
 
 changed_cookbooks.each do |cookbook|
-  search_terms << "recipes:#{cookbook[:name]}*"
-  version_map[cookbook[:name]] = cookbook[:version]
+  search_terms << "recipes:#{cookbook.name}*"
+  version_map[cookbook.name] = cookbook.version
 end
 
 ruby_block "update the #{env_name} environment" do

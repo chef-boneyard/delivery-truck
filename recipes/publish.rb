@@ -42,16 +42,16 @@ if share_cookbook_to_supermarket?
     # up just with a `metadata.json`
     #
     # Lets link the real cookbook.
-    link ::File.join(cookbook_directory_supermarket, cookbook[:name]) do
-      to cookbook[:path]
+    link ::File.join(cookbook_directory_supermarket, cookbook.name) do
+      to cookbook.path
     end
 
-    execute "share_cookbook_to_supermarket_#{cookbook[:name]}" do
-      command "knife supermarket share #{cookbook[:name]} " \
+    execute "share_cookbook_to_supermarket_#{cookbook.name}" do
+      command "knife supermarket share #{cookbook.name} " \
               "--config #{config_rb} " \
               "--supermarket-site #{supermarket_site} " \
               "--cookbook-path #{cookbook_directory_supermarket}"
-      not_if "knife supermarket show #{cookbook[:name]} #{cookbook[:version]} " \
+      not_if "knife supermarket show #{cookbook.name} #{cookbook.version} " \
               "--config #{config_rb} " \
               "--supermarket-site #{supermarket_site}"
     end
@@ -70,19 +70,19 @@ end
 # Upload each cookbook to the Chef Server
 if upload_cookbook_to_chef_server?
   changed_cookbooks.each do |cookbook|
-    if File.exist?(File.join(cookbook[:path], 'Berksfile'))
-      execute "berks_vendor_cookbook_#{cookbook[:name]}" do
+    if File.exist?(File.join(cookbook.path, 'Berksfile'))
+      execute "berks_vendor_cookbook_#{cookbook.name}" do
         command "berks vendor #{cookbook_directory}"
-        cwd cookbook[:path]
+        cwd cookbook.path
       end
     else
-      link ::File.join(cookbook_directory, cookbook[:name]) do
-        to cookbook[:path]
+      link ::File.join(cookbook_directory, cookbook.name) do
+        to cookbook.path
       end
     end
 
-    execute "upload_cookbook_#{cookbook[:name]}" do
-      command "knife cookbook upload #{cookbook[:name]} --freeze --all --force " \
+    execute "upload_cookbook_#{cookbook.name}" do
+      command "knife cookbook upload #{cookbook.name} --freeze --all --force " \
               "--config #{config_rb} " \
               "--cookbook-path #{cookbook_directory}"
     end

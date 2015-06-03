@@ -17,9 +17,9 @@
 
 changed_cookbooks.each do |cookbook|
   # Run RSpec against the modified cookbook
-  execute "unit_rspec_#{cookbook[:name]}" do
-    cwd cookbook[:path]
+  execute "unit_rspec_#{cookbook.name}" do
+    cwd cookbook.path
     command "rspec --format documentation --color"
-    only_if { has_spec_tests?(cookbook[:path]) }
+    only_if { has_spec_tests?(cookbook.path) }
   end
 end
