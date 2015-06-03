@@ -1,4 +1,5 @@
 require 'chefspec'
+require 'chefspec/berkshelf'
 
 TOPDIR = File.expand_path(File.join(File.dirname(__FILE__), ".."))
 $: << File.expand_path(File.dirname(__FILE__))
@@ -11,12 +12,12 @@ module SharedLetDeclarations
   extend RSpec::SharedContext
 
   let(:one_changed_cookbook) {[
-    {:name => 'julia', :path => "/tmp/repo/cookbooks/julia", :version => "0.1.0"}
+    double('delivery sugar cookbook', :name => 'julia', :path => '/tmp/repo/cookbooks/julia', :version => '0.1.0')
   ]}
 
   let(:two_changed_cookbooks) {[
-    {:name => 'julia', :path => "/tmp/repo/cookbooks/julia", :version => "0.1.0"},
-    {:name => 'gordon', :path => "/tmp/repo/cookbooks/gordon", :version => "0.2.0"}
+    double('delivery sugar cookbook', :name => 'julia', :path => '/tmp/repo/cookbooks/julia', :version => '0.1.0'),
+    double('delivery sugar cookbook', :name => 'gordon', :path => '/tmp/repo/cookbooks/gordon', :version => '0.2.0')
   ]}
 
   let(:no_changed_cookbooks) {[]}

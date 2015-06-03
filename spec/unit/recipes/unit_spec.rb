@@ -24,7 +24,7 @@ describe "delivery-truck::unit" do
 
   context "when a single cookbook has been modified" do
     before do
-      allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+      allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
       allow(DeliveryTruck::Helpers::Unit).to receive(:has_spec_tests?).with('/tmp/repo/cookbooks/julia').and_return(true)
     end
 
@@ -40,7 +40,7 @@ describe "delivery-truck::unit" do
 
   context "when multiple cookbooks have been modified" do
     before do
-      allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
+      allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
       allow(DeliveryTruck::Helpers::Unit).to receive(:has_spec_tests?).with('/tmp/repo/cookbooks/julia').and_return(true)
       allow(DeliveryTruck::Helpers::Unit).to receive(:has_spec_tests?).with('/tmp/repo/cookbooks/gordon').and_return(true)
     end
@@ -60,7 +60,7 @@ describe "delivery-truck::unit" do
 
   context "when no cookbooks have been modified" do
     before do
-      allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
+      allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
     end
 
     it "does not run test-kitchen against any cookbooks" do

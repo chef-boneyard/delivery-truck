@@ -17,12 +17,13 @@
 
 changed_cookbooks.each do |cookbook|
   # Run Foodcritic against any cookbooks that were modified.
-  execute "lint_foodcritic_#{cookbook[:name]}" do
-    command "foodcritic -f correctness #{foodcritic_tags} #{cookbook[:path]}"
+  execute "lint_foodcritic_#{cookbook.name}" do
+    command "foodcritic -f correctness #{foodcritic_tags} #{cookbook.path}"
   end
+  
   # Run Rubocop against any cookbooks that were modified.
-  execute "lint_rubocop_#{cookbook[:name]}" do
-    command "rubocop #{cookbook[:path]}"
-    only_if { File.exist?(File.join(cookbook[:path], '.rubocop.yml')) }
+  execute "lint_rubocop_#{cookbook.name}" do
+    command "rubocop #{cookbook.path}"
+    only_if { File.exist?(File.join(cookbook.path, '.rubocop.yml')) }
   end
 end

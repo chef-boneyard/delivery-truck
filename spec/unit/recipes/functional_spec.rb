@@ -15,14 +15,14 @@ describe "delivery-truck::functional", :ignore => true do
   let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
 
   before do
-    allow(DeliveryTruck::Helpers).to receive(:load_config).and_return(nil)
-    allow(DeliveryTruck::Helpers).to receive(:repo_path).and_return('/tmp')
+    allow_any_instance_of(Chef::Recipe).to receive(:load_config).and_return(nil)
+    allow_any_instance_of(Chef::Recipe).to receive(:repo_path).and_return('/tmp')
   end
 
   context "when a single cookbook has been modified" do
     before do
-      allow(DeliveryTruck::Helpers).to receive(:current_stage).and_return('acceptance')
-      allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+      allow_any_instance_of(Chef::Recipe).to receive(:current_stage).and_return('acceptance')
+      allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
       allow(DeliveryTruck::Helpers::Functional).to receive(:has_kitchen_tests?).with('/tmp/cookbooks/julia').and_return(true)
     end
 
@@ -40,8 +40,8 @@ describe "delivery-truck::functional", :ignore => true do
 
   context "when multiple cookbooks have been modified" do
     before do
-      allow(DeliveryTruck::Helpers).to receive(:current_stage).and_return('acceptance')
-      allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
+      allow_any_instance_of(Chef::Recipe).to receive(:current_stage).and_return('acceptance')
+      allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
       allow(DeliveryTruck::Helpers::Functional).to receive(:has_kitchen_tests?).with('/tmp/cookbooks/julia').and_return(true)
       allow(DeliveryTruck::Helpers::Functional).to receive(:has_kitchen_tests?).with('/tmp/cookbooks/gordon').and_return(true)
     end
@@ -80,8 +80,8 @@ describe "delivery-truck::functional", :ignore => true do
 
   context "when no cookbooks have been modified" do
     before do
-      allow(DeliveryTruck::Helpers).to receive(:current_stage).and_return('acceptance')
-      allow(DeliveryTruck::Helpers).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
+      allow_any_instance_of(Chef::Recipe).to receive(:current_stage).and_return('acceptance')
+      allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
     end
 
     it "does not run test-kitchen against any cookbooks" do
@@ -93,7 +93,7 @@ describe "delivery-truck::functional", :ignore => true do
 
   context 'non-acceptance environments' do
     before do
-      allow(DeliveryTruck::Helpers).to receive(:current_stage).and_return('union')
+      allow_any_instance_of(Chef::Recipe).to receive(:current_stage).and_return('union')
     end
 
     it 'does nothing' do

@@ -20,7 +20,8 @@ class Chef
     class DeliveryTruckDeploy < Chef::Provider::LWRPBase
       action :run do
         converge_by("Dispatch push-job for #{delivery_environment} => #{node['delivery']['change']['project']} - #{new_resource.name}") do
-          new_resource.updated_by_last_action(deploy_ccr)
+          result = DeliverySugar::ChefServer.new.with_server_config { deploy_ccr }
+          new_resource.updated_by_last_action(result)
         end
       end
 
@@ -64,19 +65,18 @@ class Chef
 
         ::Chef::Log.info("Will wait up to #{timeout/60} minutes for " +
                          "deployment to complete...")
+
         begin
           # Sleep unless this is our first time through the loop.
           sleep(SLEEP_TIME) unless timeout == origin
 
           # Find any dependency/app node
           ::Chef::Log.info("Finding dependency/app nodes in #{delivery_environment}...")
-          ::Chef_Delivery::ClientHelper.enter_client_mode_as_delivery
           nodes = search(:node, get_search)
 
           if !nodes || nodes.empty?
             # We didn't find any node to deploy. Lets skip this phase!
             ::Chef::Log.info("No dependency/app nodes found. Skipping phase!")
-            ::Chef_Delivery::ClientHelper.leave_client_mode_as_delivery
             break
           end
 
@@ -172,7 +172,6 @@ class Chef
 
           dec_timeout(SLEEP_TIME)
         end while timeout > 0
-        ::Chef_Delivery::ClientHelper.leave_client_mode_as_delivery
 
         ## If we make it here and we are past our timeout the job timed out.
         if timeout <= 0

@@ -16,7 +16,6 @@
 #
 
 # These files create / add to the Delivery::DSL module
-require_relative 'helpers'
 require_relative 'helpers_functional'
 require_relative 'helpers_lint'
 require_relative 'helpers_unit'

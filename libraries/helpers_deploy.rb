@@ -21,10 +21,10 @@ module DeliveryTruck
       extend self
 
       def delivery_chef_server_search(type, query)
-        ::Chef_Delivery::ClientHelper.enter_client_mode_as_delivery
         results = []
-        ::Chef::Search::Query.new.search(type, query) { |o| results << o }
-        ::Chef_Delivery::ClientHelper.leave_client_mode_as_delivery
+        DeliverySuger::ChefServer.new.with_server_config do
+          ::Chef::Search::Query.new.search(type, query) { |o| results << o }
+        end
         results
       end
     end
