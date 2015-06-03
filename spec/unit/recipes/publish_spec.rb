@@ -309,47 +309,14 @@ describe "delivery-truck::publish" do
       chef_run.converge(described_recipe)
     end
 
-    it 'creates a deploy key' do
-      expect(chef_run).to create_file('/tmp/cache/github.pem')
-                           .with(content: 'SECRET',
-                                 owner: 'dbuild',
-                                 mode: '0600',
-                                 sensitive: true)
-    end
-
-    it 'creates the git_ssh wrapper file' do
-      expect(chef_run).to create_template('/tmp/cache/git_ssh')
-                           .with(source: 'git_ssh.erb',
-                                 owner: 'dbuild',
-                                 mode: '0755')
-    end
-
-    it 'adds git username' do
-      expect(chef_run).to run_execute('set_git_username')
-                           .with(command: "git config user.name 'Delivery'",
-                                 cwd: '/tmp/repo',
-                                 environment: {"GIT_SSH" => "/tmp/cache/git_ssh"})
-    end
-
-    it 'adds git email' do
-      expect(chef_run).to run_execute('set_git_email')
-                           .with(command: "git config user.email 'delivery@chef.io'",
-                                 cwd: '/tmp/repo',
-                                 environment: {"GIT_SSH" => "/tmp/cache/git_ssh"})
-    end
-
-    it 'adds github remote' do
-      expect(chef_run).to run_execute("add_github_remote")
-                           .with(command: 'git remote add github git@github.com:spec/spec.git',
-                                 cwd: '/tmp/repo',
-                                 environment: {"GIT_SSH" => "/tmp/cache/git_ssh"})
-    end
-
     it 'pushes to github' do
-      expect(chef_run).to run_execute('push_to_github')
-                           .with(command: 'git push github master',
-                                 cwd: '/tmp/repo',
-                                 environment: {"GIT_SSH" => "/tmp/cache/git_ssh"})
+      expect(chef_run).to push_delivery_github('spec/spec')
+                              .with(deploy_key: 'SECRET',
+                                    branch: 'master',
+                                    remote_url: 'git@github.com:spec/spec.git',
+                                    repo_path: '/tmp/repo',
+                                    cache_path: '/tmp/cache',
+                                    action: [:push])
     end
   end
 
