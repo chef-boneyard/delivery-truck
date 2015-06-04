@@ -108,6 +108,36 @@ quality, security and smoke.
 }
 ```
 
+## Depends on delivery-truck
+If you would like to enjoy all the functionalities that `delivery-truck` provides
+on you own build cookbook you need to add it into your `metadata.rb`
+
+```
+name             'build_cookbook'
+maintainer       'The Authors'
+maintainer_email 'you@example.com'
+license          'all_rights'
+description      'Installs/Configures build'
+long_description 'Installs/Configures build'
+version          '0.1.0'
+
+depends 'delivery-truck'
+
+```
+
+Additionally `delivery-truck` depends on `delivery-sugar` so you need to add
+them both to your `Berksfile`
+
+```
+source "https://supermarket.chef.io"
+
+metadata
+
+cookbook 'delivery-truck', github: 'opscode-cookbooks/delivery-truck'
+cookbook 'delivery-sugar', github: 'chef-cookbooks/delivery-sugar'
+
+```
+
 ## Handling Secrets (ALPHA)
 This cookbook implements a rudimentary approach to handling secrets. This process
 is largely out of band from Chef Delivery for the time being.
