@@ -29,11 +29,7 @@ module DeliveryTruck
       # @param node [Chef::Node]
       # @return [TrueClass, FalseClass]
       def bumped_version?(path, node)
-        modified_files = DeliveryTruck::Helpers.changed_files(
-          DeliveryTruck::Helpers.pre_change_sha(node),
-          node['delivery']['change']['sha'],
-          node
-        )
+        modified_files = DeliverySugar::Change.new(node).changed_files
 
         cookbook_path = Pathname.new(path)
         workspace_repo = Pathname.new(node['delivery']['workspace']['repo'])
