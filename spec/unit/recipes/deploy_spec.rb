@@ -1,5 +1,14 @@
 require 'spec_helper'
 
+# Simple FakeNode to muck Chef::Node class
+class MyFakeNode
+  attr_reader :name
+
+  def initialize(name)
+    @name = name
+  end
+end
+
 describe "delivery-truck::deploy" do
   let(:chef_run) do
     ChefSpec::SoloRunner.new do |node|
@@ -25,8 +34,8 @@ describe "delivery-truck::deploy" do
   let(:search_query) do
     "(#{recipe_list}) AND chef_environment:union AND recipes:push-jobs*"
   end
-
-  let(:node_list) { %w(node1 node2) }
+  let(:node_list) { [MyFakeNode.new("node1"), MyFakeNode.new("node2")] }
+  let(:node_name_list) { node_list.map(&:name) }
 
   # context "when a single cookbook has been modified" do
   #   before do
@@ -59,7 +68,7 @@ describe "delivery-truck::deploy" do
       expect(chef_run).to run_ruby_block('update the union environment')
       expect(chef_run).to dispatch_delivery_push_job("deploy_Secret").with(
                             :command => 'chef-client',
-                            :nodes => node_list
+                            :nodes => node_name_list
                           )
     end
   end
