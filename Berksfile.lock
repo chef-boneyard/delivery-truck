@@ -1,7 +1,12 @@
 DEPENDENCIES
+  delivery-sugar
+    git: git://github.com/chef-cookbooks/delivery-sugar.git
+    revision: 8101415c8fed85f8c7315eafecc792459e435a33
   delivery-truck
     path: .
     metadata: true
 
 GRAPH
-  delivery-truck (0.3.11)
+  delivery-sugar (0.1.2)
+  delivery-truck (1.99.4)
+    delivery-sugar (>= 0.0.0)
