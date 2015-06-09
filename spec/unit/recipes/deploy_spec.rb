@@ -35,7 +35,6 @@ describe "delivery-truck::deploy" do
     "(#{recipe_list}) AND chef_environment:union AND recipes:push-jobs*"
   end
   let(:node_list) { [MyFakeNode.new("node1"), MyFakeNode.new("node2")] }
-  let(:node_name_list) { node_list.map(&:name) }
 
   # context "when a single cookbook has been modified" do
   #   before do
@@ -68,7 +67,7 @@ describe "delivery-truck::deploy" do
       expect(chef_run).to run_ruby_block('update the union environment')
       expect(chef_run).to dispatch_delivery_push_job("deploy_Secret").with(
                             :command => 'chef-client',
-                            :nodes => node_name_list
+                            :nodes => node_list
                           )
     end
   end
