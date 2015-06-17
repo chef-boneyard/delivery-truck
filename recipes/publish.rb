@@ -103,3 +103,18 @@ if push_repo_to_github?
     action :push
   end
 end
+
+# If the user specified a general git repo to push to, push to that repo
+if push_repo_to_git?
+  secrets = get_project_secrets
+  git_repo = node['delivery']['config']['delivery-truck']['publish']['git']
+  
+  delivery_github git_repo do
+    deploy_key secrets['git_key']
+    branch node['delivery']['change']['pipeline']
+    remote_url "#{git_repo}"
+    repo_path node['delivery']['workspace']['repo']
+    cache_path node['delivery']['workspace']['cache']
+    action :push
+  end
+end
