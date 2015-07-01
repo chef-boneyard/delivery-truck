@@ -58,4 +58,22 @@ describe DeliveryTruck::Helpers::Publish do
       end
     end
   end
+
+  describe '.push_repo_to_git?' do
+    context 'when value is unspecified' do
+      it 'returns false' do
+        expect(described_class.push_repo_to_git?(node)).to eql(false)
+      end
+    end
+
+    context 'when config value is set' do
+      it 'returns the value' do
+        node.default['delivery']['config']['delivery-truck']['publish']['git'] = true
+        expect(described_class.push_repo_to_git?(node)).to eql(true)
+
+        node.default['delivery']['config']['delivery-truck']['publish']['git'] = false
+        expect(described_class.push_repo_to_git?(node)).to eql(false)
+      end
+    end
+  end
 end

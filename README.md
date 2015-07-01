@@ -62,6 +62,7 @@ to. In order to work you must create a shared secrets data bag item (see "Handli
 Secrets" below) with a key named github with the value being a
 [deploy key](https://developer.github.com/guides/managing-deploy-keys/) with
 access to that repo.
+* `git` - Same as `github` but for Open Source Git Servers.
 
 ```json
 {
@@ -74,7 +75,8 @@ access to that repo.
     "publish": {
       "chef_server": true,
       "supermarket": "https://supermarket.chef.io",
-      "github": "<org>/<project>"
+      "github": "<org>/<project>",
+      "git": "ssh://git@stash:2222/<project-name>/<repo-name>"
     }
   }
 }
