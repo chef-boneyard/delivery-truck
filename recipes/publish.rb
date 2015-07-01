@@ -112,7 +112,7 @@ if push_repo_to_git?
   delivery_github git_repo do
     deploy_key secrets['git']
     branch node['delivery']['change']['pipeline']
-    remote_url "#{git_repo}"
+    remote_url git_repo
     repo_path node['delivery']['workspace']['repo']
     cache_path node['delivery']['workspace']['cache']
     action :push
