@@ -320,4 +320,35 @@ describe "delivery-truck::publish" do
     end
   end
 
+  context 'when they do not wish to push to git' do
+    before do
+      allow(DeliveryTruck::Helpers::Publish).to receive(:push_repo_to_git?).and_return(false)
+      chef_run.converge(described_recipe)
+    end
+
+    it 'does not push to git' do
+      expect(chef_run).not_to run_execute("push_to_git")
+    end
+  end
+
+  context 'when they wish to push to git' do
+    let(:secrets) {{'git' => 'SECRET'}}
+
+    before do
+      allow_any_instance_of(Chef::Recipe).to receive(:get_project_secrets).and_return(secrets)
+      chef_run.node.set['delivery']['config']['delivery-truck']['publish']['git'] = 'ssh://git@stash:2222/spec/spec.git'
+      chef_run.converge(described_recipe)
+    end
+
+    it 'pushes to git' do
+      expect(chef_run).to push_delivery_github('ssh://git@stash:2222/spec/spec.git')
+                              .with(deploy_key: 'SECRET',
+                                    branch: 'master',
+                                    remote_url: 'ssh://git@stash:2222/spec/spec.git',
+                                    repo_path: '/tmp/repo',
+                                    cache_path: '/tmp/cache',
+                                    action: :push)
+    end
+  end
+
 end
