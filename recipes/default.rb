@@ -21,11 +21,13 @@ ENV['PATH'] = "/opt/chefdk/bin:/opt/chefdk/embedded/bin:#{ENV['PATH']}"
 
 # Temporary workaround until we reliably use a newer version of ChefDK
 chef_gem 'chefspec' do
+  compile_time false
   version '4.1.1'
 end
 
 # Temporary workaround until chefdk installs chef-sugar.
 chef_gem 'chef-sugar' do
+  compile_time false
   # We always ride the latest version of chef-sugar. This could prove dangerous
   # but it more closely matches the CD philosophy which Delivery implements!
   action :upgrade
@@ -33,6 +35,7 @@ end
 
 # If the user specified a supermarket server lets install the knife plugin
 chef_gem 'knife-supermarket' do
+  compile_time false
   only_if { share_cookbook_to_supermarket? }
   action :install
 end

@@ -19,6 +19,11 @@
         "publish": {
             "chef_server": true,
             "github": "opscode-cookbooks/delivery-truck"
+        },
+        "lint": {
+          "foodcritic": {
+              "ignore_rules": ["FC009"]
+          }
         }
     }
 }
