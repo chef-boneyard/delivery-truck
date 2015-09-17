@@ -316,7 +316,7 @@ describe "delivery-truck::publish" do
                                     remote_url: 'git@github.com:spec/spec.git',
                                     repo_path: '/tmp/repo',
                                     cache_path: '/tmp/cache',
-                                    action: :push)
+                                    action: [:push])
     end
   end
 
@@ -347,7 +347,7 @@ describe "delivery-truck::publish" do
                                     remote_url: 'ssh://git@stash:2222/spec/spec.git',
                                     repo_path: '/tmp/repo',
                                     cache_path: '/tmp/cache',
-                                    action: :push)
+                                    action: [:push])
     end
   end
 
