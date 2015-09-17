@@ -18,7 +18,7 @@
     "delivery-truck": {
         "publish": {
             "chef_server": true,
-            "github": "opscode-cookbooks/delivery-truck"
+            "github": "chef-cookbooks/delivery-truck"
         },
         "lint": {
           "foodcritic": {

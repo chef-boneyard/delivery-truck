@@ -12,7 +12,7 @@ be your build cookbook in your `.delivery/config.json`.
   "version": "2",
   "build_cookbook": {
     "name": "delivery-truck",
-    "git": "https://github.com/opscode-cookbooks/delivery-truck.git"
+    "git": "https://github.com/chef-cookbooks/delivery-truck.git"
   }
 }
 ```
@@ -36,7 +36,7 @@ Any other rules except these will be ignored.
   "version": "2",
   "build_cookbook": {
     "name": "delivery-truck",
-    "git": "https://github.com/opscode-cookbooks/delivery-truck.git"
+    "git": "https://github.com/chef-cookbooks/delivery-truck.git"
   },
   "delivery-truck": {
     "lint": {
@@ -70,7 +70,7 @@ should have a key named git)
   "version": "2",
   "build_cookbook": {
     "name": "delivery-truck",
-    "git": "https://github.com/opscode-cookbooks/delivery-truck.git"
+    "git": "https://github.com/chef-cookbooks/delivery-truck.git"
   },
   "delivery-truck": {
     "publish": {
@@ -101,7 +101,7 @@ quality, security and smoke.
   "version": "2",
   "build_cookbook": {
     "name": "delivery-truck",
-    "git": "https://github.com/opscode-cookbooks/delivery-truck.git"
+    "git": "https://github.com/chef-cookbooks/delivery-truck.git"
   },
   "skip_phases": [
     "functional",
@@ -137,7 +137,7 @@ source "https://supermarket.chef.io"
 
 metadata
 
-cookbook 'delivery-truck', github: 'opscode-cookbooks/delivery-truck'
+cookbook 'delivery-truck', github: 'chef-cookbooks/delivery-truck'
 cookbook 'delivery-sugar', github: 'chef-cookbooks/delivery-sugar'
 
 ```
