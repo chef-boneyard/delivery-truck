@@ -39,3 +39,10 @@ chef_gem 'knife-supermarket' do
   only_if { share_cookbook_to_supermarket? }
   action :install
 end
+
+# If the user user wants to run test kitchen during the quality phase
+chef_gem 'kitchen-ec2' do
+  compile_time false
+  only_if { run_test_kitchen? }
+  action :install
+end

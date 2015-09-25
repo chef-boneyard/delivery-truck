@@ -15,16 +15,27 @@
 # limitations under the License.
 #
 
-# These files create / add to the Delivery::DSL module
-require_relative 'helpers_functional'
-require_relative 'helpers_lint'
-require_relative 'helpers_unit'
-require_relative 'helpers_publish'
-require_relative 'helpers_quality'
-require_relative 'helpers_syntax'
-require_relative 'helpers_deploy'
+module DeliveryTruck
+  module Helpers
+    module Quality
+      extend self
 
-# And these mix the DSL methods into the Chef infrastructure
-Chef::Recipe.send(:include, DeliveryTruck::DSL)
-Chef::Resource.send(:include, DeliveryTruck::DSL)
-Chef::Provider.send(:include, DeliveryTruck::DSL)
+      # See if there's a .kitchen-ec2.yml file at the root of the repo, return true if so
+      #
+      # @param [Chef::Node] Chef Node object
+      # @return [TrueClass, FalseClass]
+      def run_kitchen_test?(node)
+        File.exists?( "#{node['delivery']['workspace']['repo']}/.kitchen-ec2.yml" )
+      rescue
+        false
+      end
+    end
+  end
+
+  module DSL
+    # Check for whether user wants to run test kitchen using kitchen-ec2
+    def run_test_kitchen?
+      DeliveryTruck::Helpers::Quality.run_kitchen_test?(node)
+    end
+  end
+end
