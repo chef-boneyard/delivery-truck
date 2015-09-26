@@ -52,7 +52,7 @@ Any other rules except these will be ignored.
 ### quality
 The `quality` phase can execute integration/functional tests that are appropriate for your cookbook. Currently, we support running [Test Kitchen](http://kitchen.ci) using the [kitchen-ec2 driver](https://github.com/test-kitchen/kitchen-ec2).
 
-In order to enable this functionality, perform the following prerequisites:
+In order to enable this functionality, perform the following prerequisite steps:
 
 * Add the following items to the appropriate data bag as specified in the [Handling Secrets](#handling-secrets-alpha) section 
 

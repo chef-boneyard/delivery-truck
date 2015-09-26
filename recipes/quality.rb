@@ -24,7 +24,7 @@ if run_test_kitchen?
   ec2_private_key_file = "#{homedir}/.ssh/#{ec2_keypair_name}.pem"
 
   # Create directories for AWS credentials and SSH key
-  %w[ .aws .ssh ].each { |d| directory File.join(ENV['HOME'], d) }
+  %w[ .aws .ssh ].each { |d| directory File.join(homedir, d) }
 
   # Create AWS credentials file
   template "#{homedir}/.aws/credentials" do

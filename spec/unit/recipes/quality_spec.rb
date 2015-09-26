@@ -32,6 +32,22 @@ describe "delivery-truck::quality" do
       allow(File).to receive(:exists?).with("/tmp/repo/.kitchen-ec2.yml").and_return(true)
     end
 
+    it 'creates the ~/.aws and ~/.ssh directories correctly' do
+      %w[ .aws .ssh ].each { |d| expect(chef_run).to create_directory(File.join(ENV['HOME'], d)) }
+    end
+
+    it 'creates the ~/.aws/credentials file with correct contents' do
+      expect(chef_run).to create_template(File.join(ENV['HOME'], '.aws/credentials'))
+      expect(chef_run).to render_file(File.join(ENV['HOME'], '.aws/credentials')).with_content { |content|
+        expect(content).to include ("aws_access_key_id = #{secrets['ec2']['access_key']}")
+        expect(content).to include ("aws_secret_access_key = #{secrets['ec2']['secret_key']}")
+      }
+    end
+
+    it 'creates the EC2 private key file with the correct contents' do
+      expect(chef_run).to render_file(File.join(ENV['HOME'], ".ssh/#{secrets['ec2']['keypair_name']}.pem")).with_content(secrets['ec2']['private_key'])
+    end
+
     it "runs kitchen test" do
       expect(chef_run).to run_execute("kitchen test")
     end
