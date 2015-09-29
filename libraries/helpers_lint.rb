@@ -40,6 +40,25 @@ module DeliveryTruck
           ""
         end
       end
+
+      # Based on the properties in the Delivery Config, create the --excludes
+      # options that will be passed into the foodcritic command.
+      #
+      # @param node [Chef::Node] Chef Node object
+      # @return [String]
+      def foodcritic_excludes(node)
+        begin
+          config = node['delivery']['config']['delivery-truck']['lint']['foodcritic']
+          case
+          when config['excludes'] && !config['excludes'].empty?
+            "--exclude " + config['excludes'].join(" --exclude ")
+          else
+            ""
+          end
+        rescue
+          ""
+        end
+      end
     end
   end
 
@@ -48,6 +67,11 @@ module DeliveryTruck
     # Return the applicable tags for foodcritic runs
     def foodcritic_tags
       DeliveryTruck::Helpers::Lint.foodcritic_tags(node)
+    end
+
+    # Return the applicable excludes for foodcritic runs
+    def foodcritic_excludes
+      DeliveryTruck::Helpers::Lint.foodcritic_excludes(node)
     end
   end
 end
