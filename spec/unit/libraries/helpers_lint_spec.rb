@@ -98,5 +98,37 @@ describe DeliveryTruck::Helpers::Lint do
         expect(described_class.foodcritic_tags(node)). to eql "-t FC001"
       end
     end
+
+    context 'when `exclude` has been set' do
+      context 'with no paths' do
+        before do
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['excludes'] = []
+        end
+
+        it 'returns an empty string' do
+          expect(described_class.foodcritic_excludes(node)).to eql ""
+        end
+      end
+
+      context 'with one path' do
+        before do
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['excludes'] = ['spec']
+        end
+
+        it 'returns a string with the one exclude' do
+          expect(described_class.foodcritic_excludes(node)).to eql "--exclude spec"
+        end
+      end
+
+      context 'with multiple paths' do
+        before do
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['excludes'] = ['spec', 'test']
+        end
+
+        it 'returns a string with multiple execludes' do
+          expect(described_class.foodcritic_excludes(node)).to eql "--exclude spec --exclude test"
+        end
+      end
+    end
   end
 end

@@ -30,6 +30,7 @@ which rules you would like to follow directly from your `config.json`.
 * `ignore_rules` - Provide a list of foodcritic rules you would like to ignore.
 * `only_rules` - Explictly state which foodcritic rules you would like to run.
 Any other rules except these will be ignored.
+* `excludes` - Explictly state which relative paths foodcritic should ignore
 
 ```json
 {
@@ -42,7 +43,8 @@ Any other rules except these will be ignored.
     "lint": {
       "foodcritic": {
         "ignore_rules": ["FC001"],
-        "only_rules": ["FC002"]
+        "only_rules": ["FC002"],
+        "excludes": ["spec", "test"]
       }
     }
   }
