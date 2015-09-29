@@ -20,12 +20,12 @@ module DeliveryTruck
     module Quality
       extend self
 
-      # See if there's a .kitchen-ec2.yml file at the root of the repo, return true if so
+      # See if there's a .kitchen.ec2.yml file at the root of the repo, return true if so
       #
       # @param [Chef::Node] Chef Node object
       # @return [TrueClass, FalseClass]
-      def run_kitchen_test?(node)
-        File.exists?( "#{node['delivery']['workspace']['repo']}/.kitchen-ec2.yml" )
+      def has_kitchen_ec2_tests?(node)
+        File.exists?( "#{node['delivery']['workspace']['repo']}/.kitchen.ec2.yml" )
       rescue
         false
       end
@@ -33,9 +33,18 @@ module DeliveryTruck
   end
 
   module DSL
-    # Check for whether user wants to run test kitchen using kitchen-ec2
-    def run_test_kitchen?
-      DeliveryTruck::Helpers::Quality.run_kitchen_test?(node)
+    # Check for whether user wants to run test kitchen
+    def run_test_kitchen_ec2?
+      # For now, we only check for ec2 tests - the logic will need to be more nuanced if/when new drivers are added
+      DeliveryTruck::Helpers::Quality.has_kitchen_ec2_tests?(node)
+    end
+
+    # Return file system path to .kitchen.ec2.yml file
+    #
+    # @param [Chef::Node] Chef Node object
+    # @return [String] String representing full path to .kitchen.ec2.yml file in the repo
+    def kitchen_ec2_yml_file
+      File.join(node['delivery']['workspace']['repo'], 'kitchen.ec2.yml')
     end
   end
 end

@@ -14,7 +14,7 @@ describe "delivery-truck::quality" do
     end.converge(described_recipe)
   end
 
-  context "when a .kitchen-ec2.yml file is present" do
+  context "when a .kitchen.ec2.yml file is present" do
     let(:secrets) {{
       'ec2' => {
         'access_key' => 'MyAccessKey',
@@ -29,7 +29,7 @@ describe "delivery-truck::quality" do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with('HOME').and_return('/tmp/cache')
       allow(File).to receive(:exists?).and_call_original
-      allow(File).to receive(:exists?).with("/tmp/repo/.kitchen-ec2.yml").and_return(true)
+      allow(File).to receive(:exists?).with("/tmp/repo/.kitchen.ec2.yml").and_return(true)
     end
 
     it 'creates the ~/.aws and ~/.ssh directories correctly' do
@@ -53,11 +53,11 @@ describe "delivery-truck::quality" do
     end
   end
 
-  context "when a .kitchen-ec2.yml file is not present" do
+  context "when a .kitchen.ec2.yml file is not present" do
     before do
       # allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
       allow(File).to receive(:exists?).and_call_original
-      allow(File).to receive(:exists?).with("/tmp/repo/.kitchen-ec2.yml").and_return(false)
+      allow(File).to receive(:exists?).with("/tmp/repo/.kitchen.ec2.yml").and_return(false)
     end
 
     it "does not run kitchen test" do

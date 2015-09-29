@@ -13,16 +13,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-if run_test_kitchen?
+if run_test_kitchen_ec2?
   # Load secrets from delivery-truck data bag
   my_secrets = get_project_secrets
 
   # Variables we'll use for configuring and running test kitchen
   homedir = ENV['HOME']
-  ec2_keypair_name = my_secrets['ec2']['keypair_name']
-  ec2_private_key_file = "#{homedir}/.ssh/#{ec2_keypair_name}.pem"
-
+  ec2_keypair_name      = my_secrets['ec2']['keypair_name']
+  ec2_private_key_file  = "#{homedir}/.ssh/#{ec2_keypair_name}.pem"
+  kitchen_instance_name = "test-kitchen-#{node['delivery']['change']['project']}-#{node['delivery']['change']['change_id']}"
   # Create directories for AWS credentials and SSH key
   %w[ .aws .ssh ].each { |d| directory File.join(homedir, d) }
 
@@ -46,10 +45,10 @@ if run_test_kitchen?
   execute 'kitchen test' do
     cwd node['delivery']['workspace']['repo']
     environment(
-      'KITCHEN_YAML'              => "#{node['delivery']['workspace']['repo']}/.kitchen-ec2.yml",
+      'KITCHEN_YAML'              => kitchen_ec2_yml_file,
       'AWS_SSH_KEY_ID'            => ec2_keypair_name,
       'KITCHEN_EC2_SSH_KEY_PATH'  => ec2_private_key_file,
-      'KITCHEN_INSTANCE_NAME'     => "test-kitchen-#{node['delivery']['change']['project']}-#{node['delivery']['change']['change_id']}" 
+      'KITCHEN_INSTANCE_NAME'     => kitchen_instance_name
     )
   end
 end

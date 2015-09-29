@@ -71,11 +71,11 @@ In order to enable this functionality, perform the following prerequisite steps:
     You can convert the private key content to a JSON-compatible string with a command like this: `ruby -e 'require "json"; puts File.read("<path-to-ec2-private-key>").to_json'`
 
 
-* Create a .kitchen-ec2.yml file in the root of your repo that has all of the required information needed by the [kitchen-ec2 driver](https://github.com/test-kitchen/kitchen-ec2) driver. delivery-truck will expose the following ENV variabls for use by kitchen:
+* Create a .kitchen.ec2.yml file in the root of your repo that has all of the required information needed by the [kitchen-ec2 driver](https://github.com/test-kitchen/kitchen-ec2) driver. delivery-truck will expose the following ENV variabls for use by kitchen:
   * `KITCHEN_INSTANCE_NAME` - set to the `<project name>-<change-id>` values provided by [delivery-cli](https://github.com/chef/delivery-cli#change-details)
   * `KITCHEN_EC2_SSH_KEY_PATH` - path to the SSH private key created from the delivery-secrets data bag
 
-    These variables may be used in the .kitchen-ec2.yml like so:
+    These variables may be used in the .kitchen.ec2.yml like so:
 
     ```yaml
       driver:
