@@ -28,9 +28,9 @@ The `lint` phase will execute [foodcritic](http://foodcritic.io) but you can spe
 which rules you would like to follow directly from your `config.json`.
 
 * `ignore_rules` - Provide a list of foodcritic rules you would like to ignore.
-* `only_rules` - Explictly state which foodcritic rules you would like to run.
+* `only_rules` - Explicitly state which foodcritic rules you would like to run.
 Any other rules except these will be ignored.
-* `excludes` - Explictly state which relative paths foodcritic should ignore
+* `excludes` - Explicitly state which relative paths foodcritic should ignore
 
 ```json
 {

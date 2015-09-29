@@ -125,7 +125,7 @@ describe DeliveryTruck::Helpers::Lint do
           node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['excludes'] = ['spec', 'test']
         end
 
-        it 'returns a string with multiple execludes' do
+        it 'returns a string with multiple excludes' do
           expect(described_class.foodcritic_excludes(node)).to eql "--exclude spec --exclude test"
         end
       end
