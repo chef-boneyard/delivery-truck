@@ -25,12 +25,13 @@ describe "delivery-truck::lint" do
   context "when a single cookbook has been modified" do
     before do
       allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_tags).and_return("-t FC001")
+      allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_excludes).and_return("--exclude spec")
       allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
     end
 
     it "runs test-kitchen against only that cookbook" do
       expect(chef_run).to run_execute("lint_foodcritic_julia").with(
-        :command => "foodcritic -f correctness -t FC001 /tmp/repo/cookbooks/julia"
+        :command => "foodcritic -f correctness -t FC001 --exclude spec /tmp/repo/cookbooks/julia"
       )
       expect(chef_run).not_to run_execute("lint_foodcritic_gordon")
       expect(chef_run).not_to run_execute("lint_foodcritic_emeril")
@@ -40,15 +41,16 @@ describe "delivery-truck::lint" do
   context "when multiple cookbooks have been modified" do
     before do
       allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_tags).and_return("-t ~FC002")
+      allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_excludes).and_return("--exclude test")
       allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
     end
 
     it "runs test-kitchen against only those cookbooks" do
       expect(chef_run).to run_execute("lint_foodcritic_julia").with(
-        :command => "foodcritic -f correctness -t ~FC002 /tmp/repo/cookbooks/julia"
+        :command => "foodcritic -f correctness -t ~FC002 --exclude test /tmp/repo/cookbooks/julia"
       )
       expect(chef_run).to run_execute("lint_foodcritic_gordon").with(
-        :command => "foodcritic -f correctness -t ~FC002 /tmp/repo/cookbooks/gordon"
+        :command => "foodcritic -f correctness -t ~FC002 --exclude test /tmp/repo/cookbooks/gordon"
       )
       expect(chef_run).not_to run_execute("lint_foodcritic_emeril")
     end
