@@ -20,7 +20,7 @@ class Chef
     class DeliveryTruckDeploy < Chef::Provider::LWRPBase
       action :run do
         converge_by("Dispatch push-job for #{delivery_environment} => #{node['delivery']['change']['project']} - #{new_resource.name}") do
-          result = DeliverySugar::ChefServer.new.with_server_config { deploy_ccr }
+          result = with_server_config { deploy_ccr }
           new_resource.updated_by_last_action(result)
         end
       end
