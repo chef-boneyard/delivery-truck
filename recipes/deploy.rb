@@ -28,7 +28,7 @@ end
 
 ruby_block "update the #{env_name} environment" do
   block do
-    DeliverySugar::ChefServer.new.with_server_config do
+    with_server_config do
       begin
         env = Chef::Environment.load(env_name)
       rescue Net::HTTPServerException => http_e

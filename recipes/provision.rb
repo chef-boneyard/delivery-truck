@@ -21,7 +21,7 @@ ruby_block "copy env from prior to current" do
   block do
     to_env_name = node['delivery']['change']['stage']
 
-    DeliverySugar::ChefServer.new.with_server_config do
+    with_server_config do
       if to_env_name == 'acceptance'
         # Using DSL to get the right acceptance environment
         to_env_name = delivery_environment
