@@ -22,7 +22,7 @@ module DeliveryTruck
 
       def delivery_chef_server_search(type, query)
         results = []
-        with_server_config do
+        DeliverySugar::ChefServer.new.with_server_config do
           ::Chef::Search::Query.new.search(type, query) { |o| results << o }
         end
         results
