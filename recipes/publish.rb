@@ -22,8 +22,6 @@
 # [`delivery-truck` cookbook's README](README.md) for
 # additional configuration details.
 
-config_rb = File.join('/var/opt/delivery/workspace/.chef', 'knife.rb')
-
 # If the user specified a supermarket server to share to, share it
 if share_cookbook_to_supermarket?
   supermarket_site = node['delivery']['config']['delivery-truck']['publish']['supermarket']
@@ -48,11 +46,11 @@ if share_cookbook_to_supermarket?
 
     execute "share_cookbook_to_supermarket_#{cookbook.name}" do
       command "knife supermarket share #{cookbook.name} " \
-              "--config #{config_rb} " \
+              "--config #{delivery_knife_rb} " \
               "--supermarket-site #{supermarket_site} " \
               "--cookbook-path #{cookbook_directory_supermarket}"
       not_if "knife supermarket show #{cookbook.name} #{cookbook.version} " \
-              "--config #{config_rb} " \
+              "--config #{delivery_knife_rb} " \
               "--supermarket-site #{supermarket_site}"
     end
   end
@@ -83,7 +81,7 @@ if upload_cookbook_to_chef_server?
 
     execute "upload_cookbook_#{cookbook.name}" do
       command "knife cookbook upload #{cookbook.name} --freeze --all --force " \
-              "--config #{config_rb} " \
+              "--config #{delivery_knife_rb} " \
               "--cookbook-path #{cookbook_directory}"
     end
   end
