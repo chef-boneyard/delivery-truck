@@ -24,6 +24,10 @@ changed_cookbooks.each do |cookbook|
   # Run Rubocop against any cookbooks that were modified.
   execute "lint_rubocop_#{cookbook.name}" do
     command "rubocop #{cookbook.path}"
+    environment(
+      # workaround for https://github.com/bbatsov/rubocop/issues/2407
+      'USER' => (ENV['USER'] || 'dbuild')
+    )
     only_if { File.exist?(File.join(cookbook.path, '.rubocop.yml')) }
   end
 end
