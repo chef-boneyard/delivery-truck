@@ -51,7 +51,7 @@ end
 unless search_terms.empty?
   search_query = "(#{search_terms.join(' OR ')}) " \
                  "AND chef_environment:#{delivery_environment} " \
-                 "AND recipes:push-jobs*"
+                 "AND #{deployment_search_query}"
 
   my_nodes = delivery_chef_server_search(:node, search_query)
 
