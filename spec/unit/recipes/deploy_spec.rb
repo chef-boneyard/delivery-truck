@@ -32,7 +32,7 @@ describe "delivery-truck::deploy" do
   end
 
   let(:search_query) do
-    "(#{recipe_list}) AND chef_environment:union AND recipes:push-jobs*"
+    "(#{recipe_list}) AND chef_environment:union AND recipes:*push-jobs*"
   end
   let(:node_list) { [MyFakeNode.new("node1"), MyFakeNode.new("node2")] }
 
