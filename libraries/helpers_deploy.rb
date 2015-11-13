@@ -20,6 +20,17 @@ module DeliveryTruck
     module Deploy
       extend self
 
+      # Read the Delivery Config to see if the user has indicated an
+      # specific deployment search query to use
+      #
+      # @param [Chef::Node] Chef Node object
+      # @return [String] The deployment search query
+      def deployment_search_query(node)
+        node['delivery']['config']['delivery-truck']['deploy']['search']
+      rescue
+        'recipes:*push-jobs*'
+      end
+
       def delivery_chef_server_search(type, query)
         results = []
         DeliverySugar::ChefServer.new.with_server_config do
@@ -33,6 +44,11 @@ module DeliveryTruck
   module DSL
     def delivery_chef_server_search(type, query)
       DeliveryTruck::Helpers::Deploy.delivery_chef_server_search(type, query)
+    end
+
+    # Check config.json to get deployment search query
+    def deployment_search_query
+      DeliveryTruck::Helpers::Deploy.deployment_search_query(node)
     end
   end
 end
