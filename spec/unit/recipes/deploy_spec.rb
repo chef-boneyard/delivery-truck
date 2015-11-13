@@ -52,6 +52,26 @@ describe "delivery-truck::deploy" do
                             :nodes => node_list
                           )
     end
+
+    context "and the user sets a different search query" do
+      before do
+        allow(DeliveryTruck::Helpers::Deploy).to receive(:deployment_search_query)
+          .and_return('recipes:my_cool_push_jobs_cookbook AND more:constraints')
+      end
+      let(:search_query) do
+        "(#{recipe_list}) AND chef_environment:union AND recipes:my_cool_push_jobs_cookbook AND more:constraints"
+      end
+      it "deploy only that cookbook with the special search query" do
+        expect(DeliveryTruck::Helpers::Deploy).to receive(:delivery_chef_server_search)
+          .with(:node, search_query)
+          .and_return(node_list)
+        expect(chef_run).to run_ruby_block('update the union environment')
+        expect(chef_run).to dispatch_delivery_push_job("deploy_Secret").with(
+                              :command => 'chef-client',
+                              :nodes => node_list
+                            )
+      end
+    end
   end
 
   context "when multiple cookbooks have been modified" do
