@@ -20,13 +20,14 @@
 ruby_block "copy env from prior to current" do
   block do
     with_server_config do
-      case node['delivery']['change']['stage']
+      stage_name = node['delivery']['change']['stage']
+      case stage_name
       when 'acceptance'
-        ::DeliveryTruck::Helpers::Provision.handle_acceptance_pinnings(get_acceptance_environment)
+        ::DeliveryTruck::Helpers::Provision.handle_acceptance_pinnings(node, get_acceptance_environment)
       when 'union'
-        ::DeliveryTruck::Helpers::Provision.handle_union_pinnings(get_acceptance_environment)
+        ::DeliveryTruck::Helpers::Provision.handle_union_pinnings(node, get_acceptance_environment)
       else
-        ::DeliveryTruck::Helpers::Provision.handle_other_pinnings
+        ::DeliveryTruck::Helpers::Provision.handle_other_pinnings(node, stage_name)
       end
     end
   end
