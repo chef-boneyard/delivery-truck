@@ -29,7 +29,7 @@ module DeliveryTruck
       # 3) Insert the preserved, original version pins on the apps and cookbooks
       #    for the current project, resulting in an Acceptance that resembled
       #    Union except for Acceptance's original pinnings for the current project.
-      def handle_acceptance_pinnings(acceptance_env_name)
+      def handle_acceptance_pinnings(node, acceptance_env_name)
         union_env_name = 'union'
 
         union_env = fetch_or_create_environment(union_env_name)
@@ -37,8 +37,8 @@ module DeliveryTruck
 
         # Before we overwite acceptance with union,
         # remember the cookbook and application pinnings in acceptance for this project.
-        cookbook_pinnings = project_cookbook_version_pins_from_env(acceptance_env)
-        app_pinnings = project_application_version_pins_from_env(acceptance_env)
+        cookbook_pinnings = project_cookbook_version_pins_from_env(node, acceptance_env)
+        app_pinnings = project_application_version_pins_from_env(node, acceptance_env)
 
         ############################################################################
         # Copy Union State Onto Acceptance So Acceptance Looks Like Union To Start #
@@ -82,14 +82,14 @@ module DeliveryTruck
 
       # Promote all cookbooks and apps related to the current project from
       # Acceptance to Union.
-      def handle_union_pinnings(acceptance_env_name)
+      def handle_union_pinnings(node, acceptance_env_name)
         union_env_name = 'union'
 
         acceptance_env = fetch_or_create_environment(acceptance_env_name)
         union_env = fetch_or_create_environment(union_env_name)
 
-        promote_project_cookbooks(acceptance_env, union_env)
-        promote_project_apps(acceptance_env, union_env)
+        promote_project_cookbooks(node, acceptance_env, union_env)
+        promote_project_apps(node, acceptance_env, union_env)
 
         union_env.save
         union_env
@@ -100,7 +100,7 @@ module DeliveryTruck
       # so we promote all cookbook_versions, default_attributes, and
       # override_attributes (not just for the current project, but everything
       # in from_env).
-      def handle_other_pinnings(to_env_name)
+      def handle_other_pinnings(node, to_env_name)
         if to_env_name == 'rehearsal'
           from_env_name = 'union'
         elsif to_env_name == 'delivered'
@@ -147,7 +147,7 @@ module DeliveryTruck
       # Sets the node.default value ['delivery']['project_cookbooks'] based on
       # the node's current value for ['delivery']['project_cookbooks'], using
       # the project name as a default if project_cookbooks not set.
-      def set_project_cookbooks
+      def set_project_cookbooks(node)
         default_cookbooks = [node['delivery']['change']['project']]
         unless node['delivery']['project_cookbooks']
           node.default['delivery']['project_cookbooks'] = default_cookbooks
@@ -157,7 +157,7 @@ module DeliveryTruck
       # Sets the node.default value ['delivery']['project_apps'] based on
       # the node's current value for ['delivery']['project_apps'], using
       # the project name as a default if project_cookbooks not set.
-      def set_project_apps
+      def set_project_apps(node)
         default_apps = [node['delivery']['change']['project']]
         unless node['delivery']['project_apps']
           node.default['delivery']['project_apps'] = default_apps
@@ -167,9 +167,9 @@ module DeliveryTruck
       # Returns a hash of {cookbook_name => pin, ...} where pin is the passed
       # environment's pin for all project_cookbooks from the node.
       # Cookbooks that do no have an environment pin are excluded.
-      def project_cookbook_version_pins_from_env(env)
+      def project_cookbook_version_pins_from_env(node, env)
         pinnings = {}
-        set_project_cookbooks
+        set_project_cookbooks(node)
 
         chef_log.info("Checking #{env.name} pinnings for" +
                       " #{node['delivery']['project_cookbooks']}")
@@ -186,9 +186,9 @@ module DeliveryTruck
       # Returns a hash of {application_name => pin, ...} where pin is the passed
       # environment's override_attributes pin for all project_apps from the node.
       # Apps that do not have an environment pin are excluded.
-      def project_application_version_pins_from_env(env)
+      def project_application_version_pins_from_env(node, env)
         pinnings = {}
-        set_project_apps
+        set_project_apps(node)
 
         chef_log.info("Checking #{env.name} apps for" +
                        " #{node['delivery']['project_apps']}")
@@ -207,8 +207,8 @@ module DeliveryTruck
       # cookbook_verions pins for all project_cookbooks (or the base project
       # if no project_cookbooks set). This promotes all cookbooks related to the
       # project in promoted_from_env to promoted_on_env.
-      def promote_project_cookbooks(promoted_from_env, promoted_on_env)
-        set_project_cookbooks
+      def promote_project_cookbooks(node, promoted_from_env, promoted_on_env)
+        set_project_cookbooks(node)
 
         node['delivery']['project_cookbooks'].each do |pin|
           from_v = promoted_from_env.cookbook_versions[pin]
@@ -225,8 +225,8 @@ module DeliveryTruck
       # application pins for all project_apps (or the base project
       # if no project_apps set). This promotes all applications in
       # promoted_from_env to promoted_on_env.
-      def promote_project_apps(promoted_from_env, promoted_on_env)
-        set_project_apps
+      def promote_project_apps(node, promoted_from_env, promoted_on_env)
+        set_project_apps(node)
 
         ## Make sure the outer key is there
         if promoted_on_env.override_attributes['applications'].nil?

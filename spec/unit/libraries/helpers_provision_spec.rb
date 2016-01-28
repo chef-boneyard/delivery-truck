@@ -5,6 +5,12 @@ describe DeliveryTruck::Helpers::Provision do
 
   let(:node) { instance_double('Chef::Node') }
 
+  let(:node) do
+    node = Chef::Node.new
+    node.default_attrs = node_attributes
+    node
+  end
+
   let(:node_attributes) do
     {
       'delivery' => {
@@ -13,19 +19,6 @@ describe DeliveryTruck::Helpers::Provision do
         }
       }
     }
-  end
-
-  before(:each) do
-    allow(described_class).
-      to receive(:node).
-      and_return(node)
-    allow(node).
-      to receive(:[]).
-      with('delivery').
-      and_return(node_attributes['delivery'])
-    allow(node).
-      to receive(:default).
-      and_return(node_attributes)
   end
 
   describe '.project_cookbook_version_pins_from_env' do
@@ -50,7 +43,7 @@ describe DeliveryTruck::Helpers::Provision do
           project_name => '= 0.3.0'
         }
         cookbook_pinnings =
-          described_class.project_cookbook_version_pins_from_env(env)
+          described_class.project_cookbook_version_pins_from_env(node, env)
         expect(cookbook_pinnings).to eq(expected_cookbook_pinnings)
       end
     end
@@ -67,7 +60,7 @@ describe DeliveryTruck::Helpers::Provision do
           'cookbook-2' => '= 2.0.0'
         }
         cookbook_pinnings =
-          described_class.project_cookbook_version_pins_from_env(env)
+          described_class.project_cookbook_version_pins_from_env(node, env)
         expect(cookbook_pinnings).to eq(expected_cookbook_pinnings)
       end
     end
@@ -88,7 +81,7 @@ describe DeliveryTruck::Helpers::Provision do
 
       it 'returns no application version pinnings' do
         expect(
-          described_class.project_application_version_pins_from_env(env)
+          described_class.project_application_version_pins_from_env(node, env)
         ).to eq({})
       end
 
@@ -102,7 +95,7 @@ describe DeliveryTruck::Helpers::Provision do
         it 'sets the project as the project application and returns project' \
            ' application version pinning' do
           expect(
-            described_class.project_application_version_pins_from_env(env)
+            described_class.project_application_version_pins_from_env(node, env)
           ).to eq({project_name => '0_3_562'})
         end
       end
@@ -123,7 +116,7 @@ describe DeliveryTruck::Helpers::Provision do
       it 'sets the applications as the project applications and returns' \
          ' project application version pinnings' do
         expect(
-          described_class.project_application_version_pins_from_env(env)
+          described_class.project_application_version_pins_from_env(node, env)
         ).to eq({
           'app-1' => '0_3_562',
           'app-2' => '5_0_102'
@@ -205,7 +198,7 @@ describe DeliveryTruck::Helpers::Provision do
           'delivery-app' => '0_3_562'
         }
         acceptance_env_result =
-          described_class.handle_acceptance_pinnings(acceptance_env_name)
+          described_class.handle_acceptance_pinnings(node, acceptance_env_name)
         expect(acceptance_env_result.cookbook_versions).
           to eq(expected_cookbook_versions)
         expect(acceptance_env_result.override_attributes['applications']).
@@ -237,7 +230,7 @@ describe DeliveryTruck::Helpers::Provision do
       end
 
       before(:each) do
-        node['delivery']['project_cookbooks'] = []
+        node.default['delivery']['project_cookbooks'] = []
       end
 
       it 'copies the cookbook and application version pinnings from the union' \
@@ -252,7 +245,7 @@ describe DeliveryTruck::Helpers::Provision do
           'delivery-app' => '0_3_562'
         }
         acceptance_env_result =
-          described_class.handle_acceptance_pinnings(acceptance_env_name)
+          described_class.handle_acceptance_pinnings(node, acceptance_env_name)
         expect(acceptance_env_result.cookbook_versions).
           to eq(expected_cookbook_versions)
         expect(acceptance_env_result.override_attributes['applications']).
@@ -297,8 +290,8 @@ describe DeliveryTruck::Helpers::Provision do
       end
 
       before(:each) do
-        node['delivery']['project_cookbooks'] = [project_cookbook_name]
-        node['delivery']['project_apps'] = [project_app_name]
+        node.default['delivery']['project_cookbooks'] = [project_cookbook_name]
+        node.default['delivery']['project_apps'] = [project_app_name]
       end
 
       it 'copies the cookbook and application version pinnings from the union' \
@@ -314,7 +307,7 @@ describe DeliveryTruck::Helpers::Provision do
           'delivery-app' => '0_3_562'
         }
         acceptance_env_result =
-          described_class.handle_acceptance_pinnings(acceptance_env_name)
+          described_class.handle_acceptance_pinnings(node, acceptance_env_name)
         expect(acceptance_env_result.cookbook_versions).
           to eq(expected_cookbook_versions)
         expect(acceptance_env_result.override_attributes['applications']).
@@ -394,7 +387,7 @@ describe DeliveryTruck::Helpers::Provision do
           project_version_in_acceptance
 
         union_env_result =
-          described_class.handle_union_pinnings(acceptance_env_name)
+          described_class.handle_union_pinnings(node, acceptance_env_name)
 
         expect(union_env_result.cookbook_versions).
           to eq(expected_union_cookbook_versions)
@@ -428,7 +421,7 @@ describe DeliveryTruck::Helpers::Provision do
       end
 
       before(:each) do
-        node['delivery']['project_cookbooks'] = []
+        node.default['delivery']['project_cookbooks'] = []
       end
 
       it 'copies application version pinnings from the acceptance environment' \
@@ -438,7 +431,7 @@ describe DeliveryTruck::Helpers::Provision do
           project_version_in_acceptance
 
         union_env_result =
-          described_class.handle_union_pinnings(acceptance_env_name)
+          described_class.handle_union_pinnings(node, acceptance_env_name)
 
         expect(node['delivery']['project_apps']).to eq([project_name])
         expect(union_env_result.cookbook_versions).
@@ -488,8 +481,8 @@ describe DeliveryTruck::Helpers::Provision do
       end
 
       before(:each) do
-        node['delivery']['project_cookbooks'] = project_cookbook_names
-        node['delivery']['project_apps'] = [project_app_name]
+        node.default['delivery']['project_cookbooks'] = project_cookbook_names
+        node.default['delivery']['project_apps'] = [project_app_name]
       end
 
       it 'copies cookbook and application version pinnings from the acceptance' \
@@ -505,7 +498,7 @@ describe DeliveryTruck::Helpers::Provision do
           project_app_version_in_acceptance
 
         union_env_result =
-          described_class.handle_union_pinnings(acceptance_env_name)
+          described_class.handle_union_pinnings(node, acceptance_env_name)
 
         expect(union_env_result.cookbook_versions).
           to eq(union_cookbook_versions)
@@ -609,7 +602,7 @@ describe DeliveryTruck::Helpers::Provision do
       expected_default_attributes = previous_stage_default_attributes.dup
 
       current_stage_env_result =
-        described_class.handle_other_pinnings(current_stage_env_name)
+        described_class.handle_other_pinnings(node, current_stage_env_name)
 
       expect(current_stage_env_result.cookbook_versions).
         to eq(expected_cookbook_versions)
