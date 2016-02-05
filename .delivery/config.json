@@ -1,20 +1,12 @@
 {
     "version": "2",
     "build_cookbook": {
-        "name": "delivery-truck",
-        "path": "./"
+        "name": "delivery-truck-build-cookbook",
+        "path": ".delivery/build_cookbook"
     },
     "build_nodes": {
         "default": ["name:builder-*.delivery.chef.co"]
     },
-    "skip_phases": [
-        "security",
-        "smoke",
-        "provision",
-        "deploy",
-        "quality",
-        "functional"
-    ],
     "delivery-truck": {
         "publish": {
             "chef_server": true,
@@ -22,8 +14,15 @@
         },
         "lint": {
           "foodcritic": {
-              "ignore_rules": ["FC009"]
+             "ignore_rules": ["FC009"]
           }
-        }
-    }
+       }
+    },
+    "skip_phases": [
+        "security",
+        "smoke",
+        "quality",
+        "functional",
+        "publish"
+    ]
 }
