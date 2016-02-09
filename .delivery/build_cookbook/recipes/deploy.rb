@@ -16,7 +16,7 @@ if delivery_environment == 'delivered'
   end
 end
 
-if delivery_enviornment == 'acceptance'
+if delivery_environment == 'acceptance'
   supermarket_site = 'https://supermarket.chef.io'
   cookbook_directory_supermarket = File.join(node['delivery']['workspace']['cache'], "cookbook-share")
 
