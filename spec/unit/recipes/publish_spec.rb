@@ -82,95 +82,169 @@ describe "delivery-truck::publish" do
       end
     end
 
-    context 'and no cookbooks changed' do
-      before do
-        allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
-        chef_run.converge(described_recipe)
-      end
-
-      it 'does nothing' do
-        expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/julia')
-        expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/gordon')
-        expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/emeril')
-
-        expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_julia")
-        expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_gordon")
-        expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_emeril")
-      end
-    end
-
-    context 'and one cookbook changed' do
-      before do
-        allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
-        stub_command('knife supermarket show julia 0.1.0 ' \
-                     '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
-                     '--supermarket-site https://supermarket.chef.io').and_return(false)
-        chef_run.converge(described_recipe)
-      end
-
-      it 'shares only that cookbook' do
-        expect(chef_run).to create_link('/tmp/cache/cookbook-share/julia')
-                             .with(to: '/tmp/repo/cookbooks/julia')
-        expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/gordon')
-        expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/emeril')
-
-        expect(chef_run).to run_execute("share_cookbook_to_supermarket_julia")
-                             .with(command: 'knife supermarket share julia ' \
-                                            '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
-                                            '--supermarket-site https://supermarket.chef.io ' \
-                                            '--cookbook-path /tmp/cache/cookbook-share')
-        expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_gordon")
-        expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_emeril")
-      end
-
-      context 'but it already exists on Supermarket' do
+    shared_examples_for 'properly working supermarket upload' do
+      context 'and no cookbooks changed' do
         before do
-          stub_command('knife supermarket show julia 0.1.0 ' \
-                       '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
-                       '--supermarket-site https://supermarket.chef.io').and_return(true)
+          allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
           chef_run.converge(described_recipe)
         end
 
-        it 'do not share that cookbook' do
+        it 'does nothing' do
+          expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/julia')
+          expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/gordon')
+          expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/emeril')
+
           expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_julia")
-                                  .with(command: 'knife supermarket share julia ' \
-                                                 '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
-                                                 '--supermarket-site https://supermarket.chef.io ' \
-                                                 '--cookbook-path /tmp/cache/cookbook-share')
+          expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_gordon")
+          expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_emeril")
+        end
+      end
+
+      context 'and one cookbook changed' do
+        before do
+          allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+          stub_command('knife supermarket show julia 0.1.0 ' \
+                       '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                       '--supermarket-site https://supermarket.chef.io').and_return(false)
+          chef_run.converge(described_recipe)
+        end
+
+        it 'shares only that cookbook' do
+          expect(chef_run).to create_link('/tmp/cache/cookbook-share/julia')
+                               .with(to: '/tmp/repo/cookbooks/julia')
+          expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/gordon')
+          expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/emeril')
+
+          expect(chef_run).to run_execute("share_cookbook_to_supermarket_julia")
+                               .with(command: 'knife supermarket share julia ' \
+                                              '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                                              '--supermarket-site https://supermarket.chef.io ' \
+                                              '--cookbook-path /tmp/cache/cookbook-share' + expected_extra_args)
+          expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_gordon")
+          expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_emeril")
+        end
+
+        context 'but it already exists on Supermarket' do
+          before do
+            stub_command('knife supermarket show julia 0.1.0 ' \
+                         '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                         '--supermarket-site https://supermarket.chef.io').and_return(true)
+            chef_run.converge(described_recipe)
+          end
+
+          it 'do not share that cookbook' do
+            expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_julia")
+                                     .with(command: 'knife supermarket share julia ' \
+                                                    '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                                                    '--supermarket-site https://supermarket.chef.io ' \
+                                                    '--cookbook-path /tmp/cache/cookbook-share' + expected_extra_args)
+          end
+        end
+      end
+
+      context 'and multiple cookbooks changed' do
+        before do
+          allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
+          stub_command('knife supermarket show julia 0.1.0 ' \
+                       '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                       '--supermarket-site https://supermarket.chef.io').and_return(false)
+          stub_command('knife supermarket show gordon 0.2.0 ' \
+                       '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                       '--supermarket-site https://supermarket.chef.io').and_return(false)
+          chef_run.converge(described_recipe)
+        end
+
+        it 'shares only those cookbook' do
+          expect(chef_run).to create_link('/tmp/cache/cookbook-share/julia')
+                               .with(to: '/tmp/repo/cookbooks/julia')
+          expect(chef_run).to create_link('/tmp/cache/cookbook-share/gordon')
+                               .with(to: '/tmp/repo/cookbooks/gordon')
+          expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/emeril')
+
+          expect(chef_run).to run_execute("share_cookbook_to_supermarket_julia")
+                               .with(command: 'knife supermarket share julia ' \
+                                              '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                                              '--supermarket-site https://supermarket.chef.io ' \
+                                              '--cookbook-path /tmp/cache/cookbook-share' + expected_extra_args)
+          expect(chef_run).to run_execute("share_cookbook_to_supermarket_gordon")
+                               .with(command: 'knife supermarket share gordon ' \
+                                              '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                                              '--supermarket-site https://supermarket.chef.io ' \
+                                              '--cookbook-path /tmp/cache/cookbook-share' + expected_extra_args)
+          expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_emeril")
         end
       end
     end
 
-    context 'and multiple cookbooks changed' do
+    context 'when supermarket-custom-credentials is not specified' do
+      let(:expected_extra_args) { '' }
+
+      it_behaves_like 'properly working supermarket upload'
+    end
+
+    context 'when supermarket-custom-credentials is specified' do
       before do
-        allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
-        stub_command('knife supermarket show julia 0.1.0 ' \
-                     '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
-                     '--supermarket-site https://supermarket.chef.io').and_return(false)
-        stub_command('knife supermarket show gordon 0.2.0 ' \
-                     '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
-                     '--supermarket-site https://supermarket.chef.io').and_return(false)
-        chef_run.converge(described_recipe)
+        chef_run.node.set['delivery']['config']['delivery-truck']['publish']['supermarket-custom-credentials'] = true
+        allow_any_instance_of(Chef::Recipe).to receive(:get_project_secrets).and_return(secrets)
       end
 
-      it 'shares only those cookbook' do
-        expect(chef_run).to create_link('/tmp/cache/cookbook-share/julia')
-                             .with(to: '/tmp/repo/cookbooks/julia')
-        expect(chef_run).to create_link('/tmp/cache/cookbook-share/gordon')
-                             .with(to: '/tmp/repo/cookbooks/gordon')
-        expect(chef_run).not_to create_link('/tmp/cache/cookbook-share/emeril')
+      context 'when secrets are properly set' do
+        let(:supermarket_tmp_path) { '/tmp/cache/supermarket.pem' }
+        let(:secrets) do
+          {
+            'supermarket_user' => 'test-user',
+            'supermarket_key' => 'test-key',
+          }
+        end
 
-        expect(chef_run).to run_execute("share_cookbook_to_supermarket_julia")
-                             .with(command: 'knife supermarket share julia ' \
-                                            '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
-                                            '--supermarket-site https://supermarket.chef.io ' \
-                                            '--cookbook-path /tmp/cache/cookbook-share')
-        expect(chef_run).to run_execute("share_cookbook_to_supermarket_gordon")
-                             .with(command: 'knife supermarket share gordon ' \
-                                            '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
-                                            '--supermarket-site https://supermarket.chef.io ' \
-                                            '--cookbook-path /tmp/cache/cookbook-share')
-        expect(chef_run).not_to run_execute("share_cookbook_to_supermarket_emeril")
+        let(:expected_extra_args) { " -u test-user -k #{supermarket_tmp_path}" }
+
+        before do
+          file = instance_double('File')
+          allow(File).to receive(:new).with(supermarket_tmp_path, 'w+').and_return(file)
+          allow(file).to receive(:write).with('test-key')
+          allow(file).to receive(:close)
+        end
+
+        it_behaves_like 'properly working supermarket upload'
+      end
+
+      context 'when secrets are missing' do
+        before do
+          allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
+          stub_command('knife supermarket show julia 0.1.0 ' \
+                       '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                       '--supermarket-site https://supermarket.chef.io').and_return(false)
+          stub_command('knife supermarket show gordon 0.2.0 ' \
+                       '--config /var/opt/delivery/workspace/.chef/knife.rb ' \
+                       '--supermarket-site https://supermarket.chef.io').and_return(false)
+        end
+
+        context 'when supermarket_user is not specified in secrets' do
+          let(:secrets) do
+            {
+              'supermarket_key' => 'test-key'
+            }
+          end
+
+          it 'rasies an error' do
+            expect { chef_run.converge(described_recipe) }.to raise_error(RuntimeError)
+          end
+
+        end
+
+        context 'when supermarket_user is not specified in secrets' do
+          let(:secrets) do
+            {
+              'supermarket_user' => 'test-user'
+            }
+          end
+
+          it 'rasies an error' do
+            expect { chef_run.converge(described_recipe) }.to raise_error(RuntimeError)
+          end
+
+        end
       end
     end
   end
