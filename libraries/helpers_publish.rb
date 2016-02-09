@@ -64,6 +64,18 @@ module DeliveryTruck
       rescue
         false
       end
+
+      # Read the Delivery Config to see if the user has indicated custom credentials
+      # should be used instead of those found in delivery_knife_rb. If so, they should
+      # loaded from via get_project_secrets.
+      #
+      # @param [Chef::Node] Chef Node object
+      # @return [TrueClass, FalseClass]
+      def use_custom_supermarket_credentials?(node)
+        !!node['delivery']['config']['delivery-truck']['publish']['supermarket-custom-credentials']
+      rescue
+        false
+      end
     end
   end
 
@@ -86,6 +98,11 @@ module DeliveryTruck
     # Check config.json for whether user wants to share to Supermarket
     def share_cookbook_to_supermarket?
       DeliveryTruck::Helpers::Publish.share_cookbook_to_supermarket?(node)
+    end
+
+    # Check config.json for whether user wants to share to Supermarket
+    def use_custom_supermarket_credentials?
+      DeliveryTruck::Helpers::Publish.use_custom_supermarket_credentials?(node)
     end
   end
 end

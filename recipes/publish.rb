@@ -27,6 +27,31 @@ if share_cookbook_to_supermarket?
   supermarket_site = node['delivery']['config']['delivery-truck']['publish']['supermarket']
   cookbook_directory_supermarket = File.join(node['delivery']['workspace']['cache'], "cookbook-share")
 
+  # Start with empty string to pass if use_custom_supermarket_credentials?
+  # is false, then populate if true and override --user and --key in the
+  # knife supermarket command to superseed delivery_knife_rb.
+  custom_supermarket_credentials_options = ""
+  if use_custom_supermarket_credentials?
+    secrets = get_project_secrets
+    if secrets['supermarket_user'].nil?
+      Chef::Log.fatal "If supermarket-custom-credentials is set to true, you must add supermarket_user to the secrets data bag."
+      raise RuntimeError, "supermarket-custom-credentials was true and supermarket_user was not defined in delivery secrets."
+    end
+    custom_supermarket_credentials_options << " -u #{secrets['supermarket_user']}"
+
+    if secrets['supermarket_key'].nil?
+      Chef::Log.fatal "If supermarket-custom-credentials is set to true, you must add supermarket_key to the secrets data bag."
+      raise RuntimeError, "supermarket-custom-credentials was true and supermarket_key was not defined in delivery secrets."
+    end
+
+    # write the supermarket_key to a file on disk since knife needs a file
+    supermarket_tmp_key_path = File.join(node['delivery']['workspace']['cache'], "supermarket.pem")
+    f = File.new(supermarket_tmp_key_path, "w+")
+    f.write(secrets['supermarket_key'])
+    f.close
+    custom_supermarket_credentials_options << " -k #{supermarket_tmp_key_path}"
+  end
+
   directory cookbook_directory_supermarket do
     recursive true
     # We delete the cookbook-to-share staging directory each time to ensure we
@@ -48,7 +73,8 @@ if share_cookbook_to_supermarket?
       command "knife supermarket share #{cookbook.name} " \
               "--config #{delivery_knife_rb} " \
               "--supermarket-site #{supermarket_site} " \
-              "--cookbook-path #{cookbook_directory_supermarket}"
+              "--cookbook-path #{cookbook_directory_supermarket}" \
+              "#{custom_supermarket_credentials_options}"
       not_if "knife supermarket show #{cookbook.name} #{cookbook.version} " \
               "--config #{delivery_knife_rb} " \
               "--supermarket-site #{supermarket_site}"
