@@ -10,7 +10,8 @@
     "delivery-truck": {
         "publish": {
             "chef_server": true,
-            "github": "tylercloke/delivery-truck-test"
+            "github": "tylercloke/delivery-truck-test",
+            "supermarket": "https://supermarket.chef.io"
         },
         "lint": {
           "foodcritic": {
