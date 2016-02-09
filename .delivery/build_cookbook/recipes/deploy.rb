@@ -27,7 +27,7 @@ if delivery_environment == get_acceptance_environment
     action [:delete, :create]
   end
 
-  cookbook = load_cookbook(node['delivery']['workspace']['repo'])
+  cookbook = DeliverySugar::Cookbook.new(node['delivery']['workspace']['repo'])
   # Supermarket does not let you share a cookbook without a `metadata.rb`
   # then running `berks vendor` is not an option otherwise we will ended
   # up just with a `metadata.json`
