@@ -1,0 +1,11 @@
+source 'https://supermarket.chef.io'
+
+metadata
+
+cookbook 'delivery-sugar', git: 'https://github.com/chef-cookbooks/delivery-sugar.git'
+
+# In order for the Delivery CLI to properly find this cookbook we need
+# to specify the path in the scope of the Delivery CLI's workspace.
+# This file is located (and run) from `./chef/build_cookbook` but delivery-truck
+# is located at `./repo`
+cookbook 'delivery-truck', path: File.expand_path('../../repo')
