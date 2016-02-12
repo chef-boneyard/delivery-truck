@@ -23,6 +23,9 @@ module DeliveryTruck
     # @params Node object to pull the enterprise from.
     # @returns An array of blocked projects.  If the api doesn't exist returns [].
     def self.blocked_projects(node)
+      # TODO: endpoint is buggy, commenting out code to unblock
+      # DCC
+      return []
       # Ask the API about how things are looking in union
       ent_name = node['delivery']['change']['enterprise']
       request_url = "/api/v0/e/#{ent_name}/blocked_projects"
