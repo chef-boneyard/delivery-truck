@@ -29,7 +29,8 @@ module DeliveryTruck
       # 3) Insert the preserved, original version pins on the apps and cookbooks
       #    for the current project, resulting in an Acceptance that resembled
       #    Union except for Acceptance's original pinnings for the current project.
-      def handle_acceptance_pinnings(node, acceptance_env_name)
+      # 4) Copy over pins for all project cookbooks.
+      def handle_acceptance_pinnings(node, acceptance_env_name, get_all_project_cookbooks)
         union_env_name = 'union'
 
         union_env = fetch_or_create_environment(union_env_name)
@@ -76,23 +77,59 @@ module DeliveryTruck
           acceptance_env.override_attributes['applications'][app] = version
         end
 
+        # Copy over pins for any cookbook that changes.
+        version_map = {}
+
+        get_all_project_cookbooks.each do |cookbook|
+          version_map[cookbook.name] = cookbook.version
+        end
+
+        version_map.each do |cookbook, version|
+          acceptance_env.cookbook(cookbook, version)
+        end
+
         acceptance_env.save
         acceptance_env
       end
 
       # Promote all cookbooks and apps related to the current project from
       # Acceptance to Union.
-      def handle_union_pinnings(node, acceptance_env_name)
+      def handle_union_pinnings(node, acceptance_env_name, project_cookbooks)
         union_env_name = 'union'
 
         acceptance_env = fetch_or_create_environment(acceptance_env_name)
         union_env = fetch_or_create_environment(union_env_name)
 
-        promote_project_cookbooks(node, acceptance_env, union_env)
+        promote_project_cookbooks(node, acceptance_env, union_env, project_cookbooks)
         promote_project_apps(node, acceptance_env, union_env)
+
+        ## Update cached project metadata
+        union_env.default_attributes['delivery'] ||= {}
+        union_env.default_attributes['delivery']['project_artifacts'] ||= {}
+        project_name = project_name(node)
+        union_env.default_attributes['delivery']['project_artifacts'][project_name] ||= {}
+
+        populate_project_artifacts(node, project_cookbooks, acceptance_env, union_env)
 
         union_env.save
         union_env
+      end
+
+      def handle_rehearsal_pinnings(node)
+        blocked = ::DeliveryTruck::DeliveryApiClient.blocked_projects(node)
+
+        union_env = fetch_or_create_environment('union')
+        rehearsal_env = fetch_or_create_environment('rehearsal')
+
+        chef_log.info("current environment: #{rehearsal_env.name}")
+        chef_log.info("promoting pinnings from environment: #{union_env.name}")
+
+        promote_unblocked_cookbooks_and_applications(union_env, rehearsal_env, blocked)
+
+        chef_log.info("Promoting environment from #{union_env.name} to #{rehearsal_env.name}")
+
+        rehearsal_env.save
+        rehearsal_env
       end
 
       # Promote the from_env's attributes and cookbook_verions to to_env.
@@ -100,12 +137,9 @@ module DeliveryTruck
       # so we promote all cookbook_versions, default_attributes, and
       # override_attributes (not just for the current project, but everything
       # in from_env).
-      def handle_other_pinnings(node, to_env_name)
-        if to_env_name == 'rehearsal'
-          from_env_name = 'union'
-        elsif to_env_name == 'delivered'
-          from_env_name = 'rehearsal'
-        end
+      def handle_delivered_pinnings(node)
+        to_env_name = 'delivered'
+        from_env_name = 'rehearsal'
 
         chef_log.info("current environment: #{to_env_name}")
         chef_log.info("promoting pinnings from environment: #{from_env_name}")
@@ -134,6 +168,10 @@ module DeliveryTruck
         Chef::Log
       end
 
+      def project_name(node)
+        node['delivery']['change']['project']
+      end
+
       def fetch_or_create_environment(env_name)
         env = Chef::Environment.load(env_name)
       rescue Net::HTTPServerException => http_e
@@ -148,7 +186,7 @@ module DeliveryTruck
       # the node's current value for ['delivery']['project_cookbooks'], using
       # the project name as a default if project_cookbooks not set.
       def set_project_cookbooks(node)
-        default_cookbooks = [node['delivery']['change']['project']]
+        default_cookbooks = [project_name(node)]
         unless node['delivery']['project_cookbooks']
           node.default['delivery']['project_cookbooks'] = default_cookbooks
         end
@@ -158,10 +196,41 @@ module DeliveryTruck
       # the node's current value for ['delivery']['project_apps'], using
       # the project name as a default if project_cookbooks not set.
       def set_project_apps(node)
-        default_apps = [node['delivery']['change']['project']]
+        default_apps = [project_name(node)]
         unless node['delivery']['project_apps']
           node.default['delivery']['project_apps'] = default_apps
         end
+      end
+
+      # Determines which cookbooks and applications are a part of this project and
+      # updates union_env's project_artifacts accordingly
+      # Does _not_ call save on the enviornment so that changes can be more transactional
+      def populate_project_artifacts(node, project_cookbooks, acceptance_env, union_env)
+        # Can't blindly set project_artifacts based on project_apps and project_cookbooks,
+        # must check if anything actually exists on the acceptance env
+        # like the rest of the code does.
+        new_applications = []
+        if acceptance_env.override_attributes['applications']
+          node['delivery']['project_apps'].each do |app|
+            new_applications << app if acceptance_env.override_attributes['applications'][app]
+          end
+        end
+        union_env.default_attributes['delivery']['project_artifacts'][project_name(node)]['applications'] = new_applications
+
+        new_cookbooks = []
+        node['delivery']['project_cookbooks'].each do |cookbook|
+          if acceptance_env.cookbook_versions[cookbook]
+            new_cookbooks << cookbook
+          end
+        end
+
+        # project_cookbooks is something that's set by the user's build cookbook.
+        # We're also pulling in any cookbooks we auto-detect for backwards compatability
+        project_cookbooks.each do |cookbook|
+          new_cookbooks << cookbook.name unless new_cookbooks.include?(cookbook.name)
+        end
+
+        union_env.default_attributes['delivery']['project_artifacts'][project_name(node)]['cookbooks'] = new_cookbooks
       end
 
       # Returns a hash of {cookbook_name => pin, ...} where pin is the passed
@@ -204,13 +273,19 @@ module DeliveryTruck
       end
 
       # Set promoted_on_env's cookbook_verions pins to promoted_from_env's
-      # cookbook_verions pins for all project_cookbooks (or the base project
-      # if no project_cookbooks set). This promotes all cookbooks related to the
-      # project in promoted_from_env to promoted_on_env.
-      def promote_project_cookbooks(node, promoted_from_env, promoted_on_env)
+      # cookbook_verions pins for all project_cookbooks.
+      # This promotes all cookbooks related to the project in promoted_from_env to promoted_on_env.
+      def promote_project_cookbooks(node, promoted_from_env, promoted_on_env, project_cookbooks)
         set_project_cookbooks(node)
 
-        node['delivery']['project_cookbooks'].each do |pin|
+        all_project_cookbooks = []
+        project_cookbooks.each do |cookbook|
+          all_project_cookbooks << cookbook.name
+        end
+
+        all_project_cookbooks.concat(node['delivery']['project_cookbooks'])
+
+        all_project_cookbooks.each do |pin|
           from_v = promoted_from_env.cookbook_versions[pin]
           to_v = promoted_on_env.cookbook_versions[pin]
           if from_v
@@ -248,17 +323,46 @@ module DeliveryTruck
       # promoted_from_env's cookbook_verions for every cookbook that exists in
       # the latter.
       def promote_cookbook_versions(promoted_from_env, promoted_on_env)
-        ## TODO: Should old keys be deleted?
-        if promoted_on_env.cookbook_versions && !promoted_on_env.cookbook_versions.empty?
-          promoted_on_env.cookbook_versions.merge!(promoted_from_env.cookbook_versions)
-        else
-          promoted_on_env.cookbook_versions(promoted_from_env.cookbook_versions)
+        promoted_on_env.cookbook_versions(promoted_from_env.cookbook_versions)
+      end
+
+      def promote_unblocked_cookbooks_and_applications(promoted_from_env, promoted_on_env, blocked)
+        if blocked.empty?
+          promote_cookbook_versions(promoted_from_env, promoted_on_env)
+          promote_default_attributes(promoted_from_env, promoted_on_env)
+          promote_override_attributes(promoted_from_env, promoted_on_env)
+          return
+        end
+        # Initialize the attributes if they don't exist.
+        promoted_on_env.default_attributes['delivery'] ||= {}
+        promoted_on_env.default_attributes['delivery']['project_artifacts'] ||= {}
+        promoted_on_env.override_attributes['applications'] ||= {}
+
+        promoted_from_env.default_attributes['delivery']['project_artifacts'].each do |project_name, project_contents|
+          if blocked.include?(project_name)
+            chef_log.info("Project #{project_name} is currently blocked." +
+                          "not promoting its cookbooks or applications")
+          else
+            chef_log.info("Promoting cookbooks and applications for project #{project_name}")
+
+            # promote cookbooks
+            project_contents['cookbooks'].each do |cookbook_name|
+              promoted_on_env.cookbook_versions[cookbook_name] =
+                promoted_from_env.cookbook_versions[cookbook_name]
+            end
+
+            promoted_on_env.default_attributes['delivery']['project_artifacts'][project_name] = project_contents
+
+            project_contents['applications'].each do |app_name|
+              promoted_on_env.override_attributes['applications'][app_name] =
+                promoted_from_env.override_attributes['applications'][app_name]
+            end
+          end
         end
       end
 
       # Simply set promoted_on_env's default_attributes to match
-      # promoted_from_env's cookbook_verions for every cookbook that exists in
-      # the latter.
+      # promoted_from_env's
       def promote_default_attributes(promoted_from_env, promoted_on_env)
         if promoted_on_env.default_attributes && !promoted_on_env.default_attributes.empty?
           promoted_on_env.default_attributes.merge!(promoted_from_env.default_attributes)
@@ -271,6 +375,7 @@ module DeliveryTruck
       # promoted_from_env's override_attributes for every cookbook that exists in
       # the latter.
       def promote_override_attributes(promoted_from_env, promoted_on_env)
+        ## Only a one-level deep hash merge
         if promoted_on_env.override_attributes && !promoted_on_env.override_attributes.empty?
           promoted_on_env.override_attributes.merge!(promoted_from_env.override_attributes)
         else
