@@ -37,7 +37,7 @@ module DeliveryTruck
       when result.code.match(/20\d/)
         JSON.parse(result.body)['blocked_projects']
       else # not success or 404
-        error_str = "Failed request to #{request_url} returned #{http_e.response.code}"
+        error_str = "Failed request to #{request_url} returned #{result.code}"
         Chef::Log.fatal(error_str)
         raise error_str
       end
