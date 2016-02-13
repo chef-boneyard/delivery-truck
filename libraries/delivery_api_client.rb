@@ -23,15 +23,14 @@ module DeliveryTruck
     # @params Node object to pull the enterprise from.
     # @returns An array of blocked projects.  If the api doesn't exist returns [].
     def self.blocked_projects(node)
-      # TODO: endpoint is buggy, commenting out code to unblock
-      # DCC
-      return []
       # Ask the API about how things are looking in union
       ent_name = node['delivery']['change']['enterprise']
       request_url = "/api/v0/e/#{ent_name}/blocked_projects"
       change = get_change_hash(node)
       uri = URI(change['delivery_api_url'])
       http_client = Net::HTTP.new(uri.host, uri.port)
+      http_client.use_ssl = true
+      http_client.verify_mode = OpenSSL::SSL::VERIFY_NONE
       result = http_client.get(request_url, get_headers(change['token']))
       case
       when result.code == "404"
