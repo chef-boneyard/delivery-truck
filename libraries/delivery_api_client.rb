@@ -19,6 +19,9 @@ require 'net/http'
 
 module DeliveryTruck
   module DeliveryApiClient
+    class BadApiResponse < StandardError
+    end
+
     # Determines the list of bocked projects
     # @params Node object to pull the enterprise from.
     # @returns An array of blocked projects.  If the api doesn't exist returns [].
@@ -41,7 +44,7 @@ module DeliveryTruck
       else # not success or 404
         error_str = "Failed request to #{request_url} returned #{result.code}"
         Chef::Log.fatal(error_str)
-        raise error_str
+        raise BadApiResponse.new(error_str)
       end
     end
 
