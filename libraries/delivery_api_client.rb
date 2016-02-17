@@ -30,11 +30,15 @@ module DeliveryTruck
       ent_name = node['delivery']['change']['enterprise']
       request_url = "/api/v0/e/#{ent_name}/blocked_projects"
       change = get_change_hash(node)
-      uri = URI(change['delivery_api_url'])
+      uri = URI.parse(change['delivery_api_url'])
       http_client = Net::HTTP.new(uri.host, uri.port)
-      http_client.use_ssl = true
-      http_client.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+      if uri.scheme == "https"
+        http_client.use_ssl = true
+        http_client.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      end
       result = http_client.get(request_url, get_headers(change['token']))
+
       case
       when result.code == "404"
         Chef::Log.info("HTTP 404 recieved from #{request_url}. Please upgrade your Delivery Server.")
