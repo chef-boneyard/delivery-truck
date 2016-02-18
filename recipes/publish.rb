@@ -73,8 +73,8 @@ if share_cookbook_to_supermarket?
       command "knife supermarket share #{cookbook.name} " \
               "--config #{delivery_knife_rb} " \
               "--supermarket-site #{supermarket_site} " \
-              "--cookbook-path #{cookbook_directory_supermarket}" \
-              "#{custom_supermarket_credentials_options}"
+              "--cookbook-path #{cookbook_directory_supermarket}" +
+              custom_supermarket_credentials_options
       not_if "knife supermarket show #{cookbook.name} #{cookbook.version} " \
               "--config #{delivery_knife_rb} " \
               "--supermarket-site #{supermarket_site}"

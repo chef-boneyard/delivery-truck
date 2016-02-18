@@ -16,7 +16,7 @@
         },
         "lint": {
           "foodcritic": {
-             "ignore_rules": ["FC009"]
+             "ignore_rules": ["FC009", "FC057", "FC058"]
           }
        }
     },
