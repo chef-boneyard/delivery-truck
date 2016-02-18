@@ -10,7 +10,7 @@
     "delivery-truck": {
         "publish": {
             "chef_server": true,
-            "github": "tylercloke/delivery-truck-test",
+            "github": "chef-cookbooks/delivery-truck",
             "supermarket": "https://supermarket.chef.io",
             "supermarket-custom-credentials": true
         },
