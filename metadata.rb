@@ -4,7 +4,7 @@ maintainer_email 'delivery-team@chef.io'
 license          'Apache 2.0'
 description      'Delivery build_cookbook for your cookbooks!'
 
-version          '2.0.3'
+version          '2.0.4'
 
 source_url       'https://github.com/chef-cookbooks/delivery-truck'
 issues_url       'https://github.com/chef-cookbooks/delivery-truck/issues'
