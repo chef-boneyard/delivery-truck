@@ -4,12 +4,6 @@ module DeliverySugar
   class Change
     def changed_files
     end
-
-    def version
-    end
-
-    def base_version
-    end
   end
 end
 
@@ -56,13 +50,6 @@ describe DeliveryTruck::Helpers::Syntax do
 
     context 'when metadata for cookbook in cookbooks directory was updated' do
       let(:changed_files) { ['cookbooks/julia/README.md', 'cookbooks/julia/recipes/default.rb', 'cookbooks/julia/metadata.rb'] }
-
-      it 'returns false when the version was not changed', focus: true do
-        version = '0.2.0'
-        allow(sugar_change).to receive(:version).and_return(version)
-        allow(sugar_change).to receive(:base_version).and_return(version)
-        expect(described_class.bumped_version?('/tmp/repo/cookbooks/julia', node)).to eql false
-      end
 
       it 'returns true' do
         expect(described_class.bumped_version?('/tmp/repo/cookbooks/julia', node)).to eql true
