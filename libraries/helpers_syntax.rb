@@ -29,8 +29,7 @@ module DeliveryTruck
       # @param node [Chef::Node]
       # @return [TrueClass, FalseClass]
       def bumped_version?(path, node)
-        change = DeliverySugar::Change.new(node)
-        modified_files = change.changed_files
+        modified_files = DeliverySugar::Change.new(node).changed_files
 
         cookbook_path = Pathname.new(path)
         workspace_repo = Pathname.new(node['delivery']['workspace']['repo'])
@@ -48,8 +47,10 @@ module DeliveryTruck
           templates\/.*
         ).join('|')
 
-        if modified_files.any? {|f| /^#{relative_dir}\/(#{files_to_check})/ =~ f }
-          change.base_version != change.version
+        if relative_dir == '.' && !!modified_files.find {|f| /^(#{files_to_check})/ =~ f }
+          !!modified_files.find {|f| /^metadata\.(rb|json)/ =~ f }
+        elsif !!modified_files.find {|f| /^#{relative_dir}\/(#{files_to_check})/ =~ f }
+          !!modified_files.find {|f| /^#{relative_dir}\/metadata\.(rb|json)/ =~ f }
         else
           # We return true here as an indication that we should not fail checks.
           # In reality we simply did not change any files that would require us

@@ -1,18 +1,5 @@
 require 'spec_helper'
 
-module DeliverySugar
-  class Change
-    def changed_files
-    end
-
-    def version
-    end
-
-    def base_version
-    end
-  end
-end
-
 describe DeliveryTruck::Helpers::Syntax do
 
   describe '.bumped_version?' do
@@ -23,66 +10,57 @@ describe DeliveryTruck::Helpers::Syntax do
       nodee
     end
 
-    let(:sugar_change) { instance_double("DeliverySugar::Change") }
-
     before(:each) do
-      allow(DeliverySugar::Change).to receive(:new).and_return(sugar_change)
-      allow(sugar_change).to receive(:changed_files).and_return(changed_files)
+      allow(DeliveryTruck::Helpers).to receive(:changed_files).and_return(changed_files)
+      allow(DeliveryTruck::Helpers).to receive(:pre_change_sha).and_return('ABCDEFG')
     end
 
-    context 'when metadata in root cookbook was updated' do
-      let(:changed_files) { ['README.md', 'recipes/default.rb', 'metadata.rb'] }
+    # context 'when metadata in root cookbook was updated' do
+    #   let(:changed_files) { ['README.md', 'recipes/default.rb', 'metadata.rb'] }
 
-      it 'returns true' do
-        expect(described_class.bumped_version?('/tmp/repo', node)).to eql true
-      end
-    end
+    #   it 'returns true' do
+    #     expect(described_class.bumped_version?('/tmp/repo', node)).to eql true
+    #   end
+    # end
 
-    context 'when metadata in root cookbook was not updated' do
-      let(:changed_files) { ['README.md', 'recipes/default.rb'] }
+    # context 'when metadata in root cookbook was not updated' do
+    #   let(:changed_files) { ['README.md', 'recipes/default.rb'] }
 
-      it 'returns false' do
-        expect(described_class.bumped_version?('/tmp/repo', node)).to eql false
-      end
-    end
+    #   it 'returns false' do
+    #     expect(described_class.bumped_version?('/tmp/repo', node)).to eql false
+    #   end
+    # end
 
-    context 'when non-cookbook file in root cookbook was updated' do
-      let(:changed_files) { ['README.md'] }
+    # context 'when non-cookbook file in root cookbook was updated' do
+    #   let(:changed_files) { ['README.md'] }
 
-      it 'returns false' do
-        expect(described_class.bumped_version?('/tmp/repo', node)).to eql true
-      end
-    end
+    #   it 'returns false' do
+    #     expect(described_class.bumped_version?('/tmp/repo', node)).to eql true
+    #   end
+    # end
 
-    context 'when metadata for cookbook in cookbooks directory was updated' do
-      let(:changed_files) { ['cookbooks/julia/README.md', 'cookbooks/julia/recipes/default.rb', 'cookbooks/julia/metadata.rb'] }
+    # context 'when metadata for cookbook in cookbooks directory was updated' do
+    #   let(:changed_files) { ['cookbooks/julia/README.md', 'cookbooks/julia/recipes/default.rb', 'cookbooks/julia/metadata.rb'] }
 
-      it 'returns false when the version was not changed', focus: true do
-        version = '0.2.0'
-        allow(sugar_change).to receive(:version).and_return(version)
-        allow(sugar_change).to receive(:base_version).and_return(version)
-        expect(described_class.bumped_version?('/tmp/repo/cookbooks/julia', node)).to eql false
-      end
+    #   it 'returns true' do
+    #     expect(described_class.bumped_version?('/tmp/repo/cookbooks/julia', node)).to eql true
+    #   end
+    # end
 
-      it 'returns true' do
-        expect(described_class.bumped_version?('/tmp/repo/cookbooks/julia', node)).to eql true
-      end
-    end
+    # context 'when metadata for cookbook in cookbooks directory was not updated' do
+    #   let(:changed_files) { ['cookbooks/julia/README.md', 'cookbooks/julia/recipes/default.rb' ] }
 
-    context 'when metadata for cookbook in cookbooks directory was not updated' do
-      let(:changed_files) { ['cookbooks/julia/README.md', 'cookbooks/julia/recipes/default.rb' ] }
+    #   it 'returns false' do
+    #     expect(described_class.bumped_version?('/tmp/repo/cookbooks/julia', node)).to eql false
+    #   end
+    # end
 
-      it 'returns false' do
-        expect(described_class.bumped_version?('/tmp/repo/cookbooks/julia', node)).to eql false
-      end
-    end
+    # context 'when non-cookbook file in root cookbook was updated' do
+    #   let(:changed_files) { ['cookbooks/julia/README.md'] }
 
-    context 'when non-cookbook file in root cookbook was updated' do
-      let(:changed_files) { ['cookbooks/julia/README.md'] }
-
-      it 'returns false' do
-        expect(described_class.bumped_version?('/tmp/repo/cookbooks/julia', node)).to eql true
-      end
-    end
+    #   it 'returns false' do
+    #     expect(described_class.bumped_version?('/tmp/repo/cookbooks/julia', node)).to eql true
+    #   end
+    # end
   end
 end
