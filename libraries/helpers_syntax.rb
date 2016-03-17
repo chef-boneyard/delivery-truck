@@ -22,17 +22,30 @@ module DeliveryTruck
     module Syntax
       extend self
 
-      # Check whether or not the metadata file was modified when cookbook-related
-      # files were modified.
+      # Check whether or not the metadata file was modified when
+      # cookbook-related files were modified.
+      #
+      # Note: The concept of "the version of the cookbook at the merge base'
+      # is inherently flawed. You can rename a cookbook in the metadata.rb and
+      # leave it in the same path. You can move a cookbook to a new path and
+      # could have edited it after the move. The cookbook might not exist in
+      # this repo at the merge base - imagine migrating cookbooks from one repo
+      # to another. It would next to impossible for delivery to correctly guess
+      # the correct "base" version of this cookbook. We simply assume that if
+      # a base cookbook were to exist, it exists at the same location with the
+      # same name.
       #
       # @param path [String] The path to the cookbook
       # @param node [Chef::Node]
+      #
       # @return [TrueClass, FalseClass]
+      #
       def bumped_version?(path, node)
-        modified_files = DeliverySugar::Change.new(node).changed_files
+        change = DeliverySugar::Change.new(node)
+        modified_files = change.changed_files
 
         cookbook_path = Pathname.new(path)
-        workspace_repo = Pathname.new(node['delivery']['workspace']['repo'])
+        workspace_repo = Pathname.new(change.workspace_repo)
         relative_dir = cookbook_path.relative_path_from(workspace_repo).to_s
         files_to_check = %W(
           metadata\.(rb|json)
@@ -47,10 +60,13 @@ module DeliveryTruck
           templates\/.*
         ).join('|')
 
-        if relative_dir == '.' && !!modified_files.find {|f| /^(#{files_to_check})/ =~ f }
-          !!modified_files.find {|f| /^metadata\.(rb|json)/ =~ f }
-        elsif !!modified_files.find {|f| /^#{relative_dir}\/(#{files_to_check})/ =~ f }
-          !!modified_files.find {|f| /^#{relative_dir}\/metadata\.(rb|json)/ =~ f }
+        clean_relative_dir = relative_dir == "." ? "" : Regexp.escape("#{relative_dir}/")
+
+        if modified_files.any? { |f| /^#{clean_relative_dir}(#{files_to_check})/ =~ f }
+          base = change.merge_sha.empty? ? "origin/#{change.pipeline}" : "#{change.merge_sha}~1"
+          base_metadata = change.cookbook_metadata(relative_dir, base)
+          base_metadata.nil? ||
+            change.cookbook_metadata(path).version != base_metadata.version
         else
           # We return true here as an indication that we should not fail checks.
           # In reality we simply did not change any files that would require us
