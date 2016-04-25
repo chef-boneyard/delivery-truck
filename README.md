@@ -28,7 +28,9 @@ which rules you would like to follow directly from your `config.json`.
 * `ignore_rules` - Provide a list of foodcritic rules you would like to ignore.
 * `only_rules` - Explicitly state which foodcritic rules you would like to run.
 Any other rules except these will be ignored.
-* `excludes` - Explicitly state which relative paths foodcritic should ignore
+* `excludes` - Explicitly state which relative paths foodcritic should ignore.
+* `fail_tags` - Explicitly state which rules should cause the run to fail. Defaults
+to `correctness`.
 
 ```json
 {
@@ -42,7 +44,8 @@ Any other rules except these will be ignored.
       "foodcritic": {
         "ignore_rules": ["FC001"],
         "only_rules": ["FC002"],
-        "excludes": ["spec", "test"]
+        "excludes": ["spec", "test"],
+        "fail_tags": ["any"]
       }
     }
   }
