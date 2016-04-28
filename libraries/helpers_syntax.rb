@@ -64,7 +64,7 @@ module DeliveryTruck
 
         if modified_files.any? { |f| /^#{clean_relative_dir}(#{files_to_check})/ =~ f }
           base = change.merge_sha.empty? ? "origin/#{change.pipeline}" : "#{change.merge_sha}~1"
-          base_metadata = change.cookbook_metadata(relative_dir, base)
+          base_metadata = change.cookbook_metadata(path, base)
           base_metadata.nil? ||
             change.cookbook_metadata(path).version != base_metadata.version
         else

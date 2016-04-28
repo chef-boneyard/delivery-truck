@@ -36,7 +36,7 @@ describe DeliveryTruck::Helpers::Syntax do
 
       before do
         allow(sugar_change).to receive(:cookbook_metadata)
-          .with(relative_path, 'origin/master').and_return(base_metadata)
+          .with(File.expand_path(relative_path, workspace), 'origin/master').and_return(base_metadata)
       end
 
       context 'when root cookbook was updated' do
@@ -103,7 +103,7 @@ describe DeliveryTruck::Helpers::Syntax do
 
       before do
         allow(sugar_change).to receive(:cookbook_metadata)
-          .with(relative_path, 'abcdfakefake~1').and_return(base_metadata)
+          .with(File.expand_path(relative_path, workspace), 'abcdfakefake~1').and_return(base_metadata)
       end
 
       context 'when root cookbook was updated' do
