@@ -41,6 +41,7 @@ module DeliveryTruck
       # @return [TrueClass, FalseClass]
       #
       def bumped_version?(path, node)
+        false
         change = DeliverySugar::Change.new(node)
         modified_files = change.changed_files
 
