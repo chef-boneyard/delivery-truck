@@ -19,9 +19,20 @@ changed_cookbooks.each do |cookbook|
   # If we changed a cookbook but didn't bump the version than the build
   # phase will fail when trying to upload to the Chef Server.
   unless bumped_version?(cookbook.path)
-    raise RuntimeError, "The #{cookbook.name} cookbook was modified " \
-                        "but the version was not updated in the " \
-                        "metadata file."
+    raise RuntimeError,
+%{The #{cookbook.name} cookbook was modified but the version was not updated in the metadata file.
+
+The version must be updated when any of the following files are modified:
+   metadata.(rb|json)
+   Berksfile
+   Berksfile.lock
+   Policyfile.rb
+   Policyfile.lock.json
+   recipes/.*
+   attributes/.*
+   libraries/.*
+   files/.*
+   templates/.*}
   end
 
   # Run `knife cookbook test` against the modified cookbook
