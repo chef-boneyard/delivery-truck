@@ -24,6 +24,7 @@ describe "delivery-truck::lint" do
 
   context "when a single cookbook has been modified" do
     before do
+      allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_epic_fail).and_return("-f correctness")
       allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_tags).and_return("-t FC001")
       allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_excludes).and_return("--exclude spec")
       allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
@@ -40,6 +41,7 @@ describe "delivery-truck::lint" do
 
   context "when multiple cookbooks have been modified" do
     before do
+      allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_epic_fail).and_return("-f correctness")
       allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_tags).and_return("-t ~FC002")
       allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_excludes).and_return("--exclude test")
       allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
@@ -71,6 +73,7 @@ describe "delivery-truck::lint" do
 
   context "when a .rubocop.yml is present" do
     before do
+      allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_epic_fail).and_return("-f correctness")
       allow(DeliveryTruck::Helpers::Lint).to receive(:foodcritic_tags).and_return("")
       allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
       allow(File).to receive(:exist?).and_call_original

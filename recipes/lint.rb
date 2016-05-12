@@ -18,7 +18,8 @@
 changed_cookbooks.each do |cookbook|
   # Run Foodcritic against any cookbooks that were modified.
   execute "lint_foodcritic_#{cookbook.name}" do
-    command "foodcritic -f correctness #{foodcritic_tags} #{foodcritic_excludes} #{cookbook.path}"
+    command "foodcritic #{foodcritic_fail_tags} #{foodcritic_tags} " \
+      "#{foodcritic_excludes} #{cookbook.path}"
   end
 
   # Run Rubocop against any cookbooks that were modified.

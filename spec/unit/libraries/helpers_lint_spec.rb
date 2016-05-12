@@ -51,7 +51,7 @@ describe DeliveryTruck::Helpers::Lint do
         end
 
         it 'returns a string with multiple rules' do
-          expect(described_class.foodcritic_tags(node)).to eql "-t FC001 -t FC002"
+          expect(described_class.foodcritic_tags(node)).to eql "-t FC001,FC002"
         end
       end
     end
@@ -127,6 +127,38 @@ describe DeliveryTruck::Helpers::Lint do
 
         it 'returns a string with multiple excludes' do
           expect(described_class.foodcritic_excludes(node)).to eql "--exclude spec --exclude test"
+        end
+      end
+    end
+    
+    context 'when `fail_tags` has been set' do
+      context 'with no rules' do
+        before do
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['fail_tags'] = []
+        end
+
+        it 'returns correctness tag' do
+          expect(described_class.foodcritic_fail_tags(node)).to eql '-f correctness'
+        end
+      end
+
+      context 'with one rule' do
+        before do
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['fail_tags'] = ['any']
+        end
+
+        it 'returns a string with the one rule' do
+          expect(described_class.foodcritic_fail_tags(node)).to eql '-f any'
+        end
+      end
+
+      context 'with multiple rules' do
+        before do
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['fail_tags'] = ['correctness', 'metadata']
+        end
+
+        it 'returns a string with multiple rules' do
+          expect(described_class.foodcritic_fail_tags(node)).to eql "-f correctness,metadata"
         end
       end
     end
