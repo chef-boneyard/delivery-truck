@@ -17,19 +17,40 @@
 
 # TODO: This is a temporary workaround; ultimately, this should be
 # handled either by delivery_build or (preferably) the server itself.
-ruby_block "copy env from prior to current" do
-  block do
-    with_server_config do
-      stage_name = node['delivery']['change']['stage']
-      case stage_name
-      when 'acceptance'
-        ::DeliveryTruck::Helpers::Provision.handle_acceptance_pinnings(node, get_acceptance_environment, get_all_project_cookbooks)
-      when 'union'
-        ::DeliveryTruck::Helpers::Provision.handle_union_pinnings(node, get_acceptance_environment, get_all_project_cookbooks)
-      when 'rehearsal'
-        ::DeliveryTruck::Helpers::Provision.handle_rehearsal_pinnings(node)
-      else
-        ::DeliveryTruck::Helpers::Provision.handle_delivered_pinnings(node)
+begin
+  data_bag_item('workflow-promotion-data', node['delivery']['change']['change_id'])
+  ruby_block "copy promotion data to current env" do
+    block do
+      with_server_config do
+        stage_name = node['delivery']['change']['stage']
+        case stage_name
+        when 'acceptance'
+          ::DeliveryTruck::Helpers::ProvisionV2.handle_acceptance_pinnings(node, get_acceptance_environment)
+        when 'union'
+          ::DeliveryTruck::Helpers::ProvisionV2.handle_union_pinnings(node)
+        when 'rehearsal'
+          ::DeliveryTruck::Helpers::Provision.handle_rehearsal_pinnings(node)
+        else
+          ::DeliveryTruck::Helpers::Provision.handle_delivered_pinnings(node)
+        end
+      end
+    end
+  end
+rescue Exceptions::InvalidDataBagItemID
+  ruby_block "copy env from prior to current" do
+    block do
+      with_server_config do
+        stage_name = node['delivery']['change']['stage']
+        case stage_name
+        when 'acceptance'
+          ::DeliveryTruck::Helpers::Provision.handle_acceptance_pinnings(node, get_acceptance_environment, get_all_project_cookbooks)
+        when 'union'
+          ::DeliveryTruck::Helpers::Provision.handle_union_pinnings(node, get_acceptance_environment, get_all_project_cookbooks)
+        when 'rehearsal'
+          ::DeliveryTruck::Helpers::Provision.handle_rehearsal_pinnings(node)
+        else
+          ::DeliveryTruck::Helpers::Provision.handle_delivered_pinnings(node)
+        end
       end
     end
   end

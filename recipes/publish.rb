@@ -15,6 +15,12 @@
 # limitations under the License.
 #
 
+ruby_block "Save Cookbook Pins" do
+  block do
+    save_cookbook_pins
+  end
+end
+
 # The intended purpose of this recipe is to publish modified files to the
 # necessary endpoints like Chef Servers or Supermarkets. The specific details
 # about what to publish and where to publish it will be specified in the

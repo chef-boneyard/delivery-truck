@@ -22,7 +22,21 @@ describe "delivery-truck::provision" do
     end.converge(described_recipe)
   end
 
-  it 'copy env from prior to current' do
-    expect(chef_run).to run_ruby_block('copy env from prior to current')
+  context 'when workflow data bag exists' do
+    before do
+      stub_data_bag_item("workflow-promotion-data", 'aaaa-bbbb-cccc').and_return([])
+    end
+    it 'uses v2 of provision helper logic' do
+      expect(chef_run).to run_ruby_block('copy promotion data to current env')
+    end
+  end
+
+  context 'when workflow data bag does not exist' do
+    before do
+      stub_data_bag_item("workflow-promotion-data", 'aaaa-bbbb-cccc').and_raise(Chef::Exceptions::InvalidDataBagItemID)
+    end
+    it 'uses v1 of provision helper logic' do
+      expect(chef_run).to run_ruby_block('copy env from prior to current')
+    end
   end
 end
