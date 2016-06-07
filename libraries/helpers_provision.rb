@@ -33,6 +33,7 @@ module DeliveryTruck
       def handle_acceptance_pinnings(node, acceptance_env_name, get_all_project_cookbooks)
         union_env_name = 'union'
 
+        pinnings = fetch_or_create_data_bag_item(change_id(node))
         union_env = fetch_or_create_environment(union_env_name)
         acceptance_env = fetch_or_create_environment(acceptance_env_name)
 
@@ -88,6 +89,9 @@ module DeliveryTruck
           acceptance_env.cookbook(cookbook, version)
         end
 
+        # Save Pinnings
+        pinnings.save
+
         acceptance_env.save
         acceptance_env
       end
@@ -97,7 +101,8 @@ module DeliveryTruck
       def handle_union_pinnings(node, acceptance_env_name, project_cookbooks)
         union_env_name = 'union'
 
-        acceptance_env = fetch_or_create_environment(acceptance_env_name)
+        # acceptance_env = fetch_or_create_environment(acceptance_env_name)
+        pinnings = fetch_or_create_data_bag_item(change_id(node))
         union_env = fetch_or_create_environment(union_env_name)
 
         promote_project_cookbooks(node, acceptance_env, union_env, project_cookbooks)
@@ -168,8 +173,26 @@ module DeliveryTruck
         Chef::Log
       end
 
+      def data_bag_name
+        'workflow-pinnings'
+      end
+
       def project_name(node)
         node['delivery']['change']['project']
+      end
+
+      def change_id(node)
+        node['delivery']['change']['change_id']
+
+      def fetch_or_create_data_bag_item(change_id)
+        item = Chef::DataBagItem.load(data_bag_name, change_id)
+      rescue Net::HTTPServerException => http_e
+        raise http_e unless http_e.response.code == "404"
+        chef_log.info("Creating Data Bag for #{change_id}")
+        item = Chef::DataBagItem.new()
+        item.data_bag(data_bag_name)
+        item.name(change_id)
+        item.create
       end
 
       def fetch_or_create_environment(env_name)
