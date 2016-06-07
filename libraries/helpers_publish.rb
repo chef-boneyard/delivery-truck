@@ -32,6 +32,24 @@ module DeliveryTruck
         false
       end
 
+      def save_changeset(node, applications, cookbooks)
+        item = fetch_or_create_data_bag(node['delivery']['change']['change_id'])
+        item.applications = applications
+        item.cookbooks = cookbooks
+        item.save
+      end
+
+      def fetch_or_create_data_bag_item(change_id)
+        item = Chef::DataBagItem.load(data_bag_name, change_id)
+      rescue Net::HTTPServerException => http_e
+        raise http_e unless http_e.response.code == "404"
+        chef_log.info("Creating Data Bag for #{change_id}")
+        item = Chef::DataBagItem.new()
+        item.data_bag(data_bag_name)
+        item.name(change_id)
+        item.create
+      end
+
       # Read the Delivery Config to see if the user has indicated a Github
       # repo they would like to push to.
       #

@@ -39,8 +39,8 @@ module DeliveryTruck
 
         # Before we overwite acceptance with union,
         # remember the cookbook and application pinnings in acceptance for this project.
-        cookbook_pinnings = project_cookbook_version_pins_from_env(node, acceptance_env)
-        app_pinnings = project_application_version_pins_from_env(node, acceptance_env)
+        # cookbook_pinnings = project_cookbook_version_pins_from_env(node, acceptance_env)
+        # app_pinnings = project_application_version_pins_from_env(node, acceptance_env)
 
         ############################################################################
         # Copy Union State Onto Acceptance So Acceptance Looks Like Union To Start #
@@ -61,36 +61,7 @@ module DeliveryTruck
         ####################################################################
         # Overwrite Acceptance Pins For Project Related Cookbooks and Apps #
         ####################################################################
-        cookbook_pinnings.each do |cb, pin|
-          chef_log.info("Setting version pinning for #{cb} to what we" +
-                         " remembered earlier: (#{pin})")
-          acceptance_env.cookbook(cb, pin)
-        end
-
-        # Make sure the outer key is there.
-        if acceptance_env.override_attributes['applications'].nil?
-          acceptance_env.override_attributes['applications'] = {}
-        end
-
-        app_pinnings.each do |app, version|
-          chef_log.info("Setting version for app #{app} to what we" +
-                         " remembered earlier: (#{version})")
-          acceptance_env.override_attributes['applications'][app] = version
-        end
-
-        # Copy over pins for any cookbook that changes.
-        version_map = {}
-
-        get_all_project_cookbooks.each do |cookbook|
-          version_map[cookbook.name] = cookbook.version
-        end
-
-        version_map.each do |cookbook, version|
-          acceptance_env.cookbook(cookbook, version)
-        end
-
-        # Save Pinnings
-        pinnings.save
+        overwrite_pinnings(pinnings, acceptance_env)
 
         acceptance_env.save
         acceptance_env
@@ -105,8 +76,10 @@ module DeliveryTruck
         pinnings = fetch_or_create_data_bag_item(change_id(node))
         union_env = fetch_or_create_environment(union_env_name)
 
-        promote_project_cookbooks(node, acceptance_env, union_env, project_cookbooks)
-        promote_project_apps(node, acceptance_env, union_env)
+        # promote_project_cookbooks(node, acceptance_env, union_env, project_cookbooks)
+        # promote_project_apps(node, acceptance_env, union_env)
+
+        overwrite_pinnings(pinnings, acceptance_env)
 
         ## Update cached project metadata
         union_env.default_attributes['delivery'] ||= {}
@@ -181,8 +154,36 @@ module DeliveryTruck
         node['delivery']['change']['project']
       end
 
-      def change_id(node)
-        node['delivery']['change']['change_id']
+      def overwrite_pinnings(pinnings, environment)
+        pinnings.cookbooks.each do |cb, pin|
+          chef_log.info("Setting version pinning for #{cb} to what we" +
+                         " remembered earlier: (#{pin})")
+          environment.cookbook(cb, pin)
+        end
+
+        # Make sure the outer key is there.
+        if environment.override_attributes['applications'].nil?
+          environment.override_attributes['applications'] = {}
+        end
+
+        pinnings.applications.each do |app, version|
+          chef_log.info("Setting version for app #{app} to #{version}")
+          environment.override_attributes['applications'][app] = version
+        end
+
+        # Copy over pins for any cookbook that changes.
+        version_map = {}
+
+        get_all_project_cookbooks.each do |cookbook|
+          version_map[cookbook.name] = cookbook.version
+        end
+
+        version_map.each do |cookbook, version|
+          environment.cookbook(cookbook, version)
+        end
+
+        environment
+      end
 
       def fetch_or_create_data_bag_item(change_id)
         item = Chef::DataBagItem.load(data_bag_name, change_id)

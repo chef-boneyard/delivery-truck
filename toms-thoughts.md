@@ -26,6 +26,8 @@ might be useful here. The idea is that this would be used in the publish phase.
     action :save
   end
 
+  
+
 This is what would create the data bag item.
 
 In acceptance/provision, we would pull that data bag item (if it exists) and use it.
@@ -38,4 +40,4 @@ From rehearsal/provision onwards, delivery-truck would operate as normal.
 
 
 We could also very easily provide a `:delete` action for the resource, allowing
-people to cleanup the data bags if they so wish. 
+people to cleanup the data bags if they so wish.
