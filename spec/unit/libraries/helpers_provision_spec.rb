@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe DeliveryTruck::Helpers::Provision do
   let(:project_name) { 'delivery' }
+  let(:change_id) { 'change-id' }
 
   let(:node) { instance_double('Chef::Node') }
 
@@ -15,7 +16,8 @@ describe DeliveryTruck::Helpers::Provision do
     {
       'delivery' => {
         'change' => {
-          'project' => project_name
+          'project' => project_name,
+          'change_id' => change_id
         }
       }
     }
@@ -438,6 +440,29 @@ describe DeliveryTruck::Helpers::Provision do
           expect(union_env_result.override_attributes['applications']).
             to eq(union_application_versions)
         end
+
+        it 'does not update pinnings if change id has already been updated' do
+          first_union_env_result =
+            described_class.handle_union_pinnings(node, acceptance_env_name, [project_cookbook])
+
+          modified_acceptance_env = Chef::Environment.new()
+          modified_acceptance_env.name(acceptance_env_name)
+          modified_acceptance_env.cookbook_versions(
+              acceptance_cookbook_versions.merge(new_cookbook: '1.1.1'))
+
+          expect(described_class).
+            to receive(:fetch_or_create_environment).
+            with(acceptance_env_name).
+            and_return(modified_acceptance_env)
+          expect(described_class).
+            to receive(:fetch_or_create_environment).
+            with('union').
+            and_return(first_union_env_result)
+
+          seccond_union_env_result =
+            described_class.handle_union_pinnings(node, acceptance_env_name, [project_cookbook])
+          expect(first_union_env_result).to eq(seccond_union_env_result)
+        end
       end
 
       describe 'cached project metadata' do
@@ -718,7 +743,7 @@ describe DeliveryTruck::Helpers::Provision do
 
     let(:rehearsal_default_attributes) do
       {
-          'delivery' => { 'project_artifacts' => {} }
+        'delivery' => { 'project_artifacts' => {} }
       }
     end
 
@@ -741,6 +766,9 @@ describe DeliveryTruck::Helpers::Provision do
     let(:union_default_attributes) do
       {
         'delivery' => {
+          'union_changes' => [
+             change_id
+          ],
           'project_artifacts' => {
             'other_project_1' => {
               'cookbooks' => [
@@ -804,6 +832,17 @@ describe DeliveryTruck::Helpers::Provision do
         and_return(rehearsal_env)
       expect(rehearsal_env).
         to receive(:save)
+      expect(union_env).to receive(:save)
+    end
+
+    it 'removes the change from the union environment change list' do
+      expect(DeliveryTruck::DeliveryApiClient).
+        to receive(:blocked_projects).
+        with(node).
+        and_return([])
+
+      described_class.handle_rehearsal_pinnings(node)
+      expect(union_env.default_attributes['delivery']['union_changes']).to eql([])
     end
 
     context 'a project with a single cookbook' do
@@ -884,12 +923,14 @@ describe DeliveryTruck::Helpers::Provision do
       end
 
       context 'when the project is blocked' do
+
         before(:each) do
           expect(DeliveryTruck::DeliveryApiClient).
             to receive(:blocked_projects).
             with(node).
             and_return([project_name])
         end
+
 
         it 'does not update the version pinning for the cookbook in the' \
            ' rehearsal environment' do

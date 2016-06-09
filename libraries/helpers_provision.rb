@@ -1,4 +1,3 @@
-#
 # Copyright:: Copyright (c) 2015 Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
@@ -100,25 +99,36 @@ module DeliveryTruck
         acceptance_env = fetch_or_create_environment(acceptance_env_name)
         union_env = fetch_or_create_environment(union_env_name)
 
-        promote_project_cookbooks(node, acceptance_env, union_env, project_cookbooks)
-        promote_project_apps(node, acceptance_env, union_env)
-
-        ## Update cached project metadata
         union_env.default_attributes['delivery'] ||= {}
         union_env.default_attributes['delivery']['project_artifacts'] ||= {}
-        project_name = project_name(node)
-        union_env.default_attributes['delivery']['project_artifacts'][project_name] ||= {}
+        union_env.default_attributes['delivery']['union_changes'] ||= []
 
-        populate_project_artifacts(node, project_cookbooks, acceptance_env, union_env)
+        change_id = node['delivery']['change']['change_id']
 
-        union_env.save
+        # There's a race condition where acceptance can be updated between re-runs of union
+        # with changes that are note yet approved.  Thus we don't want to re-promote pinnings
+        # if we're in a re-run situation.
+        unless union_env.default_attributes['delivery']['union_changes'].include?(change_id)
+          union_env.default_attributes['delivery']['union_changes'] << change_id
+          promote_project_cookbooks(node, acceptance_env, union_env, project_cookbooks)
+          promote_project_apps(node, acceptance_env, union_env)
+
+          ## Update cached project metadata
+          project_name = project_name(node)
+          union_env.default_attributes['delivery']['project_artifacts'][project_name] ||= {}
+          populate_project_artifacts(node, project_cookbooks, acceptance_env, union_env)
+          union_env.save
+        end
+
         union_env
       end
 
       def handle_rehearsal_pinnings(node)
+        union_env = fetch_or_create_environment('union')
+        cleanup_union_changes(union_env, node)
+
         blocked = ::DeliveryTruck::DeliveryApiClient.blocked_projects(node)
 
-        union_env = fetch_or_create_environment('union')
         rehearsal_env = fetch_or_create_environment('rehearsal')
 
         chef_log.info("current environment: #{rehearsal_env.name}")
@@ -130,6 +140,17 @@ module DeliveryTruck
 
         rehearsal_env.save
         rehearsal_env
+      end
+
+      # This introduces a race condition with a small target window. If
+      # union/provision and rehearsal/provision end up running simultaneously
+      # the union env could end up in an unknown state because we are doing a
+      # read/modify/write in both places.
+      def cleanup_union_changes(union_env, node)
+        union_changes = union_env.default_attributes['delivery']['union_changes'] || []
+        union_changes.delete(node['delivery']['change']['change_id'])
+        union_env.default_attributes['delivery']['union_changes'] = union_changes
+        union_env.save
       end
 
       # Promote the from_env's attributes and cookbook_verions to to_env.
