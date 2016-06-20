@@ -20,6 +20,20 @@ module DeliveryTruck
     module Provision
       extend self
 
+      def provision(stage_name, node, acceptance_env_name, cookbooks)
+        if stage_name == 'acceptance'
+          handle_acceptance_pinnings(node, acceptance_env_name, cookbooks)
+        elsif stage_name == 'union'
+          handle_union_pinnings(node, acceptance_env_name, cookbooks)
+        elsif stage_name == 'rehearsal'
+          handle_rehearsal_pinnings(node)
+        elsif stage_name == 'delivered'
+          handle_delivered_pinnings(node)
+        else
+          chef_log.info("Nothing to do for #{stage_name}, did you mean to copy this environment?")
+        end
+      end
+
       # Refresh Acceptance from Union without overwriting Acceptance's pins
       # for the current project's applications and cookbooks by:
       # 1) Pulling the current Acceptance version pins for apps and cookbooks
