@@ -30,7 +30,7 @@ describe "delivery-truck::provision" do
 
   it 'copy env from prior to current' do
     expect(chef_run).to run_ruby_block('copy env from prior to current')
-    expect(::DeliveryTruck::Helpers::Provision).to receive(:provision).with(@node, 'union', 'acceptance-Chef-Delivery-Secret-master', [])
+    expect(::DeliveryTruck::Helpers::Provision).to receive(:provision).with('union', @node, 'acceptance-Chef-Delivery-Secret-master', [])
 
     chef_run.find_resources(:ruby_block).first.old_run_action(:create)
   end
