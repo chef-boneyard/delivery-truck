@@ -21,8 +21,16 @@ ruby_block "copy env from prior to current" do
   block do
     with_server_config do
       stage_name = node['delivery']['change']['stage']
-
-      ::DeliveryTruck::Helpers::Provision.provision node, stage_name, get_acceptance_environment, get_all_project_cookbooks
+      case stage_name
+      when 'acceptance'
+        ::DeliveryTruck::Helpers::Provision.handle_acceptance_pinnings(node, get_acceptance_environment, get_all_project_cookbooks)
+      when 'union'
+        ::DeliveryTruck::Helpers::Provision.handle_union_pinnings(node, get_acceptance_environment, get_all_project_cookbooks)
+      when 'rehearsal'
+        ::DeliveryTruck::Helpers::Provision.handle_rehearsal_pinnings(node)
+      else
+        ::DeliveryTruck::Helpers::Provision.handle_delivered_pinnings(node)
+      end
     end
   end
 end

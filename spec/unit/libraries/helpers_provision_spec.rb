@@ -23,62 +23,6 @@ describe DeliveryTruck::Helpers::Provision do
     }
   end
 
-  describe '#provision' do
-    let(:acceptance_env_name) { 'acceptance' }
-    let(:cookbooks) { [] }
-
-    context 'acceptance' do
-      let(:stage_name) { 'acceptance' }
-
-      it 'handles accepance' do
-        expect(subject).to receive(:handle_acceptance_pinnings).with(node, acceptance_env_name, cookbooks)
-
-        subject.provision stage_name, node, acceptance_env_name, cookbooks
-      end
-    end
-
-    context 'union' do
-      let(:stage_name) { 'union' }
-
-      it 'handles union' do
-        expect(subject).to receive(:handle_union_pinnings).with(node, acceptance_env_name, cookbooks)
-
-        subject.provision stage_name, node, acceptance_env_name, cookbooks
-      end
-    end
-
-    context 'rehearsal' do
-      let(:stage_name) { 'rehearsal' }
-
-      it 'handles union' do
-        expect(subject).to receive(:handle_rehearsal_pinnings).with(node)
-
-        subject.provision stage_name, node, acceptance_env_name, cookbooks
-      end
-    end
-
-    context 'delivered' do
-      let(:stage_name) { 'delivered' }
-
-      it 'handles union' do
-        expect(subject).to receive(:handle_delivered_pinnings).with(node)
-
-        subject.provision stage_name, node, acceptance_env_name, cookbooks
-      end
-    end
-
-    context 'unknown' do
-      let(:stage_name) { 'unknown' }
-
-      it 'logs' do
-        expect(::Chef::Log).to receive(:info).with("Nothing to do for #{stage_name}, did you mean to copy this environment?")
-
-        subject.provision stage_name, node, acceptance_env_name, cookbooks
-      end
-
-    end
-  end
-
   describe '.project_cookbook_version_pins_from_env' do
     let(:cookbook_versions) do
       {

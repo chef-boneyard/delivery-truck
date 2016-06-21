@@ -2,9 +2,7 @@ require 'spec_helper'
 
 describe "delivery-truck::provision" do
   let(:chef_run) do
-    @node = nil
     ChefSpec::SoloRunner.new do |node|
-      @node = node
       node.set['delivery']['workspace']['root'] = '/tmp'
       node.set['delivery']['workspace']['repo'] = '/tmp/repo'
       node.set['delivery']['workspace']['chef'] = '/tmp/chef'
@@ -24,14 +22,7 @@ describe "delivery-truck::provision" do
     end.converge(described_recipe)
   end
 
-  before do
-    allow(Chef::Config).to receive(:from_file).with('/var/opt/delivery/workspace/.chef/knife.rb').and_return(true)
-  end
-
   it 'copy env from prior to current' do
     expect(chef_run).to run_ruby_block('copy env from prior to current')
-    expect(::DeliveryTruck::Helpers::Provision).to receive(:provision).with(@node, 'union', 'acceptance-Chef-Delivery-Secret-master', [])
-
-    chef_run.find_resources(:ruby_block).first.old_run_action(:create)
   end
 end
