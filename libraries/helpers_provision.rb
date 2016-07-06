@@ -382,14 +382,14 @@ module DeliveryTruck
             chef_log.info("Promoting cookbooks and applications for project #{project_name}")
 
             # promote cookbooks
-            project_contents['cookbooks'].each do |cookbook_name|
+            (project_contents['cookbooks'] || []).each do |cookbook_name|
               promoted_on_env.cookbook_versions[cookbook_name] =
                 promoted_from_env.cookbook_versions[cookbook_name]
             end
 
             promoted_on_env.default_attributes['delivery']['project_artifacts'][project_name] = project_contents
 
-            project_contents['applications'].each do |app_name|
+            (project_contents['applications'] || []).each do |app_name|
               promoted_on_env.override_attributes['applications'][app_name] =
                 promoted_from_env.override_attributes['applications'][app_name]
             end
