@@ -9,8 +9,8 @@ describe DeliveryTruck::Helpers::Lint do
         node.default['delivery']['config']['delivery-truck']['lint']['foodcritic'] = nil
       end
 
-      it 'returns an empty string' do
-        expect(described_class.foodcritic_tags(node)).to eql ""
+      it 'ignores issues_url and source_url rules by default' do
+        expect(described_class.foodcritic_tags(node)).to eql "-t ~FC064 -t ~FC065"
       end
     end
 
@@ -19,8 +19,8 @@ describe DeliveryTruck::Helpers::Lint do
         node.default['delivery']['config']['delivery-truck']['lint']['foodcritic'] = {}
       end
 
-      it 'returns an empty string' do
-        expect(described_class.foodcritic_tags(node)).to eql ""
+      it 'ignores issues_url and source_url rules by default' do
+        expect(described_class.foodcritic_tags(node)).to eql "-t ~FC064 -t ~FC065"
       end
     end
 
@@ -30,8 +30,8 @@ describe DeliveryTruck::Helpers::Lint do
           node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['only_rules'] = []
         end
 
-        it 'returns an empty string' do
-          expect(described_class.foodcritic_tags(node)).to eql ""
+        it 'ignores issues_url and source_url rules by default' do
+          expect(described_class.foodcritic_tags(node)).to eql "-t ~FC064 -t ~FC065"
         end
       end
 
@@ -62,7 +62,17 @@ describe DeliveryTruck::Helpers::Lint do
           node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['ignore_rules'] = []
         end
 
-        it 'returns an empty string' do
+        it 'ignores issues_url and source_url rules by default' do
+          expect(described_class.foodcritic_tags(node)).to eql "-t ~FC064 -t ~FC065"
+        end
+      end
+
+      context 'with an empty string as the value' do
+        before do
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['ignore_rules'] = ""
+        end
+
+        it 'ignores issues_url and source_url rules by default' do
           expect(described_class.foodcritic_tags(node)).to eql ""
         end
       end
