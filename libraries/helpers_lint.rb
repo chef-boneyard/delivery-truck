@@ -39,8 +39,10 @@ module DeliveryTruck
             when config['only_rules'] && !config['only_rules'].empty?
               "-t " + config['only_rules'].join(",")
             when config['ignore_rules'].nil? || config['ignore_rules'] == []
-              # They can set ignore_rules to an empty string to disable these defaults
               default_ignore
+            when config['ignore_rules'] == ""
+              # They can set ignore_rules to an empty string to disable these defaults
+              ""
             when config['ignore_rules'] && !config['ignore_rules'].empty?
               "-t ~" + config['ignore_rules'].join(" -t ~")
             else
