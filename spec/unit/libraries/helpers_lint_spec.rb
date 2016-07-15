@@ -67,6 +67,16 @@ describe DeliveryTruck::Helpers::Lint do
         end
       end
 
+      context 'with an empty string as the value' do
+        before do
+          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['ignore_rules'] = ""
+        end
+
+        it 'ignores issues_url and source_url rules by default' do
+          expect(described_class.foodcritic_tags(node)).to eql ""
+        end
+      end
+
       context 'with one rule' do
         before do
           node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['ignore_rules'] = ['FC001']
