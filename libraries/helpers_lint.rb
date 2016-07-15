@@ -28,6 +28,10 @@ module DeliveryTruck
       def foodcritic_tags(node)
         begin
           config = node['delivery']['config']['delivery-truck']['lint']['foodcritic']
+          # We ignore these two by default since they search for the presence of
+          # `issues_url` and `source_url` in the metadata.rb. Those fields will
+          # only be populated by cookbooks uploading to Supermarket.
+          config['ignore_rules'] ||= ["FC064", "FC065"]
           case
           when config['only_rules'] && !config['only_rules'].empty?
             "-t " + config['only_rules'].join(",")
