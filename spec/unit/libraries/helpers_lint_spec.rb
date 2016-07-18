@@ -14,6 +14,16 @@ describe DeliveryTruck::Helpers::Lint do
       end
     end
 
+    context 'when cookbook will be share to supermarket' do
+      before do
+        node.default['delivery']['config']['delivery-truck']['publish']['supermarket'] = 'supermarket.chef.io'
+      end
+
+      it 'does not ignores issues_url and source_url rules' do
+        expect(described_class.foodcritic_tags(node)).to eql ""
+      end
+    end
+
     context 'when foodcritic config is empty' do
       before do
         node.default['delivery']['config']['delivery-truck']['lint']['foodcritic'] = {}
@@ -60,16 +70,6 @@ describe DeliveryTruck::Helpers::Lint do
       context 'with no rules' do
         before do
           node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['ignore_rules'] = []
-        end
-
-        it 'ignores issues_url and source_url rules by default' do
-          expect(described_class.foodcritic_tags(node)).to eql "-t ~FC064 -t ~FC065"
-        end
-      end
-
-      context 'with an empty string as the value' do
-        before do
-          node.default['delivery']['config']['delivery-truck']['lint']['foodcritic']['ignore_rules'] = ""
         end
 
         it 'ignores issues_url and source_url rules by default' do

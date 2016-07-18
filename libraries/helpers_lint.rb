@@ -33,15 +33,21 @@ module DeliveryTruck
           # `issues_url` and `source_url` in the metadata.rb. Those fields will
           # only be populated by cookbooks uploading to Supermarket.
           default_ignore = "-t ~FC064 -t ~FC065"
+
+          # Do not ignore these rules if the cookbook will be share to Supermarket
+          if ::DeliveryTruck::Helpers::Publish.share_cookbook_to_supermarket?(node)
+            default_ignore = ""
+          end
+
           case
             when config.nil?
               default_ignore
             when config['only_rules'] && !config['only_rules'].empty?
               "-t " + config['only_rules'].join(",")
-            when config['ignore_rules'].nil? || config['ignore_rules'] == []
+            when config['ignore_rules'].nil?
               default_ignore
-            when config['ignore_rules'] == ""
-              # They can set ignore_rules to an empty string to disable these defaults
+            when config['ignore_rules'].empty?
+              # They can set ignore_rules to an empty Array to disable these defaults
               ""
             when config['ignore_rules'] && !config['ignore_rules'].empty?
               "-t ~" + config['ignore_rules'].join(" -t ~")
