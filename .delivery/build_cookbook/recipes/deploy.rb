@@ -1,6 +1,11 @@
 include_recipe 'delivery-truck::default'
 
-if delivery_environment == 'delivered'
+# In Acceptance
+#
+# We want to push changes to Github Branch? so we can test other cookbooks
+# that use delivery-truck. This will allow us to know if it is working
+# fine or not. Then we can Deliver to share it to Supermarket
+if delivery_environment == get_acceptance_environment
   # Pull the encrypted secrets from the Chef Server
   secrets = get_project_secrets
 
@@ -16,7 +21,11 @@ if delivery_environment == 'delivered'
   end
 end
 
-if delivery_environment == get_acceptance_environment
+# In Delivered
+#
+# We want to share the build-cookbook to supermarket to make it
+# offitially released.
+if delivery_environment == 'delivered'
   supermarket_site = node['delivery']['config']['delivery-truck']['publish']['supermarket']
   cookbook_directory_supermarket = File.join(node['delivery']['workspace']['cache'], "cookbook-share")
 
