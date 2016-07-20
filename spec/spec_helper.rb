@@ -1,11 +1,42 @@
 require 'chefspec'
-require 'chefspec/berkshelf'
 
 TOPDIR = File.expand_path(File.join(File.dirname(__FILE__), ".."))
 $: << File.expand_path(File.dirname(__FILE__))
 
 # Require all our libraries
 Dir['libraries/*.rb'].each { |f| require File.expand_path(f) }
+
+# Alright this is going to get crazy! :)
+#
+# PROBLEM: We would like to eat our own dogfood at the earliest Stage
+# in Delivery, that means we need to pull delivery-sugar from DCC.
+# The problem is that we can't release delivery-truck with this
+# dependency because end-users won't be able to reach it
+#
+# For this reason we are going to inject the dependency before we
+# run `berks install` inside chefspec. With that we will run our
+# tests using the latest delivery-sugar cookbook and without issues
+# in the release process
+def delivery_sugar_dcc_dependency
+  <<EOF
+cookbook 'delivery-sugar',
+  git: 'ssh://builder@chef@delivery.chef.co:8989/chef/Delivery-Build-Cookbooks/delivery-sugar',
+  branch: 'master'
+EOF
+end
+
+def whoami
+  Etc.getpwuid(Process.uid).name
+end
+
+# If we are running inside Delivery
+if whoami.eql?('dbuild')
+  berks = ::File.open(File.join(TOPDIR, 'Berksfile'), 'a')
+  berks.write(delivery_sugar_dcc_dependency)
+  berks.close
+end
+
+require 'chefspec/berkshelf'
 
 # Declare common let declarations
 module SharedLetDeclarations

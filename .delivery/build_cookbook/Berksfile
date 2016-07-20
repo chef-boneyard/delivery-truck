@@ -2,7 +2,18 @@ source 'https://supermarket.chef.io'
 
 metadata
 
-cookbook 'delivery-sugar', git: 'https://github.com/chef-cookbooks/delivery-sugar.git'
+def whoami
+  Etc.getpwuid(Process.uid).name
+end
+
+# If we are running inside Delivery
+if whoami.eql?('dbuild')
+  # Consume delivery-sugar early on from DCC so we can detect
+  # any failure before we release it to Supermarket
+  cookbook 'delivery-sugar',
+    git: 'ssh://builder@chef@delivery.chef.co:8989/chef/Delivery-Build-Cookbooks/delivery-sugar',
+    branch: 'master'
+end
 
 # In order for the Delivery CLI to properly find this cookbook we need
 # to specify the path in the scope of the Delivery CLI's workspace.
