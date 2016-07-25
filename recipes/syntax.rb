@@ -40,3 +40,25 @@ The version must be updated when any of the following files are modified:
     command "knife cookbook test -o #{cookbook.path} -a"
   end
 end
+
+# Temporal Test - Modifying the Release process Stage 1
+#
+# This provisional test will verify if there are berks dependencies
+# pointing to Github, if that is the case we will log a WARN message
+# notifying the user that they need to modify their Berksfile
+#
+# TODO: Remove this on Stage 2
+berksfile = ::File.join(delivery_workspace_chef, 'build_cookbook', 'Berksfile')
+if ::File.exist?(berksfile)
+  content = ::File.read(berksfile)
+  %W(delivery-sugar delivery-truck).each do |build_cookbook|
+    if content.include?("chef-cookbooks/#{build_cookbook}")
+      log "warning_#{build_cookbook}_pull_from_github" do
+        message "Your build-cookbook depends on #{build_cookbook} that is being pulled " \
+                'from Github, please modify your Berksfile so that you consume it from ' \
+                'Supermarket instead.'
+         level :warn
+      end
+    end
+  end
+end

@@ -69,4 +69,55 @@ describe "delivery-truck::syntax" do
       end
     end
   end
+
+  # Temporal Test - Modifying the Release process Stage 1
+  #
+  # TODO: Remove this on Stage 2
+  describe 'temporal test to detect entries in Berksfile' do
+    before do
+      allow(DeliveryTruck::Helpers::Syntax).to receive(:bumped_version?).and_return(true)
+      allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
+    end
+
+    context 'when there are NO entries' do
+      it 'logs warning messages' do
+        expect(chef_run).not_to write_log('warning_delivery-sugar_pull_from_github')
+        expect(chef_run).not_to write_log('warning_delivery-truck_pull_from_github')
+      end
+    end
+
+    context 'when there are wrong entries' do
+      let(:mock_berksfile) do
+        <<EOF
+source "https://supermarket.chef.io"
+
+metadata
+
+cookbook 'delivery-truck',
+  git: 'https://github.com/chef-cookbooks/delivery-truck.git',
+  branch: 'master'
+
+cookbook 'delivery-sugar',
+  git: 'https://github.com/chef-cookbooks/delivery-sugar.git',
+  branch: 'master'
+EOF
+      end
+
+      before do
+        allow(::File).to receive(:exist?).and_call_original
+        allow(::File).to receive(:exist?)
+          .with('/tmp/chef/build_cookbook/Berksfile')
+          .and_return(true)
+        allow(::File).to receive(:read).and_call_original
+        allow(::File).to receive(:read)
+          .with('/tmp/chef/build_cookbook/Berksfile')
+          .and_return(mock_berksfile)
+      end
+
+      it 'logs warning messages' do
+        expect(chef_run).to write_log('warning_delivery-sugar_pull_from_github')
+        expect(chef_run).to write_log('warning_delivery-truck_pull_from_github')
+      end
+    end
+  end
 end

@@ -1,6 +1,19 @@
 include_recipe 'delivery-truck::default'
 
-if delivery_environment == 'delivered'
+# Modifying the Release Process
+#
+# Stage 1
+# We will continue pushing to Github until all our customers point
+# their build-cookbooks to pull from Supermarket instead. In Stage 2
+# we will move the push to Github process to Acceptance.
+if delivery_environment == 'delivered' # <- Delete on Stage 2
+
+# In Acceptance
+#
+# We want to push changes to Github so we can test other cookbooks
+# that use delivery-truck. This will allow us to know if it is working
+# fine or not. Then when we Deliver we will share it to Supermarket
+#if delivery_environment == get_acceptance_environment # <- Uncomment on Stage 2
   # Pull the encrypted secrets from the Chef Server
   secrets = get_project_secrets
 
@@ -14,62 +27,31 @@ if delivery_environment == 'delivered'
     cache_path node['delivery']['workspace']['cache']
     action :push
   end
-end
+#end # <- Uncomment on Stage 2
 
-if delivery_environment == get_acceptance_environment
-  supermarket_site = node['delivery']['config']['delivery-truck']['publish']['supermarket']
-  cookbook_directory_supermarket = File.join(node['delivery']['workspace']['cache'], "cookbook-share")
+# In Delivered
+#
+# We want to share the build-cookbook to supermarket release it officially.
+#if delivery_environment == 'delivered' # <- Uncomment on Stage 2
 
-  # Start with empty string to pass if use_custom_supermarket_credentials?
-  # is false, then populate if true and override --user and --key in the
-  # knife supermarket command to superseed delivery_knife_rb.
-  custom_supermarket_credentials_options = ""
   if use_custom_supermarket_credentials?
-    secrets = get_project_secrets
-    if secrets['supermarket_user'].nil?
-      Chef::Log.fatal "If supermarket-custom-credentials is set to true, you must add supermarket_user to the secrets data bag."
-      raise RuntimeError, "supermarket-custom-credentials was true and supermarket_user was not defined in delivery secrets."
-    end
-    custom_supermarket_credentials_options << " -u #{secrets['supermarket_user']}"
-
-    if secrets['supermarket_key'].nil?
-      Chef::Log.fatal "If supermarket-custom-credentials is set to true, you must add supermarket_key to the secrets data bag."
-      raise RuntimeError, "supermarket-custom-credentials was true and supermarket_key was not defined in delivery secrets."
+    #secrets = get_project_secrets # <- Uncomment on Stage 2
+    if secrets['supermarket_user'].nil? || secrets['supermarket_user'].empty?
+      raise RuntimeError, 'If supermarket-custom-credentials is set to true, ' \
+                          'you must add supermarket_user to the secrets data bag.' \
     end
 
-    # write the supermarket_key to a file on disk since knife needs a file
-    supermarket_tmp_key_path = File.join(node['delivery']['workspace']['cache'], "supermarket.pem")
-    f = File.new(supermarket_tmp_key_path, "w+")
-    f.write(secrets['supermarket_key'])
-    f.close
-    custom_supermarket_credentials_options << " -k #{supermarket_tmp_key_path}"
+    if secrets['supermarket_key'].nil? || secrets['supermarket_key'].nil?
+      raise RuntimeError, 'If supermarket-custom-credentials is set to true, ' \
+                          'you must add supermarket_key to the secrets data bag.'
+    end
   end
 
-  directory cookbook_directory_supermarket do
-    recursive true
-    # We delete the cookbook-to-share staging directory each time to ensure we
-    # don't have out-of-date cookbooks hanging around from a previous build.
-    action [:delete, :create]
-  end
-
-  cookbook = DeliverySugar::Cookbook.new(node['delivery']['workspace']['repo'])
-  # Supermarket does not let you share a cookbook without a `metadata.rb`
-  # then running `berks vendor` is not an option otherwise we will ended
-  # up just with a `metadata.json`
-  #
-  # Lets link the real cookbook.
-  link ::File.join(cookbook_directory_supermarket, cookbook.name) do
-    to cookbook.path
-  end
-
-  execute "share_cookbook_to_supermarket_#{cookbook.name}" do
-    command "knife supermarket share #{cookbook.name} " \
-            "--config #{delivery_knife_rb} " \
-            "--supermarket-site #{supermarket_site} " \
-            "--cookbook-path #{cookbook_directory_supermarket}" \
-            "#{custom_supermarket_credentials_options}"
-    not_if "knife supermarket show #{cookbook.name} #{cookbook.version} " \
-            "--config #{delivery_knife_rb} " \
-            "--supermarket-site #{supermarket_site}"
+  delivery_supermarket 'share_delivery_truck_to_supermarket' do
+    site node['delivery']['config']['delivery-truck']['publish']['supermarket']
+    if use_custom_supermarket_credentials?
+      user secrets['supermarket_user']
+      key secrets['supermarket_key']
+    end
   end
 end
