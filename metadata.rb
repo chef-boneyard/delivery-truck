@@ -13,4 +13,4 @@ supports 'ubuntu', '>= 12.04'
 supports 'redhat', '>= 6.5'
 supports 'centos', '>= 6.5'
 
-depends 'delivery-sugar', '>= 1.1'
+depends 'delivery-sugar', '~> 1.1'
