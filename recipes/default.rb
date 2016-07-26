@@ -16,3 +16,29 @@
 #
 
 # Everything we need comes with chef-dk
+#
+# If the end-user is still using chef-dk 0.12 we would need to install
+# knife-supermarket gem since we made it part of DK in version 0.13
+#
+# Notify the user that they need to upgrade to the latest chef-dk since
+# we don't want to install gems that we already ship within DK.
+#
+# TODO: Remove this in Stage 2
+chef_gem 'knife-supermarket' do
+  compile_time false
+  only_if {
+    require 'chef-dk/version'
+    Gem::Version.new(::ChefDK::VERSION) < Gem::Version.new('0.14')
+  }
+  only_if { share_cookbook_to_supermarket? }
+  action :install
+  notifies :write, 'log[notify_user_about_supermarket_gem]'
+end
+
+log 'notify_user_about_supermarket_gem' do
+  message "\nGEM DEPRECATED: The `knife-supermarket` gem has been deprecated " \
+          'and the `knife supermarket` subcommands have been moved in to core ' \
+          'Chef. Please ensure you have ChefDK 0.14 or newer on your build nodes.'
+  level :warn
+  action :nothing
+end
