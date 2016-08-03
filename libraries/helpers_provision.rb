@@ -383,15 +383,24 @@ module DeliveryTruck
 
             # promote cookbooks
             (project_contents['cookbooks'] || []).each do |cookbook_name|
-              promoted_on_env.cookbook_versions[cookbook_name] =
-                promoted_from_env.cookbook_versions[cookbook_name]
+              if promoted_from_env.cookbook_versions[cookbook_name]
+                promoted_on_env.cookbook_versions[cookbook_name] = promoted_from_env.cookbook_versions[cookbook_name]
+              else
+                chef_log.warn("Unable to promote cookbook '#{cookbook_name}' because " +
+                              "it does not exist in #{promoted_from_env.name} environment.")
+              end
             end
 
             promoted_on_env.default_attributes['delivery']['project_artifacts'][project_name] = project_contents
 
             (project_contents['applications'] || []).each do |app_name|
-              promoted_on_env.override_attributes['applications'][app_name] =
-                promoted_from_env.override_attributes['applications'][app_name]
+              if promoted_from_env.override_attributes['applications'][app_name]
+                promoted_on_env.override_attributes['applications'][app_name] =
+                  promoted_from_env.override_attributes['applications'][app_name]
+              else
+                chef_log.warn("Unable to promote application '#{app_name}' because " +
+                              "it does not exist in #{promoted_from_env.name} environment.")
+              end
             end
           end
         end
