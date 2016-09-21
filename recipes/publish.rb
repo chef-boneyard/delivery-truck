@@ -32,7 +32,7 @@ if share_cookbook_to_supermarket?
                           'you must add supermarket_user to the secrets data bag.'
     end
 
-    if secrets['supermarket_key'].nil? || secrets['supermarket_key'].nil?
+    if secrets['supermarket_key'].nil? || secrets['supermarket_key'].empty?
       raise RuntimeError, 'If supermarket-custom-credentials is set to true, ' \
                           'you must add supermarket_key to the secrets data bag.'
     end
