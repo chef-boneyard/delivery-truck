@@ -22,13 +22,26 @@ changed_cookbooks.each do |cookbook|
       "#{foodcritic_excludes} #{cookbook.path}"
   end
 
-  # Run Rubocop against any cookbooks that were modified.
-  execute "lint_rubocop_#{cookbook.name}" do
-    command "rubocop #{cookbook.path}"
-    environment(
-      # workaround for https://github.com/bbatsov/rubocop/issues/2407
-      'USER' => (ENV['USER'] || 'dbuild')
-    )
-    only_if { File.exist?(File.join(cookbook.path, '.rubocop.yml')) }
+  if rubocop_enable?
+    # Run Rubocop against any cookbooks that were modified.
+    execute "lint_rubocop_#{cookbook.name}" do
+      command "rubocop #{cookbook.path}"
+      environment(
+        # workaround for https://github.com/bbatsov/rubocop/issues/2407
+        'USER' => (ENV['USER'] || 'dbuild')
+      )
+      only_if { File.exist?(File.join(cookbook.path, '.rubocop.yml')) }
+    end
+  else
+    # Run cookstyle against any cookbooks that were modified
+    if %[which cookstyle] != ""
+      execute "lint_cookstyle_#{cookbook.name}" do
+        command "cookstyle #{cookbook.path}"
+        environment(
+          # workaround for https://github.com/bbatsov/rubocop/issues/2407
+          'USER' => (ENV['USER'] || 'dbuild')
+        )
+      end
+    end
   end
 end

@@ -94,6 +94,16 @@ module DeliveryTruck
       rescue
         '-f correctness'
       end
+
+      # Based on the properties in the Delivery Config, determine if the user
+      # has elected to use rubocop instead of cookstyle
+      # @param node [Chef::Node] Chef Node object
+      # @return [String]
+      def rubocop_enable(node)
+        node['delivery']['config']['delivery-truck']['lint']['rubocop_enable']
+      rescue
+        false
+      end
     end
   end
 
@@ -112,6 +122,12 @@ module DeliveryTruck
     # Return the fail tags for foodcritic runs
     def foodcritic_fail_tags
       DeliveryTruck::Helpers::Lint.foodcritic_fail_tags(node)
+    end
+
+    # Check config.json for whether user wants to use Rubocop
+    # instead of cookstyle
+    def rubocop_enable
+      DeliveryTruck::Helpers::Lint.rubocop_enable(node)
     end
   end
 end
