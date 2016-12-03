@@ -98,7 +98,7 @@ module DeliveryTruck
       # Based on the properties in the Delivery Config, determine if the user
       # has elected to use rubocop instead of cookstyle
       # @param node [Chef::Node] Chef Node object
-      # @return [String]
+      # @return [TrueClass, FalseClass]
       def rubocop_enable(node)
         node['delivery']['config']['delivery-truck']['lint']['rubocop_enable']
       rescue
