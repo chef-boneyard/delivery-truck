@@ -30,9 +30,9 @@ changed_cookbooks.each do |cookbook|
       'USER' => (ENV['USER'] || 'dbuild')
     )
     live_stream true
-    only_if "cookstyle -v"
+    only_if 'cookstyle -v'
   end
-  
+
   # Run Rubocop against any cookbooks that were modified, if cookstyle is
   # not installed
   execute "lint_rubocop_#{cookbook.name}" do
@@ -42,6 +42,6 @@ changed_cookbooks.each do |cookbook|
       'USER' => (ENV['USER'] || 'dbuild')
     )
     only_if { File.exist?(File.join(cookbook.path, '.rubocop.yml')) }
-    not_if "cookstyle -v"
+    not_if 'cookstyle -v'
   end
 end
