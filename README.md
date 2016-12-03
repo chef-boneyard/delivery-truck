@@ -52,26 +52,6 @@ to `correctness`.
 }
 ```
 
-Additionally, the `lint` phase will run [cookstyle](https://github.com/chef/cookstyle), but if you would prefer
-to over-ride this behavior to use Rubocop instead, you can specify this in your
-`config.json` as follows:
-
-```json
-{
-  "version": "2",
-  "build_cookbook": {
-    "name": "delivery-truck",
-    "git": "https://github.com/chef-cookbooks/delivery-truck.git"
-  },
-  "delivery-truck": {
-    "lint": {
-      "enable_rubocop": true
-    }
-  }
-}
-```
-
-
 ### publish
 From the `publish` phase you can quickly and easily deploy cookbooks to
 your Chef Server, Supermarket Server and your entire project to a Github account.
