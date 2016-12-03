@@ -23,7 +23,7 @@ changed_cookbooks.each do |cookbook|
   end
 
   # Run cookstyle against any cookbooks that were modified
-    if %[which cookstyle] == "/usr/bin/cookstyle"
+    if %[which cookstyle] != nil
       execute "lint_cookstyle_#{cookbook.name}" do
         command "cookstyle #{cookbook.path}"
         environment(
