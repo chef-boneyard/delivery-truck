@@ -41,6 +41,7 @@ changed_cookbooks.each do |cookbook|
           # workaround for https://github.com/bbatsov/rubocop/issues/2407
           'USER' => (ENV['USER'] || 'dbuild')
         )
+        live_stream true
       end
     # end
   # end
