@@ -129,5 +129,6 @@ module DeliveryTruck
     def rubocop_enable
       DeliveryTruck::Helpers::Lint.rubocop_enable(node)
     end
+
   end
 end
