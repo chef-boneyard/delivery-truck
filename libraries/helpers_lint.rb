@@ -94,7 +94,6 @@ module DeliveryTruck
       rescue
         '-f correctness'
       end
-
     end
   end
 
@@ -114,6 +113,5 @@ module DeliveryTruck
     def foodcritic_fail_tags
       DeliveryTruck::Helpers::Lint.foodcritic_fail_tags(node)
     end
-
   end
 end
