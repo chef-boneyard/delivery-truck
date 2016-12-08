@@ -20,6 +20,7 @@
 search_terms = []
 get_all_project_cookbooks.each do |cookbook|
   search_terms << "recipes:#{cookbook.name}*"
+  search_terms << "recipe:#{cookbook.name}*"
 end
 
 unless search_terms.empty?
