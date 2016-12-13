@@ -4,16 +4,6 @@
     "name": "delivery-truck-build-cookbook",
     "path": ".delivery/build_cookbook"
   },
-  "job_dispatch": {
-    "version": "v2"
-  },
-  "delivery-truck": {
-    "publish": {
-      "chef_server": true,
-      "github": "chef-cookbooks/delivery-truck",
-      "supermarket": "https://supermarket.chef.io",
-      "supermarket-custom-credentials": true
-    },
     "lint": {
       "foodcritic": {
         "ignore_rules": ["FC009", "FC057", "FC058"]
@@ -28,4 +18,33 @@
     "publish"
   ],
   "dependencies": []
+    "job_dispatch": {
+       "version": "v2",
+       "filters" : {
+          "default" : {
+            "os" : ["linux"],
+            "platform" : ["ubuntu"],
+            "platform_version": ["16.04"]
+          }
+       },
+    "delivery-truck": {
+        "publish": {
+            "chef_server": true,
+            "github": "chef-cookbooks/delivery-truck",
+            "supermarket": "https://supermarket.chef.io",
+            "supermarket-custom-credentials": true
+        },
+        "lint": {
+          "foodcritic": {
+             "ignore_rules": ["FC009", "FC057", "FC058"]
+          }
+       }
+    },
+    "skip_phases": [
+        "security",
+        "smoke",
+        "quality",
+        "functional",
+        "publish"
+    ]
 }
