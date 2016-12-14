@@ -94,6 +94,17 @@ module DeliveryTruck
       rescue
         '-f correctness'
       end
+      # Read the Delivery Config to see if the user has indicated they want to
+      # run cookstyle tests on their cookbook
+      #
+      # @param [Chef::Node] Chef Node object
+      # @return [TrueClass, FalseClass]
+      def cookstyle_enabled?(node)
+        node['delivery']['config']['delivery-truck']['lint']['enable_cookstyle']
+      rescue
+        false
+      end
+
     end
   end
 
@@ -112,6 +123,11 @@ module DeliveryTruck
     # Return the fail tags for foodcritic runs
     def foodcritic_fail_tags
       DeliveryTruck::Helpers::Lint.foodcritic_fail_tags(node)
+    end
+
+    # Check config.json for whether user wants to share to Supermarket
+    def cookstyle_enabled?
+      DeliveryTruck::Helpers::Lint.cookstyle_enabled?(node)
     end
   end
 end

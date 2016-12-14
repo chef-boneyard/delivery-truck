@@ -52,6 +52,30 @@ to `correctness`.
 }
 ```
 
+By default, the `lint` phase will run [RuboCop](http://batsov.com/rubocop/), but
+only on cookbooks that have a `.rubocop.yml` file.
+
+You can over-ride this behavior to use [cookstyle](https://github.com/chef/cookstyle)
+instead of RuboCop by enabling it in your `config.json`.
+
+```json
+{
+  "version": "2",
+  "build_cookbook": {
+    "name": "delivery-truck",
+    "git": "https://github.com/chef-cookbooks/delivery-truck.git"
+  },
+  "delivery-truck": {
+    "lint": {
+      "enable_cookstyle": true
+    }
+  }
+}
+```
+
+*Note: To enable cookstyle, your builders/runners must be running ChefDK version
+v0.14 or higher.*
+
 ### publish
 From the `publish` phase you can quickly and easily deploy cookbooks to
 your Chef Server, Supermarket Server and your entire project to a Github account.
