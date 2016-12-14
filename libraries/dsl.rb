@@ -20,6 +20,7 @@ require_relative 'helpers_functional'
 require_relative 'helpers_lint'
 require_relative 'helpers_unit'
 require_relative 'helpers_publish'
+require_relative 'helpers_quality'
 require_relative 'helpers_syntax'
 require_relative 'helpers_deploy'
 

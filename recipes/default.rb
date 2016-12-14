@@ -42,3 +42,10 @@ log 'notify_user_about_supermarket_gem' do
   level :warn
   action :nothing
 end
+
+# If the user user wants to run test kitchen during the quality phase
+chef_gem 'kitchen-ec2' do
+  compile_time false
+  only_if { run_test_kitchen? }
+  action :install
+end
