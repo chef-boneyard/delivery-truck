@@ -1,32 +1,12 @@
 {
-  "version": "2",
-  "build_cookbook": {
-    "name": "delivery-truck-build-cookbook",
-    "path": ".delivery/build_cookbook"
-  },
-    "lint": {
-      "foodcritic": {
-        "ignore_rules": ["FC009", "FC057", "FC058"]
-      }
-    }
-  },
-  "skip_phases": [
-    "security",
-    "smoke",
-    "quality",
-    "functional",
-    "publish"
-  ],
-  "dependencies": []
+    "version": "2",
+    "build_cookbook": {
+        "name": "delivery-truck-build-cookbook",
+        "path": ".delivery/build_cookbook"
+    },
     "job_dispatch": {
-       "version": "v2",
-       "filters" : {
-          "default" : {
-            "os" : ["linux"],
-            "platform" : ["ubuntu"],
-            "platform_version": ["16.04"]
-          }
-       },
+        "version": "v2"
+    },
     "delivery-truck": {
         "publish": {
             "chef_server": true,
@@ -35,16 +15,10 @@
             "supermarket-custom-credentials": true
         },
         "lint": {
-          "foodcritic": {
-             "ignore_rules": ["FC009", "FC057", "FC058"]
-          }
-       }
+            "foodcritic": {
+                "ignore_rules": ["FC009", "FC057", "FC058"]
+            }
+        }
     },
-    "skip_phases": [
-        "security",
-        "smoke",
-        "quality",
-        "functional",
-        "publish"
-    ]
+    "dependencies": []
 }
