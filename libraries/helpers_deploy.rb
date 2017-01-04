@@ -31,9 +31,9 @@ module DeliveryTruck
         'recipes:*push-jobs*'
       end
 
-      def delivery_chef_server_search(type, query)
+      def delivery_chef_server_search(type, query, delivery_knife_rb)
         results = []
-        DeliverySugar::ChefServer.new.with_server_config do
+        DeliverySugar::ChefServer.new(delivery_knife_rb).with_server_config do
           ::Chef::Search::Query.new.search(type, query) { |o| results << o }
         end
         results
@@ -43,7 +43,7 @@ module DeliveryTruck
 
   module DSL
     def delivery_chef_server_search(type, query)
-      DeliveryTruck::Helpers::Deploy.delivery_chef_server_search(type, query)
+      DeliveryTruck::Helpers::Deploy.delivery_chef_server_search(type, query, delivery_knife_rb)
     end
 
     # Check config.json to get deployment search query
