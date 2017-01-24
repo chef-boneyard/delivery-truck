@@ -21,5 +21,6 @@ changed_cookbooks.each do |cookbook|
     cwd cookbook.path
     command "rspec --format documentation --color"
     only_if { has_spec_tests?(cookbook.path) }
+    live_stream true
   end
 end
