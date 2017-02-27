@@ -3,22 +3,22 @@ require 'spec_helper'
 describe "delivery-truck::unit" do
   let(:chef_run) do
     ChefSpec::SoloRunner.new do |node|
-      node.set['delivery']['workspace']['root'] = '/tmp'
-      node.set['delivery']['workspace']['repo'] = '/tmp/repo'
-      node.set['delivery']['workspace']['chef'] = '/tmp/chef'
-      node.set['delivery']['workspace']['cache'] = '/tmp/cache'
+      node.default['delivery']['workspace']['root'] = '/tmp'
+      node.default['delivery']['workspace']['repo'] = '/tmp/repo'
+      node.default['delivery']['workspace']['chef'] = '/tmp/chef'
+      node.default['delivery']['workspace']['cache'] = '/tmp/cache'
 
-      node.set['delivery']['change']['enterprise'] = 'Chef'
-      node.set['delivery']['change']['organization'] = 'Delivery'
-      node.set['delivery']['change']['project'] = 'Secret'
-      node.set['delivery']['change']['pipeline'] = 'master'
-      node.set['delivery']['change']['change_id'] = 'aaaa-bbbb-cccc'
-      node.set['delivery']['change']['patchset_number'] = '1'
-      node.set['delivery']['change']['stage'] = 'union'
-      node.set['delivery']['change']['phase'] = 'deploy'
-      node.set['delivery']['change']['git_url'] = 'https://git.co/my_project.git'
-      node.set['delivery']['change']['sha'] = '0123456789abcdef'
-      node.set['delivery']['change']['patchset_branch'] = 'mypatchset/branch'
+      node.default['delivery']['change']['enterprise'] = 'Chef'
+      node.default['delivery']['change']['organization'] = 'Delivery'
+      node.default['delivery']['change']['project'] = 'Secret'
+      node.default['delivery']['change']['pipeline'] = 'master'
+      node.default['delivery']['change']['change_id'] = 'aaaa-bbbb-cccc'
+      node.default['delivery']['change']['patchset_number'] = '1'
+      node.default['delivery']['change']['stage'] = 'union'
+      node.default['delivery']['change']['phase'] = 'deploy'
+      node.default['delivery']['change']['git_url'] = 'https://git.co/my_project.git'
+      node.default['delivery']['change']['sha'] = '0123456789abcdef'
+      node.default['delivery']['change']['patchset_branch'] = 'mypatchset/branch'
     end.converge(described_recipe)
   end
 

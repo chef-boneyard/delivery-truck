@@ -3,22 +3,22 @@ require 'spec_helper'
 describe "delivery-truck::publish" do
   let(:chef_run) do
     ChefSpec::SoloRunner.new do |node|
-      node.set['delivery']['workspace']['root'] = '/tmp'
-      node.set['delivery']['workspace']['repo'] = '/tmp/repo'
-      node.set['delivery']['workspace']['chef'] = '/tmp/chef'
-      node.set['delivery']['workspace']['cache'] = '/tmp/cache'
+      node.default['delivery']['workspace']['root'] = '/tmp'
+      node.default['delivery']['workspace']['repo'] = '/tmp/repo'
+      node.default['delivery']['workspace']['chef'] = '/tmp/chef'
+      node.default['delivery']['workspace']['cache'] = '/tmp/cache'
 
-      node.set['delivery']['change']['enterprise'] = 'Chef'
-      node.set['delivery']['change']['organization'] = 'Delivery'
-      node.set['delivery']['change']['project'] = 'Secret'
-      node.set['delivery']['change']['pipeline'] = 'master'
-      node.set['delivery']['change']['change_id'] = 'aaaa-bbbb-cccc'
-      node.set['delivery']['change']['patchset_number'] = '1'
-      node.set['delivery']['change']['stage'] = 'acceptance'
-      node.set['delivery']['change']['phase'] = 'publish'
-      node.set['delivery']['change']['git_url'] = 'https://git.co/my_project.git'
-      node.set['delivery']['change']['sha'] = '0123456789abcdef'
-      node.set['delivery']['change']['patchset_branch'] = 'mypatchset/branch'
+      node.default['delivery']['change']['enterprise'] = 'Chef'
+      node.default['delivery']['change']['organization'] = 'Delivery'
+      node.default['delivery']['change']['project'] = 'Secret'
+      node.default['delivery']['change']['pipeline'] = 'master'
+      node.default['delivery']['change']['change_id'] = 'aaaa-bbbb-cccc'
+      node.default['delivery']['change']['patchset_number'] = '1'
+      node.default['delivery']['change']['stage'] = 'acceptance'
+      node.default['delivery']['change']['phase'] = 'publish'
+      node.default['delivery']['change']['git_url'] = 'https://git.co/my_project.git'
+      node.default['delivery']['change']['sha'] = '0123456789abcdef'
+      node.default['delivery']['change']['patchset_branch'] = 'mypatchset/branch'
     end
   end
 
@@ -69,7 +69,7 @@ describe "delivery-truck::publish" do
     before do
       allow(DeliveryTruck::Helpers::Publish).to receive(:share_cookbook_to_supermarket?)
         .and_return(true)
-      chef_run.node.set['delivery']['config']['delivery-truck']['publish'][
+      chef_run.node.default['delivery']['config']['delivery-truck']['publish'][
         'supermarket'
       ] = 'https://supermarket.chef.io'
     end
@@ -138,7 +138,7 @@ describe "delivery-truck::publish" do
 
     context 'when supermarket-custom-credentials is specified' do
       before do
-        chef_run.node.set['delivery']['config']['delivery-truck']['publish'][
+        chef_run.node.default['delivery']['config']['delivery-truck']['publish'][
           'supermarket-custom-credentials'
         ] = true
         allow_any_instance_of(Chef::Recipe).to receive(:get_project_secrets)
@@ -248,7 +248,7 @@ describe "delivery-truck::publish" do
     before do
       allow(DeliveryTruck::Helpers::Publish).to receive(:upload_cookbook_to_chef_server?)
         .and_return(true)
-      chef_run.node.set['delivery']['config']['delivery-truck']['publish']['chef_server'] = true
+      chef_run.node.default['delivery']['config']['delivery-truck']['publish']['chef_server'] = true
     end
 
     context 'and no cookbooks changed' do
@@ -365,7 +365,7 @@ describe "delivery-truck::publish" do
       allow_any_instance_of(Chef::Recipe).to receive(:get_project_secrets)
         .and_return(secrets)
       stub_command("git remote --verbose | grep ^github").and_return(false)
-      chef_run.node.set['delivery']['config']['delivery-truck']['publish']['github'] = 'spec/spec'
+      chef_run.node.default['delivery']['config']['delivery-truck']['publish']['github'] = 'spec/spec'
       chef_run.converge(described_recipe)
     end
 
@@ -398,7 +398,7 @@ describe "delivery-truck::publish" do
     before do
       allow_any_instance_of(Chef::Recipe).to receive(:get_project_secrets)
         .and_return(secrets)
-      chef_run.node.set['delivery']['config']['delivery-truck']['publish']['git'] = 'ssh://git@stash:2222/spec/spec.git'
+      chef_run.node.default['delivery']['config']['delivery-truck']['publish']['git'] = 'ssh://git@stash:2222/spec/spec.git'
       chef_run.converge(described_recipe)
     end
 
