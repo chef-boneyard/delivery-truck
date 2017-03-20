@@ -35,6 +35,9 @@ describe "delivery-truck::deploy" do
     "(#{recipe_list}) AND chef_environment:union AND recipes:*push-jobs*"
   end
   let(:node_list) { [MyFakeNode.new("node1"), MyFakeNode.new("node2")] }
+  let(:delivery_knife_rb) do
+    "/var/opt/delivery/workspace/.chef/knife.rb"
+  end
 
   context "when a single cookbook has been modified" do
     before do
@@ -45,7 +48,7 @@ describe "delivery-truck::deploy" do
     let(:recipe_list) { 'recipes:julia*' }
 
     it "deploy only that cookbook" do
-      expect(DeliveryTruck::Helpers::Deploy).to receive(:delivery_chef_server_search).with(:node, search_query).and_return(node_list)
+      expect(DeliveryTruck::Helpers::Deploy).to receive(:delivery_chef_server_search).with(:node, search_query, delivery_knife_rb).and_return(node_list)
       expect(chef_run).to dispatch_delivery_push_job("deploy_Secret").with(
                             :command => 'chef-client',
                             :nodes => node_list
@@ -62,7 +65,7 @@ describe "delivery-truck::deploy" do
       end
       it "deploy only that cookbook with the special search query" do
         expect(DeliveryTruck::Helpers::Deploy).to receive(:delivery_chef_server_search)
-          .with(:node, search_query)
+          .with(:node, search_query, delivery_knife_rb)
           .and_return(node_list)
         expect(chef_run).to dispatch_delivery_push_job("deploy_Secret").with(
                               :command => 'chef-client',
