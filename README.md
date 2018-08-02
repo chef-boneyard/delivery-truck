@@ -120,7 +120,7 @@ should have a key named git)
 ```
 
 ### deploy
-By default deploy will trigger a `chef-client` run thought push-jobs to all
+By default deploy will trigger a `chef-client` run through push-jobs to all
 the nodes that belong to the current environment in delivery and have the
 modified cookbook(s) in their run_list. You can customize the search query.
 
