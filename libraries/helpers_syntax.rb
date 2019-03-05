@@ -54,6 +54,9 @@ module DeliveryTruck
           Policyfile\.rb
           Policyfile\.lock\.json
           recipes\/.*
+          resources\/.*
+          providers\/.*
+          definitions\/.*
           attributes\/.*
           libraries\/.*
           files\/.*

@@ -29,6 +29,9 @@ The version must be updated when any of the following files are modified:
    Policyfile.rb
    Policyfile.lock.json
    recipes/.*
+   resources/.*
+   providers/.*
+   definitions/.*
    attributes/.*
    libraries/.*
    files/.*
