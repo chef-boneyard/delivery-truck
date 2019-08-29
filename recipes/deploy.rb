@@ -35,5 +35,7 @@ unless search_terms.empty?
   delivery_push_job "deploy_#{node['delivery']['change']['project']}" do
     command 'chef-client'
     nodes my_nodes
+    retries 5
+    retry_delay 10
   end
 end
