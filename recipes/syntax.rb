@@ -28,10 +28,13 @@ The version must be updated when any of the following files are modified:
    Berksfile.lock
    Policyfile.rb
    Policyfile.lock.json
-   recipes/.*
    attributes/.*
-   libraries/.*
+   definitions/.*
    files/.*
+   libraries/.*
+   providers/.*
+   recipes/.*
+   resources/.*
    templates/.*}
   end
 
