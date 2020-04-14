@@ -63,7 +63,7 @@ module DeliveryTruck
           templates\/.*
         ).join('|')
 
-        clean_relative_dir = relative_dir == "." ? "" : Regexp.escape("#{relative_dir}/")
+        clean_relative_dir = relative_dir == '.' ? '' : Regexp.escape("#{relative_dir}/")
 
         if modified_files.any? { |f| /^#{clean_relative_dir}(#{files_to_check})/ =~ f }
           base = change.merge_sha.empty? ? "origin/#{change.pipeline}" : "#{change.merge_sha}~1"
@@ -81,7 +81,6 @@ module DeliveryTruck
   end
 
   module DSL
-
     def bumped_version?(path)
       DeliveryTruck::Helpers::Syntax.bumped_version?(path, node)
     end

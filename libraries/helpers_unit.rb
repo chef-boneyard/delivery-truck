@@ -31,7 +31,6 @@ module DeliveryTruck
   end
 
   module DSL
-
     # Does cookbook have spec tests?
     def has_spec_tests?(cookbook_path)
       DeliveryTruck::Helpers::Unit.has_spec_tests?(cookbook_path)

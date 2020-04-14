@@ -91,7 +91,7 @@ module DeliveryTruck
     end
 
     # Check config.json for whether user wants to push to a Git Server
-     def push_repo_to_git?
+    def push_repo_to_git?
       DeliveryTruck::Helpers::Publish.push_repo_to_git?(node)
     end
 

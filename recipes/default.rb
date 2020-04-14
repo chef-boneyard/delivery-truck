@@ -26,10 +26,10 @@
 # TODO: Remove this in Stage 2
 chef_gem 'knife-supermarket' do
   compile_time false
-  only_if {
+  only_if do
     require 'chef-dk/version'
     Gem::Version.new(::ChefDK::VERSION) < Gem::Version.new('0.14')
-  }
+  end
   only_if { share_cookbook_to_supermarket? }
   action :install
   notifies :write, 'log[notify_user_about_supermarket_gem]'

@@ -64,7 +64,7 @@ module DeliveryTruck
         promote_cookbook_versions(union_env, acceptance_env)
 
         if acceptance_env.override_attributes && !acceptance_env.override_attributes.empty? &&
-           acceptance_env.override_attributes['applications'] != nil
+           !acceptance_env.override_attributes['applications'].nil?
           union_apps = union_env.override_attributes['applications']
           acceptance_env.override_attributes['applications'].merge!(union_apps) unless union_apps.nil?
         else
@@ -75,7 +75,7 @@ module DeliveryTruck
         # Overwrite Acceptance Pins For Project Related Cookbooks and Apps #
         ####################################################################
         cookbook_pinnings.each do |cb, pin|
-          chef_log.info("Setting version pinning for #{cb} to what we" +
+          chef_log.info("Setting version pinning for #{cb} to what we" \
                          " remembered earlier: (#{pin})")
           acceptance_env.cookbook(cb, pin)
         end
@@ -86,7 +86,7 @@ module DeliveryTruck
         end
 
         app_pinnings.each do |app, version|
-          chef_log.info("Setting version for app #{app} to what we" +
+          chef_log.info("Setting version for app #{app} to what we" \
                          " remembered earlier: (#{version})")
           acceptance_env.override_attributes['applications'][app] = version
         end
@@ -173,7 +173,7 @@ module DeliveryTruck
       # so we promote all cookbook_versions, default_attributes, and
       # override_attributes (not just for the current project, but everything
       # in from_env).
-      def handle_delivered_pinnings(node)
+      def handle_delivered_pinnings(_node)
         to_env_name = 'delivered'
         from_env_name = 'rehearsal'
 
@@ -211,7 +211,7 @@ module DeliveryTruck
       def fetch_or_create_environment(env_name)
         env = Chef::Environment.load(env_name)
       rescue Net::HTTPServerException => http_e
-        raise http_e unless http_e.response.code == "404"
+        raise http_e unless http_e.response.code == '404'
         chef_log.info("Creating Environment #{env_name}")
         env = Chef::Environment.new()
         env.name(env_name)
@@ -276,7 +276,7 @@ module DeliveryTruck
         pinnings = {}
         set_project_cookbooks(node)
 
-        chef_log.info("Checking #{env.name} pinnings for" +
+        chef_log.info("Checking #{env.name} pinnings for" \
                       " #{node['delivery']['project_cookbooks']}")
         node['delivery']['project_cookbooks'].each do |pin|
           if env.cookbook_versions[pin]
@@ -295,7 +295,7 @@ module DeliveryTruck
         pinnings = {}
         set_project_apps(node)
 
-        chef_log.info("Checking #{env.name} apps for" +
+        chef_log.info("Checking #{env.name} apps for" \
                        " #{node['delivery']['project_apps']}")
         node['delivery']['project_apps'].each do |app|
           if env.override_attributes['applications'] &&
@@ -324,11 +324,10 @@ module DeliveryTruck
         all_project_cookbooks.each do |pin|
           from_v = promoted_from_env.cookbook_versions[pin]
           to_v = promoted_on_env.cookbook_versions[pin]
-          if from_v
-            chef_log.info("Promoting #{pin} @ #{from_v} from #{promoted_from_env.name}" +
-                          " to #{promoted_on_env.name} was @ #{to_v}.")
-            promoted_on_env.cookbook_versions[pin] = from_v
-          end
+          next unless from_v
+          chef_log.info("Promoting #{pin} @ #{from_v} from #{promoted_from_env.name}" \
+                        " to #{promoted_on_env.name} was @ #{to_v}.")
+          promoted_on_env.cookbook_versions[pin] = from_v
         end
       end
 
@@ -347,11 +346,10 @@ module DeliveryTruck
         node['delivery']['project_apps'].each do |app|
           from_v = promoted_from_env.override_attributes['applications'][app]
           to_v = promoted_on_env.override_attributes['applications'][app]
-          if from_v
-            chef_log.info("Promoting #{app} @ #{from_v} from #{promoted_from_env.name}" +
-                          " to #{promoted_on_env.name} was @ #{to_v}.")
-            promoted_on_env.override_attributes['applications'][app] = from_v
-          end
+          next unless from_v
+          chef_log.info("Promoting #{app} @ #{from_v} from #{promoted_from_env.name}" \
+                        " to #{promoted_on_env.name} was @ #{to_v}.")
+          promoted_on_env.override_attributes['applications'][app] = from_v
         end
       end
 
@@ -376,8 +374,8 @@ module DeliveryTruck
 
         promoted_from_env.default_attributes['delivery']['project_artifacts'].each do |project_name, project_contents|
           if blocked.include?(project_name)
-            chef_log.info("Project #{project_name} is currently blocked." +
-                          "not promoting its cookbooks or applications")
+            chef_log.info("Project #{project_name} is currently blocked." \
+                          'not promoting its cookbooks or applications')
           else
             chef_log.info("Promoting cookbooks and applications for project #{project_name}")
 
@@ -386,7 +384,7 @@ module DeliveryTruck
               if promoted_from_env.cookbook_versions[cookbook_name]
                 promoted_on_env.cookbook_versions[cookbook_name] = promoted_from_env.cookbook_versions[cookbook_name]
               else
-                chef_log.warn("Unable to promote cookbook '#{cookbook_name}' because " +
+                chef_log.warn("Unable to promote cookbook '#{cookbook_name}' because " \
                               "it does not exist in #{promoted_from_env.name} environment.")
               end
             end
@@ -398,7 +396,7 @@ module DeliveryTruck
                 promoted_on_env.override_attributes['applications'][app_name] =
                   promoted_from_env.override_attributes['applications'][app_name]
               else
-                chef_log.warn("Unable to promote application '#{app_name}' because " +
+                chef_log.warn("Unable to promote application '#{app_name}' because " \
                               "it does not exist in #{promoted_from_env.name} environment.")
               end
             end

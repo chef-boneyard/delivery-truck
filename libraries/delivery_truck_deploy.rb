@@ -47,7 +47,7 @@ class Chef
             search << " AND chef_environment:#{delivery_environment}" unless search =~ /chef_environment/
 
             # We will search only on nodes that has push-jobs
-            search << " AND recipes:push-jobs*"
+            search << ' AND recipes:push-jobs*'
           end
         end
       end
@@ -63,8 +63,8 @@ class Chef
       def deploy_ccr
         origin = timeout
 
-        ::Chef::Log.info("Will wait up to #{timeout/60} minutes for " +
-                         "deployment to complete...")
+        ::Chef::Log.info("Will wait up to #{timeout / 60} minutes for " \
+                         'deployment to complete...')
 
         begin
           # Sleep unless this is our first time through the loop.
@@ -76,11 +76,11 @@ class Chef
 
           if !nodes || nodes.empty?
             # We didn't find any node to deploy. Lets skip this phase!
-            ::Chef::Log.info("No dependency/app nodes found. Skipping phase!")
+            ::Chef::Log.info('No dependency/app nodes found. Skipping phase!')
             break
           end
 
-          node_names = nodes.map { |n| n.name }
+          node_names = nodes.map(&:name)
 
           # We take out the build node we are running on
           node_names.delete(node.name)
@@ -90,27 +90,27 @@ class Chef
           chef_server_rest = Chef::REST.new(Chef::Config[:chef_server_url])
 
           # Kick off command via push.
-          ::Chef::Log.info("Triggering #{new_resource.command} on dependency nodes " +
-                           "with Chef Push Jobs...")
+          ::Chef::Log.info("Triggering #{new_resource.command} on dependency nodes " \
+                           'with Chef Push Jobs...')
 
           req = {
               'command' => new_resource.command,
-              'nodes' => node_names
+              'nodes' => node_names,
           }
           resp = chef_server_rest.post('/pushy/jobs', req)
           job_uri = resp['uri']
 
           unless job_uri
             # We were not able to start the push job.
-            ::Chef::Log.info("Could not start push job. " +
+            ::Chef::Log.info('Could not start push job. ' \
                              "Will try again in #{SLEEP_TIME} seconds...")
             next
           end
 
-          ::Chef::Log.info("Started push job with id: #{job_uri[-32,32]}")
-          previous_state = "initialized"
+          ::Chef::Log.info("Started push job with id: #{job_uri[-32, 32]}")
+          previous_state = 'initialized'
           begin
-            sleep(PUSH_SLEEP_TIME) unless previous_state == "initialized"
+            sleep(PUSH_SLEEP_TIME) unless previous_state == 'initialized'
             job = chef_server_rest.get_rest(job_uri)
             case job['status']
             when 'new'
@@ -146,15 +146,15 @@ class Chef
             ## Check for success
             if finished && job['nodes']['succeeded'] &&
                job['nodes']['succeeded'].size == nodes.size
-              ::Chef::Log.info("Deployment complete in " +
-                                "#{(origin-timeout)/60} minutes. " +
-                                "Deploy Successful!")
+              ::Chef::Log.info('Deployment complete in ' \
+                                "#{(origin - timeout) / 60} minutes. " \
+                                'Deploy Successful!')
               break
             elsif finished == true && job['nodes']['failed'] || job['nodes']['unavailable']
-              ::Chef::Log.info("Deployment failed on the following nodes with status: ")
+              ::Chef::Log.info('Deployment failed on the following nodes with status: ')
               ::Chef::Log.info(" => Failed: #{job['nodes']['failed']}.") if job['nodes']['failed']
               ::Chef::Log.info(" => Unavailable: #{job['nodes']['unavailable']}.") if job['nodes']['unavailable']
-              raise "Deployment failed! Not all nodes were successful."
+              raise 'Deployment failed! Not all nodes were successful.'
             end
 
             dec_timeout(PUSH_SLEEP_TIME)
@@ -165,9 +165,9 @@ class Chef
           ## If we make it here and we are past our timeout the job timed out
           ## waiting for the push job.
           if timeout <= 0
-            ::Chef::Log.error("Timed out after #{origin/60} minutes waiting "+
-                              "for push job. Deploy Failed...")
-            raise "Timeout waiting for deploy..."
+            ::Chef::Log.error("Timed out after #{origin / 60} minutes waiting " \
+                              'for push job. Deploy Failed...')
+            raise 'Timeout waiting for deploy...'
           end
 
           dec_timeout(SLEEP_TIME)
@@ -175,9 +175,9 @@ class Chef
 
         ## If we make it here and we are past our timeout the job timed out.
         if timeout <= 0
-          ::Chef::Log.error("Timed out after #{origin/60} minutes waiting "+
-                            "for deployment to complete. Deploy Failed...")
-          raise "Timeout waiting for deploy..."
+          ::Chef::Log.error("Timed out after #{origin / 60} minutes waiting " \
+                            'for deployment to complete. Deploy Failed...')
+          raise 'Timeout waiting for deploy...'
         end
 
         # we survived
@@ -190,17 +190,16 @@ end
 class Chef
   class Resource
     class DeliveryTruckDeploy < Chef::Resource::LWRPBase
-
       actions :run
 
       default_action :run
 
-      attribute :command, :kind_of => String,   :default => 'chef-client'
-      attribute :timeout, :kind_of => Integer,  :default => 30 * 60 # 30 mins
-      attribute :search,  :kind_of => String
+      attribute :command, kind_of: String,   default: 'chef-client'
+      attribute :timeout, kind_of: Integer,  default: 30 * 60 # 30 mins
+      attribute :search,  kind_of: String
 
       self.resource_name = :delivery_truck_deploy
-      def initialize(name, run_context=nil)
+      def initialize(name, run_context = nil)
         super
         @provider = Chef::Provider::DeliveryTruckDeploy
       end
