@@ -1,26 +1,50 @@
+*.rbc
+.config
+InstalledFiles
+lib/bundler/man
+pkg
+test/tmp
+test/version_tmp
+tmp
+_Store
 *~
 *#
 .#*
 \#*#
-.*.sw[a-z]
 *.un~
 *.tmp
 *.bk
 *.bkup
-.kitchen.local.yml
-.rspec
 
-.bundle/
-.cache/
-.delivery/cli.toml
-.kitchen/
+# editor temp files
+.idea
+.*.sw[a-z]
+
+# ruby/bundler files
+.ruby-version
+.ruby-gemset
+.rvmrc
+Gemfile.lock
+.bundle
+*.gem
+coverage
+spec/reports
+
+# YARD / rdoc artifacts
+.yardoc
+_yardoc
+doc/
+rdoc
+
+# chef infra stuff
+Berksfile.lock
+.kitchen
+kitchen.local.yml
+vendor/
+.coverage/
+.zero-knife.rb
+Policyfile.lock.json
+
+# vagrant stuff
 .vagrant/
 .vagrant.d/
-bin/
-tmp/
-vendor/
-
-.delivery/helpers/
-.delivery/live.json
-.delivery/sandbox.json
-Berksfile.lock
