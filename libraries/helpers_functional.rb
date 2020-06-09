@@ -31,7 +31,6 @@ module DeliveryTruck
   end
 
   module DSL
-
     # Can we find Test Kitchen files?
     def has_kitchen_tests?(cookbook_path)
       DeliveryTruck::Helpers::Functional.has_kitchen_tests?(cookbook_path)

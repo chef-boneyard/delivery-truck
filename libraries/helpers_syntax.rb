@@ -81,7 +81,6 @@ module DeliveryTruck
   end
 
   module DSL
-
     def bumped_version?(path)
       DeliveryTruck::Helpers::Syntax.bumped_version?(path, node)
     end

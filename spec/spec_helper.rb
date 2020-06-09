@@ -40,7 +40,6 @@ require 'chefspec/berkshelf'
 
 module ChefSpec
   class SoloRunner
-
     def initialize(options = {})
       @options = with_default_options(options)
 

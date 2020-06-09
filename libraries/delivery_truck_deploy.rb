@@ -190,7 +190,6 @@ end
 class Chef
   class Resource
     class DeliveryTruckDeploy < Chef::Resource::LWRPBase
-
       actions :run
 
       default_action :run

@@ -17,7 +17,7 @@
 
 # TODO: This is a temporary workaround; ultimately, this should be
 # handled either by delivery_build or (preferably) the server itself.
-ruby_block "copy env from prior to current" do
+ruby_block 'copy env from prior to current' do
   block do
     with_server_config do
       stage_name = node['delivery']['change']['stage']

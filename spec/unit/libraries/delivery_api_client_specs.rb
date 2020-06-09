@@ -16,24 +16,23 @@ describe DeliveryTruck::DeliveryApiClient do
   let(:change_json) do
     JSON.generate({
       'delivery_api_url' => api_url,
-      'token' => api_token
+      'token' => api_token,
     })
   end
 
   let(:expected_headers) do
     {
        'chef-delivery-token' => api_token,
-       'chef-delivery-user'  => 'builder'
+       'chef-delivery-user'  => 'builder',
     }
   end
 
   let(:http_client) { double 'Net::HTTP' }
 
-
   before(:each) do
-    allow(File).
-      to receive(:read).
-      and_return(change_json)
+    allow(File)
+      .to receive(:read)
+      .and_return(change_json)
   end
 
   describe '.blocked_projects' do

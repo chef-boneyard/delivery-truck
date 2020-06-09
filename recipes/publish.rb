@@ -53,7 +53,7 @@ if share_cookbook_to_supermarket?
 end
 
 # Create the upload directory where cookbooks to be uploaded will be staged
-cookbook_directory = File.join(node['delivery']['workspace']['cache'], "cookbook-upload")
+cookbook_directory = File.join(node['delivery']['workspace']['cache'], 'cookbook-upload')
 directory cookbook_directory do
   recursive true
   # We delete the cookbook upload staging directory each time to ensure we

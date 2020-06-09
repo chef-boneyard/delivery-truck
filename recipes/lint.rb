@@ -42,7 +42,7 @@ changed_cookbooks.each do |cookbook|
         'USER' => (ENV['USER'] || 'dbuild')
       )
       live_stream true
-      only_if { File.exist?(File.join(cookbook.path, '.rubocop.yml')) }
+      only_if { ::File.exist?(File.join(cookbook.path, '.rubocop.yml')) }
     end
   end
 end
