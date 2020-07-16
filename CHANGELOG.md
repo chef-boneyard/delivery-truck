@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- resolved cookstyle error: recipes/default.rb:31:22 warning: `ChefDeprecations/ChefDKGenerators`
 - resolved cookstyle error: libraries/delivery_api_client.rb:36:24 convention: `Style/StringLiterals`
 - resolved cookstyle error: libraries/delivery_api_client.rb:42:7 convention: `Style/EmptyCaseCondition`
 - resolved cookstyle error: libraries/delivery_api_client.rb:43:27 convention: `Style/StringLiterals`
