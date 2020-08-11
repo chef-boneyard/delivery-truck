@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- resolved cookstyle error: libraries/delivery_truck_deploy.rb:161:11 convention: `Layout/IndentationConsistency`
+- resolved cookstyle error: libraries/delivery_truck_deploy.rb:161:15 warning: `Lint/Loop`
+- resolved cookstyle error: libraries/delivery_truck_deploy.rb:174:13 warning: `Lint/Loop`
+- resolved cookstyle error: libraries/delivery_truck_deploy.rb:175:9 convention: `Layout/IndentationConsistency`
 - resolved cookstyle error: recipes/default.rb:31:22 warning: `ChefDeprecations/ChefDKGenerators`
 - resolved cookstyle error: libraries/delivery_api_client.rb:36:24 convention: `Style/StringLiterals`
 - resolved cookstyle error: libraries/delivery_api_client.rb:42:7 convention: `Style/EmptyCaseCondition`

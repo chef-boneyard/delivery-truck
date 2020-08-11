@@ -66,7 +66,7 @@ class Chef
         ::Chef::Log.info("Will wait up to #{timeout / 60} minutes for " \
                          'deployment to complete...')
 
-        begin
+        loop do
           # Sleep unless this is our first time through the loop.
           sleep(SLEEP_TIME) unless timeout == origin
 
@@ -109,7 +109,7 @@ class Chef
 
           ::Chef::Log.info("Started push job with id: #{job_uri[-32, 32]}")
           previous_state = 'initialized'
-          begin
+          loop do
             sleep(PUSH_SLEEP_TIME) unless previous_state == 'initialized'
             job = chef_server_rest.get_rest(job_uri)
             case job['status']
@@ -158,7 +158,8 @@ class Chef
             end
 
             dec_timeout(PUSH_SLEEP_TIME)
-          end until timeout <= 0
+            break if timeout <= 0
+          end
 
           break if finished
 
@@ -171,7 +172,8 @@ class Chef
           end
 
           dec_timeout(SLEEP_TIME)
-        end while timeout > 0
+          break unless timeout > 0
+        end
 
         ## If we make it here and we are past our timeout the job timed out.
         if timeout <= 0
