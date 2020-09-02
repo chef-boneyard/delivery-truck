@@ -6,9 +6,8 @@ module DeliverySugar
 end
 
 describe DeliveryTruck::Helpers::Syntax do
-
   describe '.bumped_version?' do
-    let(:node) { double("node") }
+    let(:node) { double('node') }
     let(:workspace) { '/tmp/repo' }
     let(:pipeline) { 'master' }
     let(:relative_path) { '.' }
@@ -19,11 +18,13 @@ describe DeliveryTruck::Helpers::Syntax do
     let(:current_version) { '0.0.1' }
     let(:current_metadata) { double('metadata', name: 'julia', version: current_version) }
 
-    let(:sugar_change) { double('delivery sugar change',
+    let(:sugar_change) do
+      double('delivery sugar change',
                                 workspace_repo: workspace,
                                 changed_files: changed_files,
                                 pipeline: pipeline,
-                                merge_sha: merge_sha) }
+                                merge_sha: merge_sha)
+    end
 
     before do
       allow(DeliverySugar::Change).to receive(:new).and_return(sugar_change)
@@ -54,7 +55,7 @@ describe DeliveryTruck::Helpers::Syntax do
           let(:current_version) { '0.0.2' }
 
           it 'returns true' do
-            expect(described_class.bumped_version?(workspace, node)).to eql true 
+            expect(described_class.bumped_version?(workspace, node)).to eql true
           end
         end
       end
@@ -121,7 +122,7 @@ describe DeliveryTruck::Helpers::Syntax do
           let(:current_version) { '0.0.2' }
 
           it 'returns true' do
-            expect(described_class.bumped_version?(workspace, node)).to eql true 
+            expect(described_class.bumped_version?(workspace, node)).to eql true
           end
         end
       end
