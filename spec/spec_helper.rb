@@ -1,6 +1,6 @@
 require 'chefspec'
 
-TOPDIR = File.expand_path(File.join(File.dirname(__FILE__), ".."))
+TOPDIR = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 $: << File.expand_path(File.dirname(__FILE__))
 
 # Require all our libraries
@@ -71,36 +71,40 @@ end
 module SharedLetDeclarations
   extend RSpec::SharedContext
 
-  let(:one_changed_cookbook) {[
-    double(
-      'delivery sugar cookbook',
-      :name => 'julia',
-      :path => '/tmp/repo/cookbooks/julia',
-      :version => '0.1.0'
-    )
-  ]}
+  let(:one_changed_cookbook) do
+    [
+   double(
+     'delivery sugar cookbook',
+     name: 'julia',
+     path: '/tmp/repo/cookbooks/julia',
+     version: '0.1.0'
+   ),
+    ]
+  end
 
-  let(:two_changed_cookbooks) {[
+  let(:two_changed_cookbooks) do
+    [
     double(
       'delivery sugar cookbook',
-      :name => 'julia',
-      :path => '/tmp/repo/cookbooks/julia',
-      :version => '0.1.0'
+      name: 'julia',
+      path: '/tmp/repo/cookbooks/julia',
+      version: '0.1.0'
     ),
     double(
       'delivery sugar cookbook',
-      :name => 'gordon',
-      :path => '/tmp/repo/cookbooks/gordon',
-      :version => '0.2.0'
-    )
-  ]}
+      name: 'gordon',
+      path: '/tmp/repo/cookbooks/gordon',
+      version: '0.2.0'
+    ),
+  ]
+  end
 
-  let(:no_changed_cookbooks) {[]}
+  let(:no_changed_cookbooks) { []}
 end
 
 RSpec.configure do |config|
   config.include SharedLetDeclarations
-  config.filter_run_excluding :ignore => true
+  config.filter_run_excluding ignore: true
   config.filter_run focus: true
   config.run_all_when_everything_filtered = true
 
