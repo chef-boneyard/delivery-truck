@@ -14,13 +14,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-if defined?(ChefSpec)
-  def create_chef_environment(resource_name)
-    ChefSpec::Matchers::ResourceMatcher.new(:chef_environment, :create, resource_name)
-  end
-
-  def run_delivery_truck_deploy(resource_name)
-    ChefSpec::Matchers::ResourceMatcher.new(:delivery_truck_deploy, :run, resource_name)
-  end
-end
