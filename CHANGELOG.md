@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- resolved cookstyle error: libraries/dsl.rb:27:1 refactor: `ChefCorrectness/IncorrectLibraryInjection`
+- resolved cookstyle error: libraries/dsl.rb:29:1 refactor: `ChefCorrectness/IncorrectLibraryInjection`
 - resolved cookstyle error: libraries/delivery_truck_deploy.rb:161:11 convention: `Layout/IndentationConsistency`
 - resolved cookstyle error: libraries/delivery_truck_deploy.rb:161:15 warning: `Lint/Loop`
 - resolved cookstyle error: libraries/delivery_truck_deploy.rb:174:13 warning: `Lint/Loop`
