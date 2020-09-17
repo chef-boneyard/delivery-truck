@@ -33,34 +33,32 @@ module DeliveryTruck
       uri = URI.parse(change['delivery_api_url'])
       http_client = Net::HTTP.new(uri.host, uri.port)
 
-      if uri.scheme == "https"
+      if uri.scheme == 'https'
         http_client.use_ssl = true
         http_client.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
       result = http_client.get(request_url, get_headers(change['token']))
 
-      case
-      when result.code == "404"
+      if result.code == '404'
         Chef::Log.info("HTTP 404 recieved from #{request_url}. Please upgrade your Delivery Server.")
         []
-      when result.code.match(/20\d/)
+      elsif result.code.match(/20\d/)
         JSON.parse(result.body)['blocked_projects']
       else # not success or 404
         error_str = "Failed request to #{request_url} returned #{result.code}"
         Chef::Log.fatal(error_str)
-        raise BadApiResponse.new(error_str)
+        raise BadApiResponse, error_str
       end
     end
 
     def self.get_headers(token)
-       {"chef-delivery-token" => token,
-         "chef-delivery-user"  => 'builder'}
+      { 'chef-delivery-token' => token,
+        'chef-delivery-user' => 'builder' }
     end
 
     def self.get_change_hash(node)
       change_file = ::File.read(::File.expand_path('../../../../../../../change.json', node['delivery_builder']['workspace']))
       change_hash = ::JSON.parse(change_file)
     end
-
   end
 end
