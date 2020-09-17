@@ -11,7 +11,7 @@ describe DeliveryTruck::Helpers::Deploy do
     end
 
     context 'when config value is set' do
-      let(:custom_search){ 'cool:attributes OR awful:constraints' }
+      let(:custom_search) { 'cool:attributes OR awful:constraints' }
       it 'returns the custom search query' do
         node.default['delivery']['config']['delivery-truck']['deploy']['search'] = custom_search
         expect(described_class.deployment_search_query(node)).to eql(custom_search)
