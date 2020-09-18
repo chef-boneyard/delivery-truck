@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- resolved cookstyle error: spec/spec_helper.rb:4:15 convention: `Style/Dir`
 - resolved cookstyle error: libraries/dsl.rb:27:1 refactor: `ChefCorrectness/IncorrectLibraryInjection`
 - resolved cookstyle error: libraries/dsl.rb:29:1 refactor: `ChefCorrectness/IncorrectLibraryInjection`
 - resolved cookstyle error: libraries/delivery_truck_deploy.rb:161:11 convention: `Layout/IndentationConsistency`
