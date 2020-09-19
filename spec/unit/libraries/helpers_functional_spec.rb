@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe DeliveryTruck::Helpers::Functional do
-
   describe '.has_kitchen_tests?' do
     context 'when .kitchen.docker.yml file is present' do
       before do

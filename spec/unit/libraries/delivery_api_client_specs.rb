@@ -3,8 +3,8 @@ require 'spec_helper'
 describe DeliveryTruck::DeliveryApiClient do
   let(:node) do
     {
-      'delivery' => { 'change' => {'enterprise' => 'Example_Enterprise'} },
-      'delivery_builder' => { 'workspace' => '/var/opt/delivery/workspace' }
+      'delivery' => { 'change' => { 'enterprise' => 'Example_Enterprise' } },
+      'delivery_builder' => { 'workspace' => '/var/opt/delivery/workspace' },
     }
   end
 
@@ -43,14 +43,14 @@ describe DeliveryTruck::DeliveryApiClient do
       let(:api_port) { 80 }
 
       it 'does not set ssl settings' do
-        expect(Net::HTTP).
-          to receive(:new).
+        expect(Net::HTTP)
+          .to receive(:new).
           with(api_host, api_port).
           and_return(http_client)
         expect(http_client).
           to receive(:get).
           with(blocked_project_api, expected_headers).
-          and_return(OpenStruct.new({:code => "404"}))
+          and_return(OpenStruct.new({ code: '404' }))
         result = DeliveryTruck::DeliveryApiClient.blocked_projects(node)
         expect(result).to eql([])
       end
@@ -71,7 +71,7 @@ describe DeliveryTruck::DeliveryApiClient do
         expect(http_client).
           to receive(:get).
           with(blocked_project_api, expected_headers).
-          and_return(OpenStruct.new({:code => "404"}))
+          and_return(OpenStruct.new({ code: '404' }))
         result = DeliveryTruck::DeliveryApiClient.blocked_projects(node)
         expect(result).to eql([])
       end
@@ -96,11 +96,11 @@ describe DeliveryTruck::DeliveryApiClient do
           expect(http_client).
             to receive(:get).
             with(blocked_project_api, expected_headers).
-            and_return(OpenStruct.new({:code => error_code}))
+            and_return(OpenStruct.new({ code: error_code }))
         end
 
         context 'status 404' do
-          let(:error_code) { "404" }
+          let(:error_code) { '404' }
 
           it 'returns empty array' do
             result = DeliveryTruck::DeliveryApiClient.blocked_projects(node)
@@ -109,15 +109,15 @@ describe DeliveryTruck::DeliveryApiClient do
         end
 
         context 'status not 404' do
-          let(:error_code) { "500" }
+          let(:error_code) { '500' }
 
           it 'logs and reraises' do
             # Swallow error reporting, to avoid cluttering test output
             allow(Chef::Log).
               to receive(:error)
 
-            expect{DeliveryTruck::DeliveryApiClient.blocked_projects(node)}.
-                to raise_exception(DeliveryTruck::DeliveryApiClient::BadApiResponse)
+            expect {DeliveryTruck::DeliveryApiClient.blocked_projects(node)}.
+              to raise_exception(DeliveryTruck::DeliveryApiClient::BadApiResponse)
           end
         end
       end
@@ -126,7 +126,7 @@ describe DeliveryTruck::DeliveryApiClient do
         let(:http_response) { double 'Net::HTTPOK' }
         let(:json_response) do
           JSON.generate({
-            'blocked_projects' => ['project_name_1', 'project_name_2']
+            'blocked_projects' => %w(project_name_1 project_name_2),
           })
         end
 
@@ -136,7 +136,7 @@ describe DeliveryTruck::DeliveryApiClient do
             and_return(json_response)
           allow(http_response).
             to receive(:code).
-            and_return("200")
+            and_return('200')
           expect(http_client).
             to receive(:get).
             with(blocked_project_api, expected_headers).
@@ -145,7 +145,7 @@ describe DeliveryTruck::DeliveryApiClient do
 
         it 'returns deserialized list' do
           result = DeliveryTruck::DeliveryApiClient.blocked_projects(node)
-          expect(result).to eql(['project_name_1', 'project_name_2'])
+          expect(result).to eql(%w(project_name_1 project_name_2))
         end
       end
     end
