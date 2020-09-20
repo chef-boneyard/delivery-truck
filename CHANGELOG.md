@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- resolved cookstyle error: spec/spec_helper.rb:102:31 convention: `Layout/SpaceInsideBlockBraces`
+- resolved cookstyle error: spec/unit/libraries/delivery_api_client_specs.rb:48:35 convention: `Layout/DotPosition`
+- resolved cookstyle error: spec/unit/libraries/delivery_api_client_specs.rb:49:11 convention: `Layout/MultilineMethodCallIndentation`
 - resolved cookstyle error: libraries/delivery_api_client.rb:36:24 convention: `Style/StringLiterals`
 - resolved cookstyle error: libraries/delivery_api_client.rb:42:7 convention: `Style/EmptyCaseCondition`
 - resolved cookstyle error: libraries/delivery_api_client.rb:43:27 convention: `Style/StringLiterals`
