@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- resolved cookstyle error: spec/spec_helper.rb:102:34 convention: `Layout/SpaceInsideBlockBraces`
+- resolved cookstyle error: spec/unit/libraries/delivery_api_client_specs.rb:47:28 convention: `Layout/DotPosition`
+- resolved cookstyle error: spec/unit/libraries/delivery_api_client_specs.rb:49:28 convention: `Layout/MultilineMethodCallIndentation`
 - resolved cookstyle error: spec/spec_helper.rb:102:31 convention: `Layout/SpaceInsideBlockBraces`
 - resolved cookstyle error: spec/unit/libraries/delivery_api_client_specs.rb:48:35 convention: `Layout/DotPosition`
 - resolved cookstyle error: spec/unit/libraries/delivery_api_client_specs.rb:49:11 convention: `Layout/MultilineMethodCallIndentation`

@@ -99,7 +99,7 @@ module SharedLetDeclarations
   ]
   end
 
-  let(:no_changed_cookbooks) { []}
+  let(:no_changed_cookbooks) { [] }
 end
 
 RSpec.configure do |config|

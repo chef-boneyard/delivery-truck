@@ -44,9 +44,9 @@ describe DeliveryTruck::DeliveryApiClient do
 
       it 'does not set ssl settings' do
         expect(Net::HTTP)
-          .to receive(:new).
-          with(api_host, api_port)
-                           .and_return(http_client)
+          .to receive(:new)
+          .with(api_host, api_port)
+          .and_return(http_client)
         expect(http_client).
           to receive(:get).
           with(blocked_project_api, expected_headers).
