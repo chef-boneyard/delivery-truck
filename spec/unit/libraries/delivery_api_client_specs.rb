@@ -49,8 +49,8 @@ describe DeliveryTruck::DeliveryApiClient do
           .and_return(http_client)
         expect(http_client)
           .to receive(:get).
-          with(blocked_project_api, expected_headers).
-          and_return(OpenStruct.new({ code: '404' }))
+          with(blocked_project_api, expected_headers)
+                           .and_return(OpenStruct.new({ code: '404' }))
         result = DeliveryTruck::DeliveryApiClient.blocked_projects(node)
         expect(result).to eql([])
       end
@@ -116,7 +116,7 @@ describe DeliveryTruck::DeliveryApiClient do
             allow(Chef::Log).
               to receive(:error)
 
-            expect { DeliveryTruck::DeliveryApiClient.blocked_projects(node)}.
+            expect { DeliveryTruck::DeliveryApiClient.blocked_projects(node) }.
               to raise_exception(DeliveryTruck::DeliveryApiClient::BadApiResponse)
           end
         end
