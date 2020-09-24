@@ -48,9 +48,9 @@ describe DeliveryTruck::DeliveryApiClient do
           .with(api_host, api_port)
           .and_return(http_client)
         expect(http_client)
-          .to receive(:get).
-          with(blocked_project_api, expected_headers)
-                           .and_return(OpenStruct.new({ code: '404' }))
+          .to receive(:get)
+          .with(blocked_project_api, expected_headers)
+          .and_return(OpenStruct.new({ code: '404' }))
         result = DeliveryTruck::DeliveryApiClient.blocked_projects(node)
         expect(result).to eql([])
       end
