@@ -356,7 +356,7 @@ describe 'delivery-truck::publish' do
   end
 
   context 'when they wish to push to github' do
-    let(:secrets) { { 'github' => 'SECRET' }}
+    let(:secrets) { { 'github' => 'SECRET' } }
 
     before do
       allow_any_instance_of(Chef::Recipe).to receive(:get_project_secrets)

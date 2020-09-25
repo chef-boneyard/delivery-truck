@@ -58,8 +58,8 @@ describe DeliveryTruck::DeliveryApiClient do
 
     context 'when api url is https' do
       it 'sets use ssl to true' do
-        expect(Net::HTTP).
-          to receive(:new).
+        expect(Net::HTTP)
+          .to receive(:new).
           with(api_host, api_port).
           and_return(http_client)
         expect(http_client).
