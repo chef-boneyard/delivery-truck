@@ -63,7 +63,7 @@ module DeliveryTruck
           templates\/.*
         ).join('|')
 
-        clean_relative_dir = relative_dir == "." ? "" : Regexp.escape("#{relative_dir}/")
+        clean_relative_dir = relative_dir == '.' ? '' : Regexp.escape("#{relative_dir}/")
 
         if modified_files.any? { |f| /^#{clean_relative_dir}(#{files_to_check})/ =~ f }
           base = change.merge_sha.empty? ? "origin/#{change.pipeline}" : "#{change.merge_sha}~1"
