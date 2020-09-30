@@ -65,8 +65,8 @@ describe DeliveryTruck::DeliveryApiClient do
         expect(http_client)
           .to receive(:use_ssl=)
           .with(true)
-        expect(http_client).
-          to receive(:verify_mode=).
+        expect(http_client)
+          .to receive(:verify_mode=).
           with(OpenSSL::SSL::VERIFY_NONE)
         expect(http_client).
           to receive(:get).
