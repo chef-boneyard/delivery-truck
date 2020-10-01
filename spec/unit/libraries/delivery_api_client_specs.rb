@@ -66,8 +66,8 @@ describe DeliveryTruck::DeliveryApiClient do
           .to receive(:use_ssl=)
           .with(true)
         expect(http_client)
-          .to receive(:verify_mode=).
-          with(OpenSSL::SSL::VERIFY_NONE)
+          .to receive(:verify_mode=)
+          .with(OpenSSL::SSL::VERIFY_NONE)
         expect(http_client).
           to receive(:get).
           with(blocked_project_api, expected_headers).
