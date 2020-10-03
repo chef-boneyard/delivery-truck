@@ -70,8 +70,8 @@ describe DeliveryTruck::DeliveryApiClient do
           .with(OpenSSL::SSL::VERIFY_NONE)
         expect(http_client)
           .to receive(:get).
-          with(blocked_project_api, expected_headers).
-          and_return(OpenStruct.new({ code: '404' }))
+          with(blocked_project_api, expected_headers)
+                           .and_return(OpenStruct.new({ code: '404' }))
         result = DeliveryTruck::DeliveryApiClient.blocked_projects(node)
         expect(result).to eql([])
       end
