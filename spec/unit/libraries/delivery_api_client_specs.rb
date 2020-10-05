@@ -80,9 +80,9 @@ describe DeliveryTruck::DeliveryApiClient do
     context 'responses' do
       before(:each) do
         allow(Net::HTTP)
-          .to receive(:new).
-          with(api_host, api_port)
-                           .and_return(http_client)
+          .to receive(:new)
+          .with(api_host, api_port)
+          .and_return(http_client)
         allow(http_client).
           to receive(:use_ssl=).
           with(true)
