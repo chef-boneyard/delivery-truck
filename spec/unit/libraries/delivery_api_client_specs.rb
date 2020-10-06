@@ -83,8 +83,8 @@ describe DeliveryTruck::DeliveryApiClient do
           .to receive(:new)
           .with(api_host, api_port)
           .and_return(http_client)
-        allow(http_client).
-          to receive(:use_ssl=).
+        allow(http_client)
+          .to receive(:use_ssl=).
           with(true)
         allow(http_client).
           to receive(:verify_mode=).

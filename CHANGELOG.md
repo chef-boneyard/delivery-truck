@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- resolved cookstyle error: spec/unit/libraries/delivery_api_client_specs.rb:86:27 convention: `Layout/DotPosition`
 - resolved cookstyle error: spec/unit/libraries/delivery_api_client_specs.rb:83:28 convention: `Layout/DotPosition`
 - resolved cookstyle error: spec/unit/libraries/delivery_api_client_specs.rb:85:28 convention: `Layout/MultilineMethodCallIndentation`
 - resolved cookstyle error: spec/unit/libraries/delivery_api_client_specs.rb:84:35 convention: `Layout/DotPosition`
