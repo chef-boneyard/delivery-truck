@@ -87,16 +87,16 @@ describe DeliveryTruck::DeliveryApiClient do
           .to receive(:use_ssl=)
           .with(true)
         allow(http_client)
-          .to receive(:verify_mode=).
-          with(OpenSSL::SSL::VERIFY_NONE)
+          .to receive(:verify_mode=)
+          .with(OpenSSL::SSL::VERIFY_NONE)
       end
 
       context 'when server returns an error' do
         before do
-          expect(http_client).
-            to receive(:get).
-            with(blocked_project_api, expected_headers).
-            and_return(OpenStruct.new({ code: error_code }))
+          expect(http_client)
+            .to receive(:get)
+            .with(blocked_project_api, expected_headers)
+            .and_return(OpenStruct.new({ code: error_code }))
         end
 
         context 'status 404' do
@@ -113,11 +113,11 @@ describe DeliveryTruck::DeliveryApiClient do
 
           it 'logs and reraises' do
             # Swallow error reporting, to avoid cluttering test output
-            allow(Chef::Log).
-              to receive(:error)
+            allow(Chef::Log)
+              .to receive(:error)
 
-            expect { DeliveryTruck::DeliveryApiClient.blocked_projects(node) }.
-              to raise_exception(DeliveryTruck::DeliveryApiClient::BadApiResponse)
+            expect { DeliveryTruck::DeliveryApiClient.blocked_projects(node) }
+              .to raise_exception(DeliveryTruck::DeliveryApiClient::BadApiResponse)
           end
         end
       end
@@ -131,16 +131,16 @@ describe DeliveryTruck::DeliveryApiClient do
         end
 
         before do
-          expect(http_response).
-            to receive(:body).
-            and_return(json_response)
-          allow(http_response).
-            to receive(:code).
-            and_return('200')
-          expect(http_client).
-            to receive(:get).
-            with(blocked_project_api, expected_headers).
-            and_return(http_response)
+          expect(http_response)
+            .to receive(:body)
+            .and_return(json_response)
+          allow(http_response)
+            .to receive(:code)
+            .and_return('200')
+          expect(http_client)
+            .to receive(:get)
+            .with(blocked_project_api, expected_headers)
+            .and_return(http_response)
         end
 
         it 'returns deserialized list' do

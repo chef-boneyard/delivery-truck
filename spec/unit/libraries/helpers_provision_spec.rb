@@ -209,14 +209,14 @@ describe DeliveryTruck::Helpers::Provision do
     end
 
     before do
-      expect(described_class).
-        to receive(:fetch_or_create_environment).
-        with(acceptance_env_name).
-        and_return(acceptance_env)
-      expect(described_class).
-        to receive(:fetch_or_create_environment).
-        with('union').
-        and_return(union_env)
+      expect(described_class)
+        .to receive(:fetch_or_create_environment)
+        .with(acceptance_env_name)
+        .and_return(acceptance_env)
+      expect(described_class)
+        .to receive(:fetch_or_create_environment)
+        .with('union')
+        .and_return(union_env)
       expect(acceptance_env).to receive(:save)
     end
 
@@ -267,10 +267,10 @@ describe DeliveryTruck::Helpers::Provision do
         }
         acceptance_env_result =
           described_class.handle_acceptance_pinnings(node, acceptance_env_name, get_all_project_cookbooks)
-        expect(acceptance_env_result.cookbook_versions).
-          to eq(expected_cookbook_versions)
-        expect(acceptance_env_result.override_attributes['applications']).
-          to eq(expected_application_versions)
+        expect(acceptance_env_result.cookbook_versions)
+          .to eq(expected_cookbook_versions)
+        expect(acceptance_env_result.override_attributes['applications'])
+          .to eq(expected_application_versions)
       end
     end
 
@@ -318,10 +318,10 @@ describe DeliveryTruck::Helpers::Provision do
         }
         acceptance_env_result =
           described_class.handle_acceptance_pinnings(node, acceptance_env_name, get_all_project_cookbooks)
-        expect(acceptance_env_result.cookbook_versions).
-          to eq(expected_cookbook_versions)
-        expect(acceptance_env_result.override_attributes['applications']).
-          to eq(expected_application_versions)
+        expect(acceptance_env_result.cookbook_versions)
+          .to eq(expected_cookbook_versions)
+        expect(acceptance_env_result.override_attributes['applications'])
+          .to eq(expected_application_versions)
       end
     end
 
@@ -388,10 +388,10 @@ describe DeliveryTruck::Helpers::Provision do
         }
         acceptance_env_result =
           described_class.handle_acceptance_pinnings(node, acceptance_env_name, get_all_project_cookbooks)
-        expect(acceptance_env_result.cookbook_versions).
-          to eq(expected_cookbook_versions)
-        expect(acceptance_env_result.override_attributes['applications']).
-          to eq(expected_application_versions)
+        expect(acceptance_env_result.cookbook_versions)
+          .to eq(expected_cookbook_versions)
+        expect(acceptance_env_result.override_attributes['applications'])
+          .to eq(expected_application_versions)
       end
     end
   end
@@ -423,16 +423,16 @@ describe DeliveryTruck::Helpers::Provision do
     end
 
     before(:each) do
-      expect(Chef::Environment).
-        to receive(:load).
-        with(acceptance_env_name).
-        and_return(acceptance_env)
-      expect(Chef::Environment).
-        to receive(:load).
-        with('union').
-        and_return(union_env)
-      expect(union_env).
-        to receive(:save)
+      expect(Chef::Environment)
+        .to receive(:load)
+        .with(acceptance_env_name)
+        .and_return(acceptance_env)
+      expect(Chef::Environment)
+        .to receive(:load)
+        .with('union')
+        .and_return(union_env)
+      expect(union_env)
+        .to receive(:save)
     end
 
     let(:passed_in_project_cookbooks) { [] }
@@ -490,10 +490,10 @@ describe DeliveryTruck::Helpers::Provision do
           union_env_result =
             described_class.handle_union_pinnings(node, acceptance_env_name, [project_cookbook])
 
-          expect(union_env_result.cookbook_versions).
-            to eq(expected_union_cookbook_versions)
-          expect(union_env_result.override_attributes['applications']).
-            to eq(union_application_versions)
+          expect(union_env_result.cookbook_versions)
+            .to eq(expected_union_cookbook_versions)
+          expect(union_env_result.override_attributes['applications'])
+            .to eq(union_application_versions)
         end
 
         it 'does not update pinnings if change id has already been updated' do
@@ -505,14 +505,14 @@ describe DeliveryTruck::Helpers::Provision do
           modified_acceptance_env.cookbook_versions(
               acceptance_cookbook_versions.merge(new_cookbook: '1.1.1'))
 
-          expect(described_class).
-            to receive(:fetch_or_create_environment).
-            with(acceptance_env_name).
-            and_return(modified_acceptance_env)
-          expect(described_class).
-            to receive(:fetch_or_create_environment).
-            with('union').
-            and_return(first_union_env_result)
+          expect(described_class)
+            .to receive(:fetch_or_create_environment)
+            .with(acceptance_env_name)
+            .and_return(modified_acceptance_env)
+          expect(described_class)
+            .to receive(:fetch_or_create_environment)
+            .with('union')
+            .and_return(first_union_env_result)
 
           seccond_union_env_result =
             described_class.handle_union_pinnings(node, acceptance_env_name, [project_cookbook])
@@ -538,8 +538,8 @@ describe DeliveryTruck::Helpers::Provision do
             union_env_result =
               described_class.handle_union_pinnings(node, acceptance_env_name, passed_in_project_cookbooks)
 
-            expect(union_env_result.default_attributes['delivery']['project_artifacts']).
-              to eq(expected_project_metadata)
+            expect(union_env_result.default_attributes['delivery']['project_artifacts'])
+              .to eq(expected_project_metadata)
           end
         end
 
@@ -573,8 +573,8 @@ describe DeliveryTruck::Helpers::Provision do
             union_env_result =
               described_class.handle_union_pinnings(node, acceptance_env_name, passed_in_project_cookbooks)
 
-            expect(union_env_result.default_attributes['delivery']['project_artifacts']).
-              to eq(expected_projects_metadata)
+            expect(union_env_result.default_attributes['delivery']['project_artifacts'])
+              .to eq(expected_projects_metadata)
           end
         end
 
@@ -604,8 +604,8 @@ describe DeliveryTruck::Helpers::Provision do
             union_env_result =
               described_class.handle_union_pinnings(node, acceptance_env_name, passed_in_project_cookbooks)
 
-            expect(union_env_result.default_attributes['delivery']['project_artifacts']).
-              to eq(expected_projects_metadata)
+            expect(union_env_result.default_attributes['delivery']['project_artifacts'])
+              .to eq(expected_projects_metadata)
           end
         end
       end
@@ -673,8 +673,8 @@ describe DeliveryTruck::Helpers::Provision do
           union_env_result =
             described_class.handle_union_pinnings(node, acceptance_env_name, passed_in_project_cookbooks)
 
-          expect(union_env_result.default_attributes['delivery']['project_artifacts']).
-            to eq(expected_project_metadata)
+          expect(union_env_result.default_attributes['delivery']['project_artifacts'])
+            .to eq(expected_project_metadata)
         end
       end
 
@@ -688,10 +688,10 @@ describe DeliveryTruck::Helpers::Provision do
           described_class.handle_union_pinnings(node, acceptance_env_name, passed_in_project_cookbooks)
 
         expect(node['delivery']['project_apps']).to eq([project_name])
-        expect(union_env_result.cookbook_versions).
-          to eq(union_cookbook_versions)
-        expect(union_env_result.override_attributes['applications']).
-          to eq(expected_union_application_versions)
+        expect(union_env_result.cookbook_versions)
+          .to eq(union_cookbook_versions)
+        expect(union_env_result.override_attributes['applications'])
+          .to eq(expected_union_application_versions)
       end
     end
 
@@ -751,8 +751,8 @@ describe DeliveryTruck::Helpers::Provision do
           union_env_result =
             described_class.handle_union_pinnings(node, acceptance_env_name, passed_in_project_cookbooks)
 
-          expect(union_env_result.default_attributes['delivery']['project_artifacts']).
-            to eq(expected_project_metadata)
+          expect(union_env_result.default_attributes['delivery']['project_artifacts'])
+            .to eq(expected_project_metadata)
         end
       end
 
@@ -771,10 +771,10 @@ describe DeliveryTruck::Helpers::Provision do
         union_env_result =
           described_class.handle_union_pinnings(node, acceptance_env_name, [])
 
-        expect(union_env_result.cookbook_versions).
-          to eq(union_cookbook_versions)
-        expect(union_env_result.override_attributes['applications']).
-          to eq(expected_union_application_versions)
+        expect(union_env_result.cookbook_versions)
+          .to eq(union_cookbook_versions)
+        expect(union_env_result.override_attributes['applications'])
+          .to eq(expected_union_application_versions)
       end
     end
   end
@@ -877,24 +877,24 @@ describe DeliveryTruck::Helpers::Provision do
     end
 
     before(:each) do
-      expect(Chef::Environment).
-        to receive(:load).
-        with('union').
-        and_return(union_env)
-      expect(Chef::Environment).
-        to receive(:load).
-        with('rehearsal').
-        and_return(rehearsal_env)
-      expect(rehearsal_env).
-        to receive(:save)
+      expect(Chef::Environment)
+        .to receive(:load)
+        .with('union')
+        .and_return(union_env)
+      expect(Chef::Environment)
+        .to receive(:load)
+        .with('rehearsal')
+        .and_return(rehearsal_env)
+      expect(rehearsal_env)
+        .to receive(:save)
       expect(union_env).to receive(:save)
     end
 
     it 'removes the change from the union environment change list' do
-      expect(DeliveryTruck::DeliveryApiClient).
-        to receive(:blocked_projects).
-        with(node).
-        and_return([])
+      expect(DeliveryTruck::DeliveryApiClient)
+        .to receive(:blocked_projects)
+        .with(node)
+        .and_return([])
 
       described_class.handle_rehearsal_pinnings(node)
       expect(union_env.default_attributes['delivery']['union_changes']).to eql([])
@@ -979,10 +979,10 @@ describe DeliveryTruck::Helpers::Provision do
 
       context 'when the project is blocked' do
         before(:each) do
-          expect(DeliveryTruck::DeliveryApiClient).
-            to receive(:blocked_projects).
-            with(node).
-            and_return([project_name])
+          expect(DeliveryTruck::DeliveryApiClient)
+            .to receive(:blocked_projects)
+            .with(node)
+            .and_return([project_name])
         end
 
         it 'does not update the version pinning for the cookbook in the' \
@@ -1022,12 +1022,12 @@ describe DeliveryTruck::Helpers::Provision do
 
           rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-          expect(rehearsal_env_result.cookbook_versions).
-            to eq(expected_cookbook_versions)
-          expect(rehearsal_env_result.default_attributes).
-            to eq(expected_default_attributes)
-          expect(rehearsal_env_result.override_attributes['applications']).
-            to eq(expected_applications)
+          expect(rehearsal_env_result.cookbook_versions)
+            .to eq(expected_cookbook_versions)
+          expect(rehearsal_env_result.default_attributes)
+            .to eq(expected_default_attributes)
+          expect(rehearsal_env_result.override_attributes['applications'])
+            .to eq(expected_applications)
         end
 
         # maybe we want to test when node['delivery']['project_cookbooks'] is set
@@ -1037,10 +1037,10 @@ describe DeliveryTruck::Helpers::Provision do
       context 'when the project is not blocked' do
         let(:blocked_projects) { [] }
         before(:each) do
-          expect(DeliveryTruck::DeliveryApiClient).
-            to receive(:blocked_projects).
-            with(node).
-            and_return(blocked_projects)
+          expect(DeliveryTruck::DeliveryApiClient)
+            .to receive(:blocked_projects)
+            .with(node)
+            .and_return(blocked_projects)
         end
 
         context 'nothing is blocked' do
@@ -1069,12 +1069,12 @@ describe DeliveryTruck::Helpers::Provision do
 
             rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-            expect(rehearsal_env_result.cookbook_versions).
-              to eq(expected_cookbook_versions)
-            expect(rehearsal_env_result.default_attributes).
-              to eq(expected_default_attributes)
-            expect(rehearsal_env_result.override_attributes['applications']).
-              to eq(expected_applications)
+            expect(rehearsal_env_result.cookbook_versions)
+              .to eq(expected_cookbook_versions)
+            expect(rehearsal_env_result.default_attributes)
+              .to eq(expected_default_attributes)
+            expect(rehearsal_env_result.override_attributes['applications'])
+              .to eq(expected_applications)
           end
         end
 
@@ -1143,12 +1143,12 @@ describe DeliveryTruck::Helpers::Provision do
 
             rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-            expect(rehearsal_env_result.cookbook_versions).
-              to eq(expected_cookbook_versions)
-            expect(rehearsal_env_result.default_attributes).
-              to eq(expected_default_attributes)
-            expect(rehearsal_env_result.override_attributes['applications']).
-              to eq(expected_applications)
+            expect(rehearsal_env_result.cookbook_versions)
+              .to eq(expected_cookbook_versions)
+            expect(rehearsal_env_result.default_attributes)
+              .to eq(expected_default_attributes)
+            expect(rehearsal_env_result.override_attributes['applications'])
+              .to eq(expected_applications)
           end
         end
       end
@@ -1220,10 +1220,10 @@ describe DeliveryTruck::Helpers::Provision do
         }
       end
       before(:each) do
-        expect(DeliveryTruck::DeliveryApiClient).
-          to receive(:blocked_projects).
-          with(node).
-          and_return(blocked_projects)
+        expect(DeliveryTruck::DeliveryApiClient)
+          .to receive(:blocked_projects)
+          .with(node)
+          .and_return(blocked_projects)
       end
 
       context 'nothing is blocked' do
@@ -1237,12 +1237,12 @@ describe DeliveryTruck::Helpers::Provision do
 
           rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-          expect(rehearsal_env_result.cookbook_versions).
-            to eq(expected_cookbook_versions)
-          expect(rehearsal_env_result.default_attributes).
-            to eq(expected_default_attributes)
-          expect(rehearsal_env_result.override_attributes['applications']).
-            to eq(expected_applications)
+          expect(rehearsal_env_result.cookbook_versions)
+            .to eq(expected_cookbook_versions)
+          expect(rehearsal_env_result.default_attributes)
+            .to eq(expected_default_attributes)
+          expect(rehearsal_env_result.override_attributes['applications'])
+            .to eq(expected_applications)
         end
 
         context 'when the rehersal delivery attribute has not been initialized' do
@@ -1255,12 +1255,12 @@ describe DeliveryTruck::Helpers::Provision do
 
             rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-            expect(rehearsal_env_result.cookbook_versions).
-              to eq(expected_cookbook_versions)
-            expect(rehearsal_env_result.default_attributes).
-              to eq(expected_default_attributes)
-            expect(rehearsal_env_result.override_attributes['applications']).
-              to eq(expected_applications)
+            expect(rehearsal_env_result.cookbook_versions)
+              .to eq(expected_cookbook_versions)
+            expect(rehearsal_env_result.default_attributes)
+              .to eq(expected_default_attributes)
+            expect(rehearsal_env_result.override_attributes['applications'])
+              .to eq(expected_applications)
           end
         end
       end
@@ -1278,12 +1278,12 @@ describe DeliveryTruck::Helpers::Provision do
 
           rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-          expect(rehearsal_env_result.cookbook_versions).
-            to eq(expected_cookbook_versions)
-          expect(rehearsal_env_result.default_attributes).
-            to eq(expected_default_attributes)
-          expect(rehearsal_env_result.override_attributes['applications']).
-            to eq(expected_applications)
+          expect(rehearsal_env_result.cookbook_versions)
+            .to eq(expected_cookbook_versions)
+          expect(rehearsal_env_result.default_attributes)
+            .to eq(expected_default_attributes)
+          expect(rehearsal_env_result.override_attributes['applications'])
+            .to eq(expected_applications)
         end
       end
     end
@@ -1360,10 +1360,10 @@ describe DeliveryTruck::Helpers::Provision do
 
       context 'when the project is blocked' do
         before(:each) do
-          expect(DeliveryTruck::DeliveryApiClient).
-            to receive(:blocked_projects).
-            with(node).
-            and_return([project_name])
+          expect(DeliveryTruck::DeliveryApiClient)
+            .to receive(:blocked_projects)
+            .with(node)
+            .and_return([project_name])
         end
 
         it 'does not update the version pinning for the cookbook or apps in the' \
@@ -1384,10 +1384,10 @@ describe DeliveryTruck::Helpers::Provision do
 
           rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-          expect(rehearsal_env_result.cookbook_versions).
-            to eq(expected_cookbook_versions)
-          expect(rehearsal_env_result.override_attributes['applications']).
-            to eq(expected_applications)
+          expect(rehearsal_env_result.cookbook_versions)
+            .to eq(expected_cookbook_versions)
+          expect(rehearsal_env_result.override_attributes['applications'])
+            .to eq(expected_applications)
         end
 
         # maybe we want to test when node['delivery']['project_cookbooks'] is set
@@ -1396,10 +1396,10 @@ describe DeliveryTruck::Helpers::Provision do
 
       context 'when a different project is blocked' do
         before(:each) do
-          expect(DeliveryTruck::DeliveryApiClient).
-            to receive(:blocked_projects).
-            with(node).
-            and_return(['other_project_1'])
+          expect(DeliveryTruck::DeliveryApiClient)
+            .to receive(:blocked_projects)
+            .with(node)
+            .and_return(['other_project_1'])
         end
 
         it 'does not update the version pinning for the cookbook or apps in the' \
@@ -1420,10 +1420,10 @@ describe DeliveryTruck::Helpers::Provision do
 
           rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-          expect(rehearsal_env_result.cookbook_versions).
-            to eq(expected_cookbook_versions)
-          expect(rehearsal_env_result.override_attributes['applications']).
-            to eq(expected_applications)
+          expect(rehearsal_env_result.cookbook_versions)
+            .to eq(expected_cookbook_versions)
+          expect(rehearsal_env_result.override_attributes['applications'])
+            .to eq(expected_applications)
         end
 
         # maybe we want to test when node['delivery']['project_cookbooks'] is set
@@ -1504,16 +1504,16 @@ describe DeliveryTruck::Helpers::Provision do
     end
 
     before(:each) do
-      expect(Chef::Environment).
-        to receive(:load).
-        with(previous_stage_env_name).
-        and_return(previous_stage_env)
-      expect(Chef::Environment).
-        to receive(:load).
-        with(current_stage_env_name).
-        and_return(current_stage_env)
-      expect(current_stage_env).
-        to receive(:save)
+      expect(Chef::Environment)
+        .to receive(:load)
+        .with(previous_stage_env_name)
+        .and_return(previous_stage_env)
+      expect(Chef::Environment)
+        .to receive(:load)
+        .with(current_stage_env_name)
+        .and_return(current_stage_env)
+      expect(current_stage_env)
+        .to receive(:save)
     end
 
     it 'merges all cookbook and application version pinnings from the previous' \
@@ -1527,12 +1527,12 @@ describe DeliveryTruck::Helpers::Provision do
       current_stage_env_result =
         described_class.handle_delivered_pinnings(node)
 
-      expect(current_stage_env_result.cookbook_versions).
-        to eq(expected_cookbook_versions)
-      expect(current_stage_env_result.default_attributes).
-        to eq(expected_default_attributes)
-      expect(current_stage_env_result.override_attributes['applications']).
-        to eq(expected_applications)
+      expect(current_stage_env_result.cookbook_versions)
+        .to eq(expected_cookbook_versions)
+      expect(current_stage_env_result.default_attributes)
+        .to eq(expected_default_attributes)
+      expect(current_stage_env_result.override_attributes['applications'])
+        .to eq(expected_applications)
     end
   end
 end
