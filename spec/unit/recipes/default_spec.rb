@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "delivery-truck::default", :ignore => true do
+describe 'delivery-truck::default', ignore: true do
   let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
 
   it 'should install chefspec' do
