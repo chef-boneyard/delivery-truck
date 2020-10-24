@@ -17,9 +17,9 @@ describe DeliveryTruck::Helpers::Provision do
       'delivery' => {
         'change' => {
           'project' => project_name,
-          'change_id' => change_id
-        }
-      }
+          'change_id' => change_id,
+        },
+      },
     }
   end
 
@@ -75,7 +75,6 @@ describe DeliveryTruck::Helpers::Provision do
 
         subject.provision stage_name, node, acceptance_env_name, cookbooks
       end
-
     end
   end
 
@@ -84,7 +83,7 @@ describe DeliveryTruck::Helpers::Provision do
       {
         project_name => '= 0.3.0',
         'cookbook-1' => '= 1.2.0',
-        'cookbook-2' => '= 2.0.0'
+        'cookbook-2' => '= 2.0.0',
       }
     end
 
@@ -98,7 +97,7 @@ describe DeliveryTruck::Helpers::Provision do
     context 'when the project is a cookbook' do
       it 'returns the cookbook version pinning' do
         expected_cookbook_pinnings = {
-          project_name => '= 0.3.0'
+          project_name => '= 0.3.0',
         }
         cookbook_pinnings =
           described_class.project_cookbook_version_pins_from_env(node, env)
@@ -108,14 +107,14 @@ describe DeliveryTruck::Helpers::Provision do
 
     describe 'when the repository contains multiple project cookbooks' do
       before(:each) do
-        node_attributes['delivery']['project_cookbooks'] = ['cookbook-1',
-                                                            'cookbook-2']
+        node_attributes['delivery']['project_cookbooks'] = %w(cookbook-1
+                                                            cookbook-2)
       end
 
       it 'returns the version pinnings of the project cookbooks' do
         expected_cookbook_pinnings = {
           'cookbook-1' => '= 1.2.0',
-          'cookbook-2' => '= 2.0.0'
+          'cookbook-2' => '= 2.0.0',
         }
         cookbook_pinnings =
           described_class.project_cookbook_version_pins_from_env(node, env)
@@ -129,7 +128,7 @@ describe DeliveryTruck::Helpers::Provision do
       env = Chef::Environment.new
       env.name('test-env')
       env.override_attributes = {
-        'applications' => application_versions
+        'applications' => application_versions,
       }
       env
     end
@@ -146,7 +145,7 @@ describe DeliveryTruck::Helpers::Provision do
       context 'when the project is an application' do
         let(:application_versions) do
           {
-            project_name => '0_3_562'
+            project_name => '0_3_562',
           }
         end
 
@@ -154,7 +153,7 @@ describe DeliveryTruck::Helpers::Provision do
            ' application version pinning' do
           expect(
             described_class.project_application_version_pins_from_env(node, env)
-          ).to eq({project_name => '0_3_562'})
+          ).to eq({ project_name => '0_3_562' })
         end
       end
     end
@@ -163,12 +162,12 @@ describe DeliveryTruck::Helpers::Provision do
       let(:application_versions) do
         {
           'app-1' => '0_3_562',
-          'app-2' => '5_0_102'
+          'app-2' => '5_0_102',
         }
       end
 
       before(:each) do
-        node_attributes['delivery']['project_apps'] = [ 'app-1', 'app-2' ]
+        node_attributes['delivery']['project_apps'] = %w(app-1 app-2)
       end
 
       it 'sets the applications as the project applications and returns' \
@@ -177,7 +176,7 @@ describe DeliveryTruck::Helpers::Provision do
           described_class.project_application_version_pins_from_env(node, env)
         ).to eq({
           'app-1' => '0_3_562',
-          'app-2' => '5_0_102'
+          'app-2' => '5_0_102',
         })
       end
     end
@@ -194,7 +193,7 @@ describe DeliveryTruck::Helpers::Provision do
       env.name(acceptance_env_name)
       env.cookbook_versions(acceptance_cookbook_versions)
       env.override_attributes = {
-        'applications' => acceptance_application_versions
+        'applications' => acceptance_application_versions,
       }
       env
     end
@@ -204,27 +203,27 @@ describe DeliveryTruck::Helpers::Provision do
       env.name('union')
       env.cookbook_versions(union_cookbook_versions)
       env.override_attributes = {
-        'applications' => union_application_versions
+        'applications' => union_application_versions,
       }
       env
     end
 
     before do
-      expect(described_class).
-        to receive(:fetch_or_create_environment).
-        with(acceptance_env_name).
-        and_return(acceptance_env)
-      expect(described_class).
-        to receive(:fetch_or_create_environment).
-        with('union').
-        and_return(union_env)
+      expect(described_class)
+        .to receive(:fetch_or_create_environment)
+        .with(acceptance_env_name)
+        .and_return(acceptance_env)
+      expect(described_class)
+        .to receive(:fetch_or_create_environment)
+        .with('union')
+        .and_return(union_env)
       expect(acceptance_env).to receive(:save)
     end
 
     context 'when the project is a cookbook' do
       let(:acceptance_cookbook_versions) do
         {
-          project_name => project_version
+          project_name => project_version,
         }
       end
 
@@ -234,13 +233,13 @@ describe DeliveryTruck::Helpers::Provision do
         {
           project_name => project_version_in_union,
           'cookbook-1' => '= 1.2.0',
-          'cookbook-2' => '= 2.0.0'
+          'cookbook-2' => '= 2.0.0',
         }
       end
 
       let(:union_application_versions) do
         {
-          'delivery-app' => '0_3_562'
+          'delivery-app' => '0_3_562',
         }
       end
 
@@ -261,17 +260,17 @@ describe DeliveryTruck::Helpers::Provision do
         expected_cookbook_versions = {
           project_name => project_version,
           'cookbook-1' => '= 1.2.0',
-          'cookbook-2' => '= 2.0.0'
+          'cookbook-2' => '= 2.0.0',
         }
         expected_application_versions = {
-          'delivery-app' => '0_3_562'
+          'delivery-app' => '0_3_562',
         }
         acceptance_env_result =
           described_class.handle_acceptance_pinnings(node, acceptance_env_name, get_all_project_cookbooks)
-        expect(acceptance_env_result.cookbook_versions).
-          to eq(expected_cookbook_versions)
-        expect(acceptance_env_result.override_attributes['applications']).
-          to eq(expected_application_versions)
+        expect(acceptance_env_result.cookbook_versions)
+          .to eq(expected_cookbook_versions)
+        expect(acceptance_env_result.override_attributes['applications'])
+          .to eq(expected_application_versions)
       end
     end
 
@@ -280,21 +279,21 @@ describe DeliveryTruck::Helpers::Provision do
 
       let(:acceptance_application_versions) do
         {
-          project_name => project_version
+          project_name => project_version,
         }
       end
 
       let(:union_cookbook_versions) do
         {
           'cookbook-1' => '= 1.2.0',
-          'cookbook-2' => '= 2.0.0'
+          'cookbook-2' => '= 2.0.0',
         }
       end
 
       let(:union_application_versions) do
         {
           project_name => project_version_in_union,
-          'delivery-app' => '0_3_562'
+          'delivery-app' => '0_3_562',
         }
       end
 
@@ -311,18 +310,18 @@ describe DeliveryTruck::Helpers::Provision do
          ' version pinning in the acceptance environment' do
         expected_cookbook_versions = {
           'cookbook-1' => '= 1.2.0',
-          'cookbook-2' => '= 2.0.0'
+          'cookbook-2' => '= 2.0.0',
         }
         expected_application_versions = {
           project_name => project_version,
-          'delivery-app' => '0_3_562'
+          'delivery-app' => '0_3_562',
         }
         acceptance_env_result =
           described_class.handle_acceptance_pinnings(node, acceptance_env_name, get_all_project_cookbooks)
-        expect(acceptance_env_result.cookbook_versions).
-          to eq(expected_cookbook_versions)
-        expect(acceptance_env_result.override_attributes['applications']).
-          to eq(expected_application_versions)
+        expect(acceptance_env_result.cookbook_versions)
+          .to eq(expected_cookbook_versions)
+        expect(acceptance_env_result.override_attributes['applications'])
+          .to eq(expected_application_versions)
       end
     end
 
@@ -337,13 +336,13 @@ describe DeliveryTruck::Helpers::Provision do
 
       let(:acceptance_cookbook_versions) do
         {
-          project_cookbook_name => project_cookbook_version
+          project_cookbook_name => project_cookbook_version,
         }
       end
 
       let(:acceptance_application_versions) do
         {
-          project_app_name => project_app_version
+          project_app_name => project_app_version,
         }
       end
 
@@ -351,14 +350,14 @@ describe DeliveryTruck::Helpers::Provision do
         {
           project_cookbook_name => project_cookbook_version_in_union,
           'cookbook-1' => '= 1.2.0',
-          'cookbook-2' => '= 2.0.0'
+          'cookbook-2' => '= 2.0.0',
         }
       end
 
       let(:union_application_versions) do
         {
           project_app_name => project_app_version_in_union,
-          'delivery-app' => '0_3_562'
+          'delivery-app' => '0_3_562',
         }
       end
 
@@ -381,18 +380,18 @@ describe DeliveryTruck::Helpers::Provision do
         expected_cookbook_versions = {
           project_cookbook_name => project_cookbook_version,
           'cookbook-1' => '= 1.2.0',
-          'cookbook-2' => '= 2.0.0'
+          'cookbook-2' => '= 2.0.0',
         }
         expected_application_versions = {
           project_app_name => project_app_version,
-          'delivery-app' => '0_3_562'
+          'delivery-app' => '0_3_562',
         }
         acceptance_env_result =
           described_class.handle_acceptance_pinnings(node, acceptance_env_name, get_all_project_cookbooks)
-        expect(acceptance_env_result.cookbook_versions).
-          to eq(expected_cookbook_versions)
-        expect(acceptance_env_result.override_attributes['applications']).
-          to eq(expected_application_versions)
+        expect(acceptance_env_result.cookbook_versions)
+          .to eq(expected_cookbook_versions)
+        expect(acceptance_env_result.override_attributes['applications'])
+          .to eq(expected_application_versions)
       end
     end
   end
@@ -408,7 +407,7 @@ describe DeliveryTruck::Helpers::Provision do
       env.name(acceptance_env_name)
       env.cookbook_versions(acceptance_cookbook_versions)
       env.override_attributes = {
-        'applications' => acceptance_application_versions
+        'applications' => acceptance_application_versions,
       }
       env
     end
@@ -418,22 +417,22 @@ describe DeliveryTruck::Helpers::Provision do
       env.name('union')
       env.cookbook_versions(union_cookbook_versions)
       env.override_attributes = {
-        'applications' => union_application_versions
+        'applications' => union_application_versions,
       }
       env
     end
 
     before(:each) do
-      expect(Chef::Environment).
-        to receive(:load).
-        with(acceptance_env_name).
-        and_return(acceptance_env)
-      expect(Chef::Environment).
-        to receive(:load).
-        with('union').
-        and_return(union_env)
-      expect(union_env).
-        to receive(:save)
+      expect(Chef::Environment)
+        .to receive(:load)
+        .with(acceptance_env_name)
+        .and_return(acceptance_env)
+      expect(Chef::Environment)
+        .to receive(:load)
+        .with('union')
+        .and_return(union_env)
+      expect(union_env)
+        .to receive(:save)
     end
 
     let(:passed_in_project_cookbooks) { [] }
@@ -443,13 +442,13 @@ describe DeliveryTruck::Helpers::Provision do
 
       let(:acceptance_cookbook_versions) do
         {
-          project_name => project_version_in_acceptance        }
+          project_name => project_version_in_acceptance }
       end
 
       let(:union_application_versions) do
         {
           'an_application' => '= 3.2.0',
-          'another_application' => '= 2.2.4'
+          'another_application' => '= 2.2.4',
         }
       end
 
@@ -457,18 +456,18 @@ describe DeliveryTruck::Helpers::Provision do
         {
           project_name => project_version,
           'an_cookbook' => '= 0.3.1',
-          'another_cookbook' => '= 2.0.0'
+          'another_cookbook' => '= 2.0.0',
         }
       end
 
       context 'when project cookbooks are detected' do
-        let(:project_cookbook_name) { "changed_cookbook_that_is_not_in_project_cookbook_attributes" }
-        let(:project_cookbook_version) { "= 0.1.0" }
+        let(:project_cookbook_name) { 'changed_cookbook_that_is_not_in_project_cookbook_attributes' }
+        let(:project_cookbook_version) { '= 0.1.0' }
 
         let(:acceptance_cookbook_versions) do
           {
             project_name => project_version_in_acceptance,
-            project_cookbook_name => project_cookbook_version
+            project_cookbook_name => project_cookbook_version,
           }
         end
 
@@ -491,10 +490,10 @@ describe DeliveryTruck::Helpers::Provision do
           union_env_result =
             described_class.handle_union_pinnings(node, acceptance_env_name, [project_cookbook])
 
-          expect(union_env_result.cookbook_versions).
-            to eq(expected_union_cookbook_versions)
-          expect(union_env_result.override_attributes['applications']).
-            to eq(union_application_versions)
+          expect(union_env_result.cookbook_versions)
+            .to eq(expected_union_cookbook_versions)
+          expect(union_env_result.override_attributes['applications'])
+            .to eq(union_application_versions)
         end
 
         it 'does not update pinnings if change id has already been updated' do
@@ -506,14 +505,14 @@ describe DeliveryTruck::Helpers::Provision do
           modified_acceptance_env.cookbook_versions(
               acceptance_cookbook_versions.merge(new_cookbook: '1.1.1'))
 
-          expect(described_class).
-            to receive(:fetch_or_create_environment).
-            with(acceptance_env_name).
-            and_return(modified_acceptance_env)
-          expect(described_class).
-            to receive(:fetch_or_create_environment).
-            with('union').
-            and_return(first_union_env_result)
+          expect(described_class)
+            .to receive(:fetch_or_create_environment)
+            .with(acceptance_env_name)
+            .and_return(modified_acceptance_env)
+          expect(described_class)
+            .to receive(:fetch_or_create_environment)
+            .with('union')
+            .and_return(first_union_env_result)
 
           seccond_union_env_result =
             described_class.handle_union_pinnings(node, acceptance_env_name, [project_cookbook])
@@ -532,15 +531,15 @@ describe DeliveryTruck::Helpers::Provision do
                 # You only populate if acceptance_env.override_attributes['applications']
                 # actually contains an application named `project_name`, which is
                 # not the case in this test.
-                'applications' => []
-              }
+                'applications' => [],
+              },
             }
 
             union_env_result =
               described_class.handle_union_pinnings(node, acceptance_env_name, passed_in_project_cookbooks)
 
-            expect(union_env_result.default_attributes['delivery']['project_artifacts']).
-              to eq(expected_project_metadata)
+            expect(union_env_result.default_attributes['delivery']['project_artifacts'])
+              .to eq(expected_project_metadata)
           end
         end
 
@@ -549,18 +548,18 @@ describe DeliveryTruck::Helpers::Provision do
             {
               'project-foo' => {
                 'cookbooks' => [],
-                'applications' => ['project-foo-app']
+                'applications' => ['project-foo-app'],
               },
               'project-bar' => {
-                'cookbooks' => ['project-bar-1', 'project-bar-1'],
-                'applications' => ['project-bar-app']
-              }
+                'cookbooks' => %w(project-bar-1 project-bar-1),
+                'applications' => ['project-bar-app'],
+              },
             }
           end
 
           before(:each) do
             union_env.default_attributes = {
-              'delivery' => { 'project_artifacts' => projects_metadata }
+              'delivery' => { 'project_artifacts' => projects_metadata },
             }
           end
 
@@ -568,14 +567,14 @@ describe DeliveryTruck::Helpers::Provision do
             expected_projects_metadata = projects_metadata.dup
             expected_projects_metadata[project_name] = {
               'cookbooks' => [project_name],
-              'applications' => []
+              'applications' => [],
             }
 
             union_env_result =
               described_class.handle_union_pinnings(node, acceptance_env_name, passed_in_project_cookbooks)
 
-            expect(union_env_result.default_attributes['delivery']['project_artifacts']).
-              to eq(expected_projects_metadata)
+            expect(union_env_result.default_attributes['delivery']['project_artifacts'])
+              .to eq(expected_projects_metadata)
           end
         end
 
@@ -584,14 +583,14 @@ describe DeliveryTruck::Helpers::Provision do
             {
               project_name => {
                 'cookbooks' => ["#{project_name}-1", "#{project_name}-2"],
-                'applications' => []
-              }
+                'applications' => [],
+              },
             }
           end
 
           before(:each) do
             union_env.default_attributes = {
-              'delivery' => { 'project_artifacts' => projects_metadata }
+              'delivery' => { 'project_artifacts' => projects_metadata },
             }
           end
 
@@ -599,14 +598,14 @@ describe DeliveryTruck::Helpers::Provision do
             expected_projects_metadata = projects_metadata.dup
             expected_projects_metadata[project_name] = {
               'cookbooks' => [project_name],
-              'applications' => []
+              'applications' => [],
             }
 
             union_env_result =
               described_class.handle_union_pinnings(node, acceptance_env_name, passed_in_project_cookbooks)
 
-            expect(union_env_result.default_attributes['delivery']['project_artifacts']).
-              to eq(expected_projects_metadata)
+            expect(union_env_result.default_attributes['delivery']['project_artifacts'])
+              .to eq(expected_projects_metadata)
           end
         end
       end
@@ -615,13 +614,13 @@ describe DeliveryTruck::Helpers::Provision do
     context 'when the project is an application' do
       let(:acceptance_application_versions) do
         {
-          project_name => project_version_in_acceptance
+          project_name => project_version_in_acceptance,
         }
       end
 
       let(:acceptance_cookbook_versions) do
         {
-          project_name => project_version
+          project_name => project_version,
         }
       end
 
@@ -629,14 +628,14 @@ describe DeliveryTruck::Helpers::Provision do
         {
           project_name => project_version,
           'an_application' => '= 3.2.0',
-          'another_application' => '= 2.2.4'
+          'another_application' => '= 2.2.4',
         }
       end
 
       let(:union_cookbook_versions) do
         {
           'an_cookbook' => '= 0.3.1',
-          'another_cookbook' => '= 2.0.0'
+          'another_cookbook' => '= 2.0.0',
         }
       end
 
@@ -644,7 +643,7 @@ describe DeliveryTruck::Helpers::Provision do
         node.default['delivery']['project_cookbooks'] = nil
       end
 
-      context "cached project metadata" do
+      context 'cached project metadata' do
         let(:acceptance_env) do
           env = Chef::Environment.new()
           env.name(acceptance_env_name)
@@ -653,29 +652,29 @@ describe DeliveryTruck::Helpers::Provision do
             'applications' => {
               'app1' => '= 1.0.0',
               'app2' => '= 1.0.0',
-              'app3' => '= 1.0.0'
-            }
+              'app3' => '= 1.0.0',
+            },
           }
           env
         end
 
-        it "saved all app names for the current project that have valid values" \
-          "in the acceptance env" do
-          app_names = ["app1", "app2", "app3"]
+        it 'saved all app names for the current project that have valid values' \
+          'in the acceptance env' do
+          app_names = %w(app1 app2 app3)
           node.default['delivery']['project_apps'] = app_names
 
           expected_project_metadata = {
             project_name => {
               'cookbooks' => [project_name],
-              'applications' => app_names
-            }
+              'applications' => app_names,
+            },
           }
 
           union_env_result =
             described_class.handle_union_pinnings(node, acceptance_env_name, passed_in_project_cookbooks)
 
-          expect(union_env_result.default_attributes['delivery']['project_artifacts']).
-            to eq(expected_project_metadata)
+          expect(union_env_result.default_attributes['delivery']['project_artifacts'])
+            .to eq(expected_project_metadata)
         end
       end
 
@@ -689,10 +688,10 @@ describe DeliveryTruck::Helpers::Provision do
           described_class.handle_union_pinnings(node, acceptance_env_name, passed_in_project_cookbooks)
 
         expect(node['delivery']['project_apps']).to eq([project_name])
-        expect(union_env_result.cookbook_versions).
-          to eq(union_cookbook_versions)
-        expect(union_env_result.override_attributes['applications']).
-          to eq(expected_union_application_versions)
+        expect(union_env_result.cookbook_versions)
+          .to eq(union_cookbook_versions)
+        expect(union_env_result.override_attributes['applications'])
+          .to eq(expected_union_application_versions)
       end
     end
 
@@ -701,13 +700,13 @@ describe DeliveryTruck::Helpers::Provision do
       let(:project_app_version) { '0_3_562' }
       let(:project_app_version_in_acceptance) { '0_3_563' }
 
-      let(:project_cookbook_names) { ['delivery-cookbook-1', 'delivery-cookbook-2'] }
+      let(:project_cookbook_names) { %w(delivery-cookbook-1 delivery-cookbook-2) }
       let(:project_cookbook_versions) { ['= 0.3.0', '= 1.0.2'] }
       let(:project_cookbook_versions_in_acceptance) { ['= 0.3.2', '= 1.0.4'] }
 
       let(:acceptance_application_versions) do
         {
-          project_app_name => project_app_version_in_acceptance
+          project_app_name => project_app_version_in_acceptance,
         }
       end
 
@@ -722,7 +721,7 @@ describe DeliveryTruck::Helpers::Provision do
         {
           project_app_name => project_app_version,
           'an_application' => '= 3.2.0',
-          'another_application' => '= 2.2.4'
+          'another_application' => '= 2.2.4',
         }
       end
 
@@ -731,7 +730,7 @@ describe DeliveryTruck::Helpers::Provision do
           project_cookbook_names[0] => project_cookbook_versions[0],
           project_cookbook_names[1] => project_cookbook_versions[1],
           'an_cookbook' => '= 0.3.1',
-          'another_cookbook' => '= 2.0.0'
+          'another_cookbook' => '= 2.0.0',
         }
       end
 
@@ -740,20 +739,20 @@ describe DeliveryTruck::Helpers::Provision do
         node.default['delivery']['project_apps'] = [project_app_name]
       end
 
-      describe "cached project metadata" do
-        it "saved all apps and cookbooks for the current project" do
-            expected_project_metadata = {
-              project_name => {
-                'cookbooks' => project_cookbook_names,
-                'applications' => [project_app_name]
-              }
-            }
+      describe 'cached project metadata' do
+        it 'saved all apps and cookbooks for the current project' do
+          expected_project_metadata = {
+            project_name => {
+              'cookbooks' => project_cookbook_names,
+              'applications' => [project_app_name],
+            },
+          }
 
-            union_env_result =
-              described_class.handle_union_pinnings(node, acceptance_env_name, passed_in_project_cookbooks)
+          union_env_result =
+            described_class.handle_union_pinnings(node, acceptance_env_name, passed_in_project_cookbooks)
 
-            expect(union_env_result.default_attributes['delivery']['project_artifacts']).
-              to eq(expected_project_metadata)
+          expect(union_env_result.default_attributes['delivery']['project_artifacts'])
+            .to eq(expected_project_metadata)
         end
       end
 
@@ -772,10 +771,10 @@ describe DeliveryTruck::Helpers::Provision do
         union_env_result =
           described_class.handle_union_pinnings(node, acceptance_env_name, [])
 
-        expect(union_env_result.cookbook_versions).
-          to eq(union_cookbook_versions)
-        expect(union_env_result.override_attributes['applications']).
-          to eq(expected_union_application_versions)
+        expect(union_env_result.cookbook_versions)
+          .to eq(union_cookbook_versions)
+        expect(union_env_result.override_attributes['applications'])
+          .to eq(expected_union_application_versions)
       end
     end
   end
@@ -785,7 +784,7 @@ describe DeliveryTruck::Helpers::Provision do
       {
         'app_1' => '0_3_562',
         'app_2' => '1_0_205',
-        'no_longer_supported_app' => '0_0_50'
+        'no_longer_supported_app' => '0_0_50',
       }
     end
 
@@ -793,13 +792,13 @@ describe DeliveryTruck::Helpers::Provision do
       {
         'cookbook_1' => '= 1.2.2',
         'cookbook_2' => '= 0.0.9',
-        'no_longer_supported_cookbook' => '= 2.3.0'
+        'no_longer_supported_cookbook' => '= 2.3.0',
       }
     end
 
     let(:rehearsal_default_attributes) do
       {
-        'delivery' => { 'project_artifacts' => {} }
+        'delivery' => { 'project_artifacts' => {} },
       }
     end
 
@@ -807,7 +806,7 @@ describe DeliveryTruck::Helpers::Provision do
       {
         'app_1' => '0_3_563',
         'app_2' => '1_0_206',
-        'new_app' => '0_0_1'
+        'new_app' => '0_0_1',
       }
     end
 
@@ -815,7 +814,7 @@ describe DeliveryTruck::Helpers::Provision do
       {
         'cookbook_1' => '= 1.2.3',
         'cookbook_2' => '= 0.1.0',
-        'new_cookbook' => '= 0.1.0'
+        'new_cookbook' => '= 0.1.0',
       }
     end
 
@@ -823,35 +822,35 @@ describe DeliveryTruck::Helpers::Provision do
       {
         'delivery' => {
           'union_changes' => [
-             change_id
+             change_id,
           ],
           'project_artifacts' => {
             'other_project_1' => {
               'cookbooks' => [
-                'cookbook_1'
+                'cookbook_1',
               ],
               'applications' => [
-                  'app_1'
-              ]
+                  'app_1',
+              ],
             },
             'other_project_2' => {
               'cookbooks' => [
-                'cookbook_2'
+                'cookbook_2',
               ],
               'applications' => [
-                'app_2'
-              ]
+                'app_2',
+              ],
             },
             'new_project' => {
               'cookbooks' => [
-                'new_cookbook'
+                'new_cookbook',
               ],
               'applications' => [
-                'new_app'
-              ]
-            }
-          }
-        }
+                'new_app',
+              ],
+            },
+          },
+        },
       }
     end
 
@@ -861,7 +860,7 @@ describe DeliveryTruck::Helpers::Provision do
       env.cookbook_versions(rehearsal_cookbook_versions)
       env.default_attributes = rehearsal_default_attributes
       env.override_attributes = {
-        'applications' => rehearsal_applications
+        'applications' => rehearsal_applications,
       }
       env
     end
@@ -872,45 +871,45 @@ describe DeliveryTruck::Helpers::Provision do
       env.cookbook_versions(union_cookbook_versions)
       env.default_attributes = union_default_attributes
       env.override_attributes = {
-        'applications' => union_applications
+        'applications' => union_applications,
       }
       env
     end
 
     before(:each) do
-      expect(Chef::Environment).
-        to receive(:load).
-        with('union').
-        and_return(union_env)
-      expect(Chef::Environment).
-        to receive(:load).
-        with('rehearsal').
-        and_return(rehearsal_env)
-      expect(rehearsal_env).
-        to receive(:save)
+      expect(Chef::Environment)
+        .to receive(:load)
+        .with('union')
+        .and_return(union_env)
+      expect(Chef::Environment)
+        .to receive(:load)
+        .with('rehearsal')
+        .and_return(rehearsal_env)
+      expect(rehearsal_env)
+        .to receive(:save)
       expect(union_env).to receive(:save)
     end
 
     it 'removes the change from the union environment change list' do
-      expect(DeliveryTruck::DeliveryApiClient).
-        to receive(:blocked_projects).
-        with(node).
-        and_return([])
+      expect(DeliveryTruck::DeliveryApiClient)
+        .to receive(:blocked_projects)
+        .with(node)
+        .and_return([])
 
       described_class.handle_rehearsal_pinnings(node)
       expect(union_env.default_attributes['delivery']['union_changes']).to eql([])
     end
 
     context 'a project with a single cookbook' do
-      let(:project_version_in_rehearsal) { "= 2.2.0" }
-      let(:project_version_in_union) { "= 2.2.2" }
+      let(:project_version_in_rehearsal) { '= 2.2.0' }
+      let(:project_version_in_union) { '= 2.2.2' }
 
       let(:rehearsal_applications) { {} }
       let(:rehearsal_cookbook_versions) do
         {
           project_name => project_version_in_rehearsal,
           'cookbook_1' => '= 0.3.0',
-          'cookbook_2' => '= 1.4.1'
+          'cookbook_2' => '= 1.4.1',
         }
       end
 
@@ -919,7 +918,7 @@ describe DeliveryTruck::Helpers::Provision do
         {
           project_name => project_version_in_union,
           'cookbook_1' => '= 0.3.1',
-          'cookbook_2' => '= 1.4.1'
+          'cookbook_2' => '= 1.4.1',
         }
       end
       let(:rehearsal_default_attributes) do
@@ -929,25 +928,25 @@ describe DeliveryTruck::Helpers::Provision do
               project_name => {
                 'cookbooks' => [
                   project_name,
-                  'vestigal_cookbook'
+                  'vestigal_cookbook',
                 ],
-                'applications' => []
+                'applications' => [],
               },
               'other_project_1' => {
-                'cookbooks' => [
-                  'cookbook_1',
-                  'outdated_cookbook'
-                ],
-                'applications' => []
+                'cookbooks' => %w(
+                  cookbook_1
+                  outdated_cookbook
+                ),
+                'applications' => [],
               },
               'other_project_2' => {
                 'cookbooks' => [
-                  'cookbook_2'
+                  'cookbook_2',
                 ],
-                'applications' => []
-              }
-            }
-          }
+                'applications' => [],
+              },
+            },
+          },
         }
       end
 
@@ -957,33 +956,33 @@ describe DeliveryTruck::Helpers::Provision do
             'project_artifacts' => {
               project_name => {
                 'cookbooks' => [
-                  project_name
+                  project_name,
                 ],
-                'applications' => []
+                'applications' => [],
               },
               'other_project_1' => {
                 'cookbooks' => [
-                  'cookbook_1'
+                  'cookbook_1',
                 ],
-                'applications' => []
+                'applications' => [],
               },
               'other_project_2' => {
                 'cookbooks' => [
-                  'cookbook_2'
+                  'cookbook_2',
                 ],
-                'applications' => []
-              }
-            }
-          }
+                'applications' => [],
+              },
+            },
+          },
         }
       end
 
       context 'when the project is blocked' do
         before(:each) do
-          expect(DeliveryTruck::DeliveryApiClient).
-            to receive(:blocked_projects).
-            with(node).
-            and_return([project_name])
+          expect(DeliveryTruck::DeliveryApiClient)
+            .to receive(:blocked_projects)
+            .with(node)
+            .and_return([project_name])
         end
 
         it 'does not update the version pinning for the cookbook in the' \
@@ -991,7 +990,7 @@ describe DeliveryTruck::Helpers::Provision do
           expected_cookbook_versions = {
             project_name => project_version_in_rehearsal,
             'cookbook_1' => '= 0.3.1',
-            'cookbook_2' => '= 1.4.1'
+            'cookbook_2' => '= 1.4.1',
           }
 
           expected_applications = rehearsal_applications.dup
@@ -1001,34 +1000,34 @@ describe DeliveryTruck::Helpers::Provision do
                 project_name => {
                   'cookbooks' => [
                     project_name,
-                    'vestigal_cookbook'
+                    'vestigal_cookbook',
                   ],
-                  'applications' => []
+                  'applications' => [],
                 },
                 'other_project_1' => {
                   'cookbooks' => [
-                    'cookbook_1'
+                    'cookbook_1',
                   ],
-                  'applications' => []
+                  'applications' => [],
                 },
                 'other_project_2' => {
                   'cookbooks' => [
-                    'cookbook_2'
+                    'cookbook_2',
                   ],
-                  'applications' => []
-                }
-              }
-            }
+                  'applications' => [],
+                },
+              },
+            },
           }
 
           rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-          expect(rehearsal_env_result.cookbook_versions).
-            to eq(expected_cookbook_versions)
-          expect(rehearsal_env_result.default_attributes).
-            to eq(expected_default_attributes)
-          expect(rehearsal_env_result.override_attributes['applications']).
-            to eq(expected_applications)
+          expect(rehearsal_env_result.cookbook_versions)
+            .to eq(expected_cookbook_versions)
+          expect(rehearsal_env_result.default_attributes)
+            .to eq(expected_default_attributes)
+          expect(rehearsal_env_result.override_attributes['applications'])
+            .to eq(expected_applications)
         end
 
         # maybe we want to test when node['delivery']['project_cookbooks'] is set
@@ -1038,10 +1037,10 @@ describe DeliveryTruck::Helpers::Provision do
       context 'when the project is not blocked' do
         let(:blocked_projects) { [] }
         before(:each) do
-          expect(DeliveryTruck::DeliveryApiClient).
-            to receive(:blocked_projects).
-            with(node).
-            and_return(blocked_projects)
+          expect(DeliveryTruck::DeliveryApiClient)
+            .to receive(:blocked_projects)
+            .with(node)
+            .and_return(blocked_projects)
         end
 
         context 'nothing is blocked' do
@@ -1049,18 +1048,18 @@ describe DeliveryTruck::Helpers::Provision do
 
           let(:union_applications) do
             {
-              "unknown_application" => "1.1.1",
-              "other_application" => "0.0.1"
+              'unknown_application' => '1.1.1',
+              'other_application' => '0.0.1',
             }
           end
 
           let(:union_cookbook_versions) do
-              {
-                project_name => project_version_in_union,
-                'cookbook_1' => '= 0.3.1',
-                'cookbook_2' => '= 1.4.1',
-                'unknown_cookbook' => '= 110.100.100'
-              }
+            {
+              project_name => project_version_in_union,
+              'cookbook_1' => '= 0.3.1',
+              'cookbook_2' => '= 1.4.1',
+              'unknown_cookbook' => '= 110.100.100',
+            }
           end
 
           it 'moves all version pinnings from union to rehersal' do
@@ -1070,12 +1069,12 @@ describe DeliveryTruck::Helpers::Provision do
 
             rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-            expect(rehearsal_env_result.cookbook_versions).
-              to eq(expected_cookbook_versions)
-            expect(rehearsal_env_result.default_attributes).
-              to eq(expected_default_attributes)
-            expect(rehearsal_env_result.override_attributes['applications']).
-              to eq(expected_applications)
+            expect(rehearsal_env_result.cookbook_versions)
+              .to eq(expected_cookbook_versions)
+            expect(rehearsal_env_result.default_attributes)
+              .to eq(expected_default_attributes)
+            expect(rehearsal_env_result.override_attributes['applications'])
+              .to eq(expected_applications)
           end
         end
 
@@ -1088,68 +1087,68 @@ describe DeliveryTruck::Helpers::Provision do
                 'project_artifacts' => {
                   project_name => {
                     'cookbooks' => [
-                      project_name
+                      project_name,
                     ],
-                    'applications' => []
+                    'applications' => [],
                   },
                   'other_project_1' => {
                     'cookbooks' => [
-                      'cookbook_1'
+                      'cookbook_1',
                     ],
-                    'applications' => []
+                    'applications' => [],
                   },
                   'other_project_2' => {
                     'cookbooks' => [
-                      'cookbook_2'
+                      'cookbook_2',
                     ],
-                    'applications' => []
-                  }
-                }
-              }
+                    'applications' => [],
+                  },
+                },
+              },
             }
           end
 
           it 'does not update the version pinning for the impacted cookbook in' \
              '  the rehearsal environment' do
-           expected_cookbook_versions = {
-                     project_name => project_version_in_union,
-                     'cookbook_1' => '= 0.3.0',
-                     'cookbook_2' => '= 1.4.1' }
-           expected_applications = union_applications.dup
-           expected_default_attributes = {
-               'delivery' => {
-                 'project_artifacts' => {
-                   project_name => {
-                     'cookbooks' => [
-                       project_name
-                     ],
-                     'applications' => []
-                   },
-                   'other_project_1' => {
-                       'cookbooks' => [
-                           'cookbook_1',
-                           'outdated_cookbook'
-                       ],
-                       'applications' => []
-                   },
-                   'other_project_2' => {
-                     'cookbooks' => [
-                       'cookbook_2'
-                     ],
-                     'applications' => []
-                   }
-                 }
-               }
-             }
+            expected_cookbook_versions = {
+                      project_name => project_version_in_union,
+                      'cookbook_1' => '= 0.3.0',
+                      'cookbook_2' => '= 1.4.1' }
+            expected_applications = union_applications.dup
+            expected_default_attributes = {
+                'delivery' => {
+                  'project_artifacts' => {
+                    project_name => {
+                      'cookbooks' => [
+                        project_name,
+                      ],
+                      'applications' => [],
+                    },
+                    'other_project_1' => {
+                        'cookbooks' => %w(
+                            cookbook_1
+                            outdated_cookbook
+                        ),
+                        'applications' => [],
+                    },
+                    'other_project_2' => {
+                      'cookbooks' => [
+                        'cookbook_2',
+                      ],
+                      'applications' => [],
+                    },
+                  },
+                },
+              }
 
-           rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
+            rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-           expect(rehearsal_env_result.cookbook_versions).
-             to eq(expected_cookbook_versions)
-           expect(rehearsal_env_result.default_attributes).
-             to eq(expected_default_attributes)
-           expect(rehearsal_env_result.override_attributes['applications']).
-             to eq(expected_applications)
+            expect(rehearsal_env_result.cookbook_versions)
+              .to eq(expected_cookbook_versions)
+            expect(rehearsal_env_result.default_attributes)
+              .to eq(expected_default_attributes)
+            expect(rehearsal_env_result.override_attributes['applications'])
+              .to eq(expected_applications)
           end
         end
       end
@@ -1162,12 +1161,14 @@ describe DeliveryTruck::Helpers::Provision do
           'delivery_1' => '= 0.0.0',
           'delivery_2' => '= 1.0.0',
           'cookbook_1' => '= 0.3.0',
-          'cookbook_2' => '= 1.4.1'
+          'cookbook_2' => '= 1.4.1',
         }
       end
-      let(:rehearsal_default_attributes) { {
-          'delivery' => { 'project_artifacts' => {} }
-      } }
+      let(:rehearsal_default_attributes) do
+        {
+          'delivery' => { 'project_artifacts' => {} },
+      }
+      end
 
       let(:union_applications) { {} }
       let(:union_cookbook_versions) do
@@ -1175,7 +1176,7 @@ describe DeliveryTruck::Helpers::Provision do
           'delivery_1' => '= 0.0.1',
           'delivery_2' => '= 1.0.1',
           'cookbook_1' => '= 0.3.1',
-          'cookbook_2' => '= 1.4.1'
+          'cookbook_2' => '= 1.4.1',
         }
       end
 
@@ -1184,26 +1185,26 @@ describe DeliveryTruck::Helpers::Provision do
           'delivery' => {
             'project_artifacts' => {
               project_name => {
-                'cookbooks' => [
-                  'delivery_1',
-                  'delivery_2'
-                ],
-                'applications' => []
+                'cookbooks' => %w(
+                  delivery_1
+                  delivery_2
+                ),
+                'applications' => [],
               },
               'other_project_1' => {
                 'cookbooks' => [
-                  'cookbook_1'
+                  'cookbook_1',
                 ],
-                'applications' => []
+                'applications' => [],
               },
               'other_project_2' => {
                 'cookbooks' => [
-                  'cookbook_2'
+                  'cookbook_2',
                 ],
-                'applications' => []
-              }
-            }
-          }
+                'applications' => [],
+              },
+            },
+          },
         }
       end
 
@@ -1212,17 +1213,17 @@ describe DeliveryTruck::Helpers::Provision do
         {
           'delivery' => {
             'change' => {
-              'project' => project_name
+              'project' => project_name,
             },
-            'project_cookbooks' => ['delivery_1', 'delivery_2']
-          }
+            'project_cookbooks' => %w(delivery_1 delivery_2),
+          },
         }
       end
       before(:each) do
-        expect(DeliveryTruck::DeliveryApiClient).
-          to receive(:blocked_projects).
-          with(node).
-          and_return(blocked_projects)
+        expect(DeliveryTruck::DeliveryApiClient)
+          .to receive(:blocked_projects)
+          .with(node)
+          .and_return(blocked_projects)
       end
 
       context 'nothing is blocked' do
@@ -1230,19 +1231,18 @@ describe DeliveryTruck::Helpers::Provision do
 
         it 'updates the version pinning for the cookbook in the rehearsal' \
           ' environment' do
+          expected_cookbook_versions = union_cookbook_versions.dup
+          expected_applications = union_applications.dup
+          expected_default_attributes = union_default_attributes.dup
 
-         expected_cookbook_versions = union_cookbook_versions.dup
-         expected_applications = union_applications.dup
-         expected_default_attributes = union_default_attributes.dup
+          rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-         rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
-
-         expect(rehearsal_env_result.cookbook_versions).
-           to eq(expected_cookbook_versions)
-         expect(rehearsal_env_result.default_attributes).
-           to eq(expected_default_attributes)
-         expect(rehearsal_env_result.override_attributes['applications']).
-           to eq(expected_applications)
+          expect(rehearsal_env_result.cookbook_versions)
+            .to eq(expected_cookbook_versions)
+          expect(rehearsal_env_result.default_attributes)
+            .to eq(expected_default_attributes)
+          expect(rehearsal_env_result.override_attributes['applications'])
+            .to eq(expected_applications)
         end
 
         context 'when the rehersal delivery attribute has not been initialized' do
@@ -1255,12 +1255,12 @@ describe DeliveryTruck::Helpers::Provision do
 
             rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-            expect(rehearsal_env_result.cookbook_versions).
-              to eq(expected_cookbook_versions)
-            expect(rehearsal_env_result.default_attributes).
-              to eq(expected_default_attributes)
-            expect(rehearsal_env_result.override_attributes['applications']).
-              to eq(expected_applications)
+            expect(rehearsal_env_result.cookbook_versions)
+              .to eq(expected_cookbook_versions)
+            expect(rehearsal_env_result.default_attributes)
+              .to eq(expected_default_attributes)
+            expect(rehearsal_env_result.override_attributes['applications'])
+              .to eq(expected_applications)
           end
         end
       end
@@ -1268,22 +1268,22 @@ describe DeliveryTruck::Helpers::Provision do
       context 'the project is blocked' do
         let(:blocked_projects) { [project_name] }
         it "does not update this project's project cookbooks but does update" \
-           "other cookbooks" do
-         expected_cookbook_versions = union_cookbook_versions.dup
-         expected_cookbook_versions['delivery_1']= '= 0.0.0'
-         expected_cookbook_versions['delivery_2']= '= 1.0.0'
+           'other cookbooks' do
+          expected_cookbook_versions = union_cookbook_versions.dup
+          expected_cookbook_versions['delivery_1'] = '= 0.0.0'
+          expected_cookbook_versions['delivery_2'] = '= 1.0.0'
 
-         expected_applications = union_applications.dup
-         expected_default_attributes = rehearsal_default_attributes.dup
+          expected_applications = union_applications.dup
+          expected_default_attributes = rehearsal_default_attributes.dup
 
-         rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
+          rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-         expect(rehearsal_env_result.cookbook_versions).
-           to eq(expected_cookbook_versions)
-         expect(rehearsal_env_result.default_attributes).
-           to eq(expected_default_attributes)
-         expect(rehearsal_env_result.override_attributes['applications']).
-           to eq(expected_applications)
+          expect(rehearsal_env_result.cookbook_versions)
+            .to eq(expected_cookbook_versions)
+          expect(rehearsal_env_result.default_attributes)
+            .to eq(expected_default_attributes)
+          expect(rehearsal_env_result.override_attributes['applications'])
+            .to eq(expected_applications)
         end
       end
     end
@@ -1294,7 +1294,7 @@ describe DeliveryTruck::Helpers::Provision do
           'our_app_1' => '= 2.0.0',
           'our_app_2' => '= 3.0.0',
           'app_1' => '= 0.3.0',
-          'app_2' => '= 1.4.1'
+          'app_2' => '= 1.4.1',
         }
       end
       let(:rehearsal_cookbook_versions) do
@@ -1302,7 +1302,7 @@ describe DeliveryTruck::Helpers::Provision do
           'our_cookbook_1' => '= 0.0.0',
           'our_cookbook_2' => '= 1.0.0',
           'cookbook_1' => '= 0.3.0',
-          'cookbook_2' => '= 1.4.1'
+          'cookbook_2' => '= 1.4.1',
         }
       end
 
@@ -1311,7 +1311,7 @@ describe DeliveryTruck::Helpers::Provision do
           'our_app_1' => '= 2.0.1',
           'our_app_2' => '= 3.0.1',
           'app_1' => '= 0.3.1',
-          'app_2' => '= 1.4.2'
+          'app_2' => '= 1.4.2',
         }
       end
       let(:union_cookbook_versions) do
@@ -1319,7 +1319,7 @@ describe DeliveryTruck::Helpers::Provision do
           'our_cookbook_1' => '= 0.0.1',
           'our_cookbook_2' => '= 1.0.1',
           'cookbook_1' => '= 0.3.1',
-          'cookbook_2' => '= 1.4.1'
+          'cookbook_2' => '= 1.4.1',
         }
       end
 
@@ -1328,29 +1328,29 @@ describe DeliveryTruck::Helpers::Provision do
           'delivery' => {
             'project_artifacts' => {
               project_name => {
-                'cookbooks' => [
-                  'our_cookbook_1',
-                  'our_cookbook_2'
-                ],
-                'applications' => [
-                  'our_app_1',
-                  'our_app_2',
-                ]
+                'cookbooks' => %w(
+                  our_cookbook_1
+                  our_cookbook_2
+                ),
+                'applications' => %w(
+                  our_app_1
+                  our_app_2
+                ),
               },
               'other_project_1' => {
                 'cookbooks' => [
                   'cookbook_1',
                 ],
-                'applications' => [ 'app_1' ]
+                'applications' => [ 'app_1' ],
               },
               'other_project_2' => {
                 'cookbooks' => [
-                  'cookbook_2'
+                  'cookbook_2',
                 ],
-                'applications' => [ 'app_2' ]
-              }
-            }
-          }
+                'applications' => [ 'app_2' ],
+              },
+            },
+          },
         }
       end
 
@@ -1360,10 +1360,10 @@ describe DeliveryTruck::Helpers::Provision do
 
       context 'when the project is blocked' do
         before(:each) do
-          expect(DeliveryTruck::DeliveryApiClient).
-            to receive(:blocked_projects).
-            with(node).
-            and_return([project_name])
+          expect(DeliveryTruck::DeliveryApiClient)
+            .to receive(:blocked_projects)
+            .with(node)
+            .and_return([project_name])
         end
 
         it 'does not update the version pinning for the cookbook or apps in the' \
@@ -1372,22 +1372,22 @@ describe DeliveryTruck::Helpers::Provision do
             'our_cookbook_1' => '= 0.0.0',
             'our_cookbook_2' => '= 1.0.0',
             'cookbook_1' => '= 0.3.1',
-            'cookbook_2' => '= 1.4.1'
+            'cookbook_2' => '= 1.4.1',
           }
 
           expected_applications = {
             'our_app_1' => '= 2.0.0',
             'our_app_2' => '= 3.0.0',
             'app_1' => '= 0.3.1',
-            'app_2' => '= 1.4.2'
+            'app_2' => '= 1.4.2',
           }
 
           rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-          expect(rehearsal_env_result.cookbook_versions).
-            to eq(expected_cookbook_versions)
-          expect(rehearsal_env_result.override_attributes['applications']).
-            to eq(expected_applications)
+          expect(rehearsal_env_result.cookbook_versions)
+            .to eq(expected_cookbook_versions)
+          expect(rehearsal_env_result.override_attributes['applications'])
+            .to eq(expected_applications)
         end
 
         # maybe we want to test when node['delivery']['project_cookbooks'] is set
@@ -1396,10 +1396,10 @@ describe DeliveryTruck::Helpers::Provision do
 
       context 'when a different project is blocked' do
         before(:each) do
-          expect(DeliveryTruck::DeliveryApiClient).
-            to receive(:blocked_projects).
-            with(node).
-            and_return(['other_project_1'])
+          expect(DeliveryTruck::DeliveryApiClient)
+            .to receive(:blocked_projects)
+            .with(node)
+            .and_return(['other_project_1'])
         end
 
         it 'does not update the version pinning for the cookbook or apps in the' \
@@ -1408,28 +1408,27 @@ describe DeliveryTruck::Helpers::Provision do
             'our_cookbook_1' => '= 0.0.1',
             'our_cookbook_2' => '= 1.0.1',
             'cookbook_1' => '= 0.3.0',
-            'cookbook_2' => '= 1.4.1'
+            'cookbook_2' => '= 1.4.1',
           }
 
           expected_applications = {
             'our_app_1' => '= 2.0.1',
             'our_app_2' => '= 3.0.1',
             'app_1' => '= 0.3.0',
-            'app_2' => '= 1.4.2'
+            'app_2' => '= 1.4.2',
           }
 
           rehearsal_env_result = described_class.handle_rehearsal_pinnings(node)
 
-          expect(rehearsal_env_result.cookbook_versions).
-            to eq(expected_cookbook_versions)
-          expect(rehearsal_env_result.override_attributes['applications']).
-            to eq(expected_applications)
+          expect(rehearsal_env_result.cookbook_versions)
+            .to eq(expected_cookbook_versions)
+          expect(rehearsal_env_result.override_attributes['applications'])
+            .to eq(expected_applications)
         end
 
         # maybe we want to test when node['delivery']['project_cookbooks'] is set
         # context 'when the project ships multiple cookbooks' do
       end
-
     end
   end
 
@@ -1440,7 +1439,7 @@ describe DeliveryTruck::Helpers::Provision do
       {
         'app_1' => '0_3_563',
         'app_2' => '1_0_206',
-        'new_app' => '0_0_1'
+        'new_app' => '0_0_1',
       }
     end
 
@@ -1448,13 +1447,13 @@ describe DeliveryTruck::Helpers::Provision do
       {
         'cookbook_1' => '= 1.2.3',
         'cookbook_2' => '= 0.1.0',
-        'new_cookbook' => '= 0.1.0'
+        'new_cookbook' => '= 0.1.0',
       }
     end
 
     let(:previous_stage_default_attributes) do
       {
-        'foo' => 'bar'
+        'foo' => 'bar',
       }
     end
 
@@ -1464,7 +1463,7 @@ describe DeliveryTruck::Helpers::Provision do
       env.cookbook_versions(previous_stage_cookbook_versions)
       env.default_attributes = previous_stage_default_attributes
       env.override_attributes = {
-        'applications' => previous_stage_applications
+        'applications' => previous_stage_applications,
       }
       env
     end
@@ -1475,7 +1474,7 @@ describe DeliveryTruck::Helpers::Provision do
       {
         'app_1' => '0_3_562',
         'app_2' => '1_0_205',
-        'no_longer_supported_app' => '0_0_50'
+        'no_longer_supported_app' => '0_0_50',
       }
     end
 
@@ -1483,13 +1482,13 @@ describe DeliveryTruck::Helpers::Provision do
       {
         'cookbook_1' => '= 1.2.2',
         'cookbook_2' => '= 0.0.9',
-        'no_longer_supported_cookbook' => '= 2.3.0'
+        'no_longer_supported_cookbook' => '= 2.3.0',
       }
     end
 
     let(:current_stage_default_attributes) do
       {
-        'foo' => 'baz'
+        'foo' => 'baz',
       }
     end
 
@@ -1499,22 +1498,22 @@ describe DeliveryTruck::Helpers::Provision do
       env.cookbook_versions(current_stage_cookbook_versions)
       env.default_attributes = current_stage_default_attributes
       env.override_attributes = {
-        'applications' => current_stage_applications
+        'applications' => current_stage_applications,
       }
       env
     end
 
     before(:each) do
-      expect(Chef::Environment).
-        to receive(:load).
-        with(previous_stage_env_name).
-        and_return(previous_stage_env)
-      expect(Chef::Environment).
-        to receive(:load).
-        with(current_stage_env_name).
-        and_return(current_stage_env)
-      expect(current_stage_env).
-        to receive(:save)
+      expect(Chef::Environment)
+        .to receive(:load)
+        .with(previous_stage_env_name)
+        .and_return(previous_stage_env)
+      expect(Chef::Environment)
+        .to receive(:load)
+        .with(current_stage_env_name)
+        .and_return(current_stage_env)
+      expect(current_stage_env)
+        .to receive(:save)
     end
 
     it 'merges all cookbook and application version pinnings from the previous' \
@@ -1528,13 +1527,12 @@ describe DeliveryTruck::Helpers::Provision do
       current_stage_env_result =
         described_class.handle_delivered_pinnings(node)
 
-      expect(current_stage_env_result.cookbook_versions).
-        to eq(expected_cookbook_versions)
-      expect(current_stage_env_result.default_attributes).
-        to eq(expected_default_attributes)
-      expect(current_stage_env_result.override_attributes['applications']).
-        to eq(expected_applications)
+      expect(current_stage_env_result.cookbook_versions)
+        .to eq(expected_cookbook_versions)
+      expect(current_stage_env_result.default_attributes)
+        .to eq(expected_default_attributes)
+      expect(current_stage_env_result.override_attributes['applications'])
+        .to eq(expected_applications)
     end
   end
-
 end
