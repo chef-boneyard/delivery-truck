@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "delivery-truck::syntax" do
+describe 'delivery-truck::syntax' do
   let(:chef_run) do
     ChefSpec::ServerRunner.new do |node|
       node.default['delivery']['workspace']['root'] = '/tmp'
@@ -27,45 +27,45 @@ describe "delivery-truck::syntax" do
       allow(DeliveryTruck::Helpers::Syntax).to receive(:bumped_version?).and_return(true)
     end
 
-    context "when a single cookbook has been modified" do
+    context 'when a single cookbook has been modified' do
       before do
         allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(one_changed_cookbook)
       end
 
-      it "runs `knife cookbook test` against only that cookbook" do
-        expect(chef_run).to run_execute("syntax_check_julia").with(
-          :command => "knife cookbook test -o /tmp/repo/cookbooks/julia -a"
+      it 'runs `knife cookbook test` against only that cookbook' do
+        expect(chef_run).to run_execute('syntax_check_julia').with(
+          command: 'knife cookbook test -o /tmp/repo/cookbooks/julia -a'
         )
-        expect(chef_run).not_to run_execute("syntax_check_gordon")
-        expect(chef_run).not_to run_execute("syntax_check_emeril")
+        expect(chef_run).not_to run_execute('syntax_check_gordon')
+        expect(chef_run).not_to run_execute('syntax_check_emeril')
       end
     end
 
-    context "when multiple cookbooks have been modified" do
+    context 'when multiple cookbooks have been modified' do
       before do
         allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(two_changed_cookbooks)
       end
 
-      it "runs `knife cookbook test` against only those cookbooks" do
-        expect(chef_run).to run_execute("syntax_check_julia").with(
-          :command => "knife cookbook test -o /tmp/repo/cookbooks/julia -a"
+      it 'runs `knife cookbook test` against only those cookbooks' do
+        expect(chef_run).to run_execute('syntax_check_julia').with(
+          command: 'knife cookbook test -o /tmp/repo/cookbooks/julia -a'
         )
-        expect(chef_run).to run_execute("syntax_check_gordon").with(
-          :command => "knife cookbook test -o /tmp/repo/cookbooks/gordon -a"
+        expect(chef_run).to run_execute('syntax_check_gordon').with(
+          command: 'knife cookbook test -o /tmp/repo/cookbooks/gordon -a'
         )
-        expect(chef_run).not_to run_execute("syntax_check_emeril")
+        expect(chef_run).not_to run_execute('syntax_check_emeril')
       end
     end
 
-    context "when no cookbooks have been modified" do
+    context 'when no cookbooks have been modified' do
       before do
         allow_any_instance_of(Chef::Recipe).to receive(:changed_cookbooks).and_return(no_changed_cookbooks)
       end
 
-      it "does not run `knife cookbook test` against any cookbooks" do
-        expect(chef_run).not_to run_execute("syntax_check_julia")
-        expect(chef_run).not_to run_execute("syntax_check_gordon")
-        expect(chef_run).not_to run_execute("syntax_check_emeril")
+      it 'does not run `knife cookbook test` against any cookbooks' do
+        expect(chef_run).not_to run_execute('syntax_check_julia')
+        expect(chef_run).not_to run_execute('syntax_check_gordon')
+        expect(chef_run).not_to run_execute('syntax_check_emeril')
       end
     end
   end

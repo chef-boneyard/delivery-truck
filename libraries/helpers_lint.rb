@@ -26,37 +26,34 @@ module DeliveryTruck
       # @param node [Chef::Node] Chef Node object
       # @return [String]
       def foodcritic_tags(node)
-        begin
-          config = node['delivery']['config']['delivery-truck']['lint']['foodcritic']
+        config = node['delivery']['config']['delivery-truck']['lint']['foodcritic']
 
-          # We ignore these two by default since they search for the presence of
-          # `issues_url` and `source_url` in the metadata.rb. Those fields will
-          # only be populated by cookbooks uploading to Supermarket.
-          default_ignore = "-t ~FC064 -t ~FC065"
+        # We ignore these two by default since they search for the presence of
+        # `issues_url` and `source_url` in the metadata.rb. Those fields will
+        # only be populated by cookbooks uploading to Supermarket.
+        default_ignore = '-t ~FC064 -t ~FC065'
 
-          # Do not ignore these rules if the cookbook will be share to Supermarket
-          if ::DeliveryTruck::Helpers::Publish.share_cookbook_to_supermarket?(node)
-            default_ignore = ""
-          end
-
-          case
-            when config.nil?
-              default_ignore
-            when config['only_rules'] && !config['only_rules'].empty?
-              "-t " + config['only_rules'].join(",")
-            when config['ignore_rules'].nil?
-              default_ignore
-            when config['ignore_rules'].empty?
-              # They can set ignore_rules to an empty Array to disable these defaults
-              ""
-            when config['ignore_rules'] && !config['ignore_rules'].empty?
-              "-t ~" + config['ignore_rules'].join(" -t ~")
-            else
-              ""
-          end
-        rescue
-          ""
+        # Do not ignore these rules if the cookbook will be share to Supermarket
+        if ::DeliveryTruck::Helpers::Publish.share_cookbook_to_supermarket?(node)
+          default_ignore = ''
         end
+
+        if config.nil?
+          default_ignore
+        elsif config['only_rules'] && !config['only_rules'].empty?
+          '-t ' + config['only_rules'].join(',')
+        elsif config['ignore_rules'].nil?
+          default_ignore
+        elsif config['ignore_rules'].empty?
+          # They can set ignore_rules to an empty Array to disable these defaults
+          ''
+        elsif config['ignore_rules'] && !config['ignore_rules'].empty?
+          '-t ~' + config['ignore_rules'].join(' -t ~')
+        else
+          ''
+        end
+      rescue
+        ''
       end
 
       # Based on the properties in the Delivery Config, create the --excludes
@@ -65,17 +62,14 @@ module DeliveryTruck
       # @param node [Chef::Node] Chef Node object
       # @return [String]
       def foodcritic_excludes(node)
-        begin
-          config = node['delivery']['config']['delivery-truck']['lint']['foodcritic']
-          case
-          when config['excludes'] && !config['excludes'].empty?
-            "--exclude " + config['excludes'].join(" --exclude ")
-          else
-            ""
-          end
-        rescue
-          ""
+        config = node['delivery']['config']['delivery-truck']['lint']['foodcritic']
+        if config['excludes'] && !config['excludes'].empty?
+          '--exclude ' + config['excludes'].join(' --exclude ')
+        else
+          ''
         end
+      rescue
+        ''
       end
 
       # Based on the properties in the Delivery Config, create the --epic_fail
@@ -85,8 +79,7 @@ module DeliveryTruck
       # @return [String]
       def foodcritic_fail_tags(node)
         config = node['delivery']['config']['delivery-truck']['lint']['foodcritic']
-        case
-        when config['fail_tags'] && !config['fail_tags'].empty?
+        if config['fail_tags'] && !config['fail_tags'].empty?
           '-f ' + config['fail_tags'].join(',')
         else
           '-f correctness'
@@ -94,6 +87,7 @@ module DeliveryTruck
       rescue
         '-f correctness'
       end
+
       # Read the Delivery Config to see if the user has indicated they want to
       # run cookstyle tests on their cookbook
       #
@@ -104,12 +98,10 @@ module DeliveryTruck
       rescue
         false
       end
-
     end
   end
 
   module DSL
-
     # Return the applicable tags for foodcritic runs
     def foodcritic_tags
       DeliveryTruck::Helpers::Lint.foodcritic_tags(node)
