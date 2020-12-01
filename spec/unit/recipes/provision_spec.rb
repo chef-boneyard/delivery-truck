@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "delivery-truck::provision" do
+describe 'delivery-truck::provision' do
   let(:chef_run) do
     @node = nil
     ChefSpec::SoloRunner.new do |node|

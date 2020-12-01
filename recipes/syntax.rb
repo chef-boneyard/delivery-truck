@@ -19,8 +19,7 @@ changed_cookbooks.each do |cookbook|
   # If we changed a cookbook but didn't bump the version than the build
   # phase will fail when trying to upload to the Chef Server.
   unless bumped_version?(cookbook.path)
-    raise RuntimeError,
-%{The #{cookbook.name} cookbook was modified but the version was not updated in the metadata file.
+    raise %{The #{cookbook.name} cookbook was modified but the version was not updated in the metadata file.
 
 The version must be updated when any of the following files are modified:
    metadata.(rb|json)
@@ -55,13 +54,12 @@ berksfile = ::File.join(delivery_workspace_chef, 'build_cookbook', 'Berksfile')
 if ::File.exist?(berksfile)
   content = ::File.read(berksfile)
   %W(delivery-sugar delivery-truck).each do |build_cookbook|
-    if content.include?("chef-cookbooks/#{build_cookbook}")
-      log "warning_#{build_cookbook}_pull_from_github" do
-        message "Your build-cookbook depends on #{build_cookbook} that is being pulled " \
-                'from Github, please modify your Berksfile so that you consume it from ' \
-                'Supermarket instead.'
-         level :warn
-      end
+    next unless content.include?("chef-cookbooks/#{build_cookbook}")
+    log "warning_#{build_cookbook}_pull_from_github" do
+      message "Your build-cookbook depends on #{build_cookbook} that is being pulled " \
+              'from Github, please modify your Berksfile so that you consume it from ' \
+              'Supermarket instead.'
+      level :warn
     end
   end
 end
